@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signInAction } from "@/actions/signin";
 import { useMutation } from "@tanstack/react-query";
+import FetchAPI, { FetchError } from "@/lib/fetchApi";
 
 export const SignInServerActionForm = () => {
   const [state, formAction, pending] = React.useActionState<
@@ -43,6 +44,14 @@ type SignInFormData = {
   password: string;
 };
 
+const authApi = FetchAPI.createInstance({
+  baseUrl: "http://localhost:4000" + "/api/v1/users",
+  credentials: "include",
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+});
 export const SignInForm = () => {
   const [formData, setFormData] = React.useState<SignInFormData>({
     email: "",
@@ -54,8 +63,17 @@ export const SignInForm = () => {
   };
 
   const { data, error, mutate, isPending } = useMutation({
-    mutationFn: async () => {},
+    mutationFn: async () => {
+      await authApi.post<{
+        status: number;
+        success: boolean;
+        message: string;
+      }>("/signin", formData);
+    },
+    onError() {},
   });
+
+  console.log(error);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

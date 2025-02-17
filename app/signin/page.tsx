@@ -1,9 +1,9 @@
 "use server";
 import React from "react";
-import { SignInServerActionForm } from "./form";
+import { SignInForm } from "./form";
 
 const SignInPage = () => {
-  return <SignInServerActionForm />;
+  return <SignInForm />;
 };
 
 export default SignInPage;

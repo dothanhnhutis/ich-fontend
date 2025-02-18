@@ -1,8 +1,8 @@
 import React from "react";
 import DisplayPagination from "./display-pagination";
 
-const TvFooter = () => {
+const DisplayFooter = () => {
   return <DisplayPagination hasNextPage={2} totalItem={100} totalPage={10} />;
 };
 
-export default TvFooter;
+export default DisplayFooter;

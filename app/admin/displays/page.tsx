@@ -9,10 +9,10 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
-import TvBody from "./tv-body";
+import TvBody from "./display-body";
 
 export const metadata: Metadata = {
-  title: "Tivi",
+  title: "Trình Chiếu TV",
 };
 
 const TvPage = () => {
@@ -26,12 +26,12 @@ const TvPage = () => {
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block ">
                 <BreadcrumbPage className="text-muted-foreground">
-                  Tivi
+                  Trình Chiếu TV
                 </BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Hiển thị</BreadcrumbPage>
+                <BreadcrumbPage>Danh sách trình chiếu</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

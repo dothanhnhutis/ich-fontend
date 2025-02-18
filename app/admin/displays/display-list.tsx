@@ -8,10 +8,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MapPinHouseIcon, SmartphoneIcon } from "lucide-react";
+import {
+  EllipsisIcon,
+  MapPinHouseIcon,
+  MinusIcon,
+  PlusIcon,
+  SmartphoneIcon,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 const invoices = [
   {
     invoice: "INV001",
@@ -78,24 +84,40 @@ type OrderDisplay = {
 const OrderGridItem = (data: OrderDisplay) => {
   const [showMore, setShowMore] = React.useState<boolean>(false);
   return (
-    <div className="bg-white rounded-lg p-2 px-3 shadow-md">
+    <div className="bg-white rounded-lg p-2 px-3 shadow-md relative">
+      <div className="absolute top-2 right-3 ">
+        <button
+          type="button"
+          className="cursor-pointer text-muted-foreground hover:bg-accent rounded-md"
+        >
+          <EllipsisIcon className="w-6 h-6 shrink-0" />
+        </button>
+      </div>
       <div className="grid gap-1">
-        <div className="flex flex-col min-[450px]:flex-row justify-between min-[450px]:items-center gap-2">
-          <p className="lg:text-base text-sm text-muted-foreground">
-            Tên KH:{" "}
-            <span className="font-bold text-black text-base lg:text-lg">
-              {data.cus_name}
-            </span>
-          </p>
-          <p className="lg:text-base text-sm text-muted-foreground">
-            Trạng thái:{" "}
-            <span className="font-bold text-black">{data.status}</span>
-          </p>
-          <p className="lg:text-base text-sm text-muted-foreground">
-            Ưu tiên:{" "}
-            <span className="font-bold text-black">{data.priority}</span>
-          </p>
-        </div>
+        <p className="lg:text-base text-sm text-muted-foreground line-clamp-2 max-w-[calc(100%_-_40px)]">
+          Tên KH:{" "}
+          <span className="font-bold text-black text-base lg:text-lg">
+            {data.cus_name}
+          </span>
+        </p>
+        <p className="lg:text-base text-sm text-muted-foreground">
+          Trạng thái:{" "}
+          <span
+            className={cn(
+              "font-bold",
+              data.status == "COMPLETED"
+                ? "text-lime-500"
+                : data.status == "TO_DO"
+                ? "text-gray-500"
+                : "text-amber-500"
+            )}
+          >
+            {data.status}
+          </span>
+        </p>
+        <p className="lg:text-base text-sm text-muted-foreground">
+          Ưu tiên: <span className="font-bold text-black">{data.priority}</span>
+        </p>
         {data.phone_number && (
           <div className="flex gap-2 items-center text-muted-foreground">
             <SmartphoneIcon className="size-4 shrink-0" />
@@ -111,9 +133,20 @@ const OrderGridItem = (data: OrderDisplay) => {
         )}
       </div>
       <Separator className="my-1 h-4" />
-      <p className="text-muted-foreground text-sm">
-        Sản Phẩm ({data.products.length})
-      </p>
+      <div className="flex justify-between items-center gap-2 text-muted-foreground">
+        <p className="text-sm">Sản Phẩm ({data.products.length})</p>
+        <button
+          type="button"
+          className="cursor-pointer"
+          onClick={() => setShowMore(!showMore)}
+        >
+          {showMore ? (
+            <MinusIcon className="h-4 w-4 shrink-0" />
+          ) : (
+            <PlusIcon className="h-4 w-4 shrink-0" />
+          )}
+        </button>
+      </div>
       {showMore && (
         <div className="grid gap-2 mt-2">
           {data.products.map((product, idx) => (
@@ -127,7 +160,7 @@ const OrderGridItem = (data: OrderDisplay) => {
                 />
               </div>
               <div className="w-full text-muted-foreground">
-                <p className="text-sm lg:text-base font-semibold">
+                <p className="text-sm lg:text-base font-semibold line-clamp-2">
                   {product.prod_name}
                 </p>
                 <p className="text-sm">
@@ -148,25 +181,19 @@ const OrderGridItem = (data: OrderDisplay) => {
           ))}
         </div>
       )}
-      <div className="flex items-center justify-between mt-2 gap-2">
-        <div className="flex items-center gap-2">
-          <p className="text-muted-foreground text-xs lg:text-sm">
-            Ngày tạo: 17/02/25 23:13
-          </p>
-          <p className="text-muted-foreground text-xs lg:text-sm">
-            Ngày cập nhật: 17/02/25 23:13
-          </p>
-        </div>
-
-        <button className="border text-sm lg:text-base border-blue-500 text-blue-500 hover:bg-sky-50 rounded-md px-2 p-0.5 cursor-pointer">
-          <span>Sửa</span>
-        </button>
+      <div className="flex items-center gap-2 mt-1">
+        <p className="text-muted-foreground text-xs lg:text-sm">
+          Ngày tạo: 17/02/25 23:13
+        </p>
+        <p className="text-muted-foreground text-xs lg:text-sm">
+          Ngày cập nhật: 17/02/25 23:13
+        </p>
       </div>
     </div>
   );
 };
 
-const TvList = ({
+const DisplayList = ({
   mode,
   orders,
 }: {
@@ -216,4 +243,4 @@ const TvList = ({
   );
 };
 
-export default TvList;
+export default DisplayList;

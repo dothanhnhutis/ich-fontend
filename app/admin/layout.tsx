@@ -23,7 +23,9 @@ import {
   MapPinHouseIcon,
   MonitorIcon,
   NewspaperIcon,
+  ShoppingBagIcon,
   SirenIcon,
+  SprayCanIcon,
   TvIcon,
   UsersIcon,
 } from "lucide-react";
@@ -76,7 +78,7 @@ const AdminLayout = async ({
                   >
                     <Link href={"/admin"}>
                       <MonitorIcon />
-                      <span>Dashboard</span>
+                      <span>Bảng điều khiển</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -117,9 +119,31 @@ const AdminLayout = async ({
                     asChild
                     className="[&>svg:first-child]:size-5"
                   >
-                    <Link href={"/admin/tv"}>
+                    <Link href={"/admin/displays"}>
                       <TvIcon />
-                      <span>Tivi</span>
+                      <span>Trình chiếu TV</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    className="[&>svg:first-child]:size-5"
+                  >
+                    <Link href={"/admin/products"}>
+                      <SprayCanIcon />
+                      <span>Sản phẩm</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    className="[&>svg:first-child]:size-5"
+                  >
+                    <Link href={"/admin/orders"}>
+                      <ShoppingBagIcon />
+                      <span>Đơn hàng</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

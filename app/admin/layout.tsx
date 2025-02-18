@@ -1,8 +1,7 @@
-"use client";
 import React from "react";
 import Image from "next/image";
 
-// import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +24,7 @@ import {
   MonitorIcon,
   NewspaperIcon,
   SirenIcon,
+  TvIcon,
   UsersIcon,
 } from "lucide-react";
 import {
@@ -32,47 +32,23 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  SidebarFooter,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-const AdminLayout = ({
+import AdminSidebarFooter from "./siderbar-footer";
+
+const AdminLayout = async ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  // const cookieStore = await cookies();
-  // const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
-  const isMobile = useIsMobile();
-  const currentUser = {
-    username: "Do Thanh Nhut",
-    image:
-      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1724856906/avatar.jpg",
-    email: "dothanhnhutis@gmail.com",
-  };
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
+
   return (
-    <SidebarProvider defaultOpen={true} className="bg-gray-100">
+    <SidebarProvider defaultOpen={defaultOpen} className="bg-gray-100">
       <Sidebar className="[&_>_div[data-sidebar='sidebar']]:bg-white">
         <SidebarHeader>
           <div className="flex items-center gap-2">
@@ -93,6 +69,17 @@ const AdminLayout = ({
             <SidebarGroupLabel>Quản trị</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    className="[&>svg:first-child]:size-5"
+                  >
+                    <Link href={"/admin"}>
+                      <MonitorIcon />
+                      <span>Dashboard</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <Collapsible className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
@@ -131,7 +118,7 @@ const AdminLayout = ({
                     className="[&>svg:first-child]:size-5"
                   >
                     <Link href={"/admin/tv"}>
-                      <MonitorIcon />
+                      <TvIcon />
                       <span>Tivi</span>
                     </Link>
                   </SidebarMenuButton>
@@ -249,92 +236,7 @@ const AdminLayout = ({
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton
-                    size="lg"
-                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                  >
-                    <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarImage
-                        src={currentUser?.image || "/user-picture.jpg"}
-                        alt={currentUser?.username}
-                      />
-                      <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">
-                        {currentUser?.username}
-                      </span>
-                      <span className="truncate text-xs">
-                        {currentUser?.email}
-                      </span>
-                    </div>
-                    <ChevronsUpDown className="ml-auto size-4" />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                  side={isMobile ? "bottom" : "right"}
-                  align="end"
-                  sideOffset={4}
-                >
-                  <DropdownMenuLabel className="p-0 font-normal">
-                    <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                      <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage
-                          src={currentUser?.image || "/user-picture.jpg"}
-                          alt={currentUser?.username}
-                        />
-                        <AvatarFallback className="rounded-lg">
-                          CN
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-semibold">
-                          {currentUser?.username}
-                        </span>
-                        <span className="truncate text-xs">
-                          {currentUser?.email}
-                        </span>
-                      </div>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <Sparkles />
-                      Upgrade to Pro
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <BadgeCheck />
-                      Account
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <CreditCard />
-                      Billing
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Bell />
-                      Notifications
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <LogOut />
-                    Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
+        <AdminSidebarFooter />
         <SidebarRail />
       </Sidebar>
       <SidebarInset className="bg-transparent">{children}</SidebarInset>

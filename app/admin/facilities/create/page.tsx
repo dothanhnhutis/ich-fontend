@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
 import CreateFacilityForm from "./form";
 export const metadata: Metadata = {
-  title: "Tạo cơ sở",
+  title: "Tạo Cơ Sở",
 };
 const CreateFacilityPage = () => {
   return (
@@ -44,7 +44,10 @@ const CreateFacilityPage = () => {
         </div>
       </header>
       <main className="max-w-3xl mx-auto px-2 w-full py-4">
-        <CreateFacilityForm />
+        <div className="bg-white rounded-lg p-2 px-3 shadow-md">
+          <h3 className="font-bold lg:text-2xl text-lg">Tạo cơ sở mới</h3>
+          <CreateFacilityForm />
+        </div>
       </main>
     </>
   );

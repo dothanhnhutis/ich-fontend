@@ -29,7 +29,7 @@ const FacilitiesBody = () => {
         <div className="flex justify-between gap-2">
           <h3 className="font-bold lg:text-2xl text-lg">Danh sách sản phẩm</h3>
           <Button size="icon" variant="ghost" asChild>
-            <Link href="/admin/products/create">
+            <Link href="/admin/facilities/create">
               <PlusIcon className="size-4 shrink-0" />
             </Link>
           </Button>

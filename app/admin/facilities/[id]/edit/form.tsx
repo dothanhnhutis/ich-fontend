@@ -16,19 +16,23 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-type CreateFacilityData = {
+type UpdateFacilityData = {
+  id: string;
   location_name: string;
   address: string;
   location_type: "Factory" | "Warehouse";
-  room_names: string[];
+  rooms: {
+    room_id: string;
+    room_name: string;
+  }[];
 };
 
-const CreateFacilityForm = () => {
-  const [formData, setFormData] = React.useState<CreateFacilityData>({
+const CreateFacilityForm = (data: UpdateFacilityData) => {
+  const [formData, setFormData] = React.useState<UpdateFacilityData>({
     location_name: "",
     address: "",
     location_type: "Factory",
-    room_names: [],
+    rooms: [],
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

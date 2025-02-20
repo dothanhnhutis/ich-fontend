@@ -1,17 +1,21 @@
 import React from "react";
-import { Metadata } from "next";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { Metadata } from "next";
+import FacilitiesBody from "./facilities-body";
+
 export const metadata: Metadata = {
-  title: "Màn Hình Trình Chiếu",
+  title: "Cơ sở",
 };
-const TvPage = () => {
+
+const FacilitiesPage = () => {
   return (
     <>
       <header className="sticky top-0 z-[5] bg-white flex shrink-0 items-center py-2 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -24,14 +28,21 @@ const TvPage = () => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage>Phòng1</BreadcrumbPage>
+                <BreadcrumbPage className="text-muted-foreground">
+                  Cơ sở
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Danh sách cơ sở</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
+      <FacilitiesBody />
     </>
   );
 };
 
-export default TvPage;
+export default FacilitiesPage;

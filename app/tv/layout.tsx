@@ -47,7 +47,7 @@ const TvLayout = async ({
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Quản trị</SidebarGroupLabel>
+            <SidebarGroupLabel>Phòng ban</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>

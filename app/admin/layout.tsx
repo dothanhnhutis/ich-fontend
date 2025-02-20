@@ -82,6 +82,18 @@ const AdminLayout = async ({
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    className="[&>svg:first-child]:size-5"
+                  >
+                    <Link href={"/admin/facilities"}>
+                      <MapPinHouseIcon />
+                      <span>Cơ sở</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <Collapsible className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>

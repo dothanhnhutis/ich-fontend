@@ -7,6 +7,7 @@ import {
   SlidersHorizontalIcon,
   Table2Icon,
 } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 const DisplayFilter = ({
@@ -21,10 +22,17 @@ const DisplayFilter = ({
       <div className="bg-white rounded-lg p-2 px-3 shadow-md">
         <div className="flex justify-between gap-2">
           <h3 className="font-bold lg:text-2xl text-lg">
-            Danh sách trình chiếu
+            Danh sách trình chiếu đơn hàng
           </h3>
-          <Button size="icon" variant="ghost">
-            <PlusIcon className="size-4 shrink-0" />
+          <Button
+            size="icon"
+            variant="ghost"
+            asChild
+            className="cursor-pointer"
+          >
+            <Link href="/admin/displays/create">
+              <PlusIcon className="size-4 shrink-0" />
+            </Link>
           </Button>
         </div>
         <Separator className="my-1 h-4" />

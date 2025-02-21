@@ -147,3 +147,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+::-webkit-scrollbar {
+  @apply w-1 h-1;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground rounded-xl;
+}

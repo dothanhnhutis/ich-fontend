@@ -1,8 +1,11 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+
 import { Trash2Icon } from "lucide-react";
 import {
   Select,
@@ -13,27 +16,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-
-type CreateFacilityData = {
-  location_name: string;
-  address: string;
-  location_type: "Factory" | "Warehouse";
-  room_names: string[];
-};
+import { useMutation } from "@tanstack/react-query";
+import { createFacilityAction, CreateFacilityActionData } from "../action";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const CreateFacilityForm = () => {
-  const [formData, setFormData] = React.useState<CreateFacilityData>({
+  const router = useRouter();
+  const [formData, setFormData] = React.useState<CreateFacilityActionData>({
     location_name: "",
     address: "",
     location_type: "Factory",
     room_names: [],
   });
 
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data: CreateFacilityActionData) => {
+      return await createFacilityAction(data);
+    },
+    onSuccess(data) {
+      if (data.success) {
+        toast.success(data.message);
+        router.push("/admin/facilities");
+        setFormData({
+          location_name: "",
+          address: "",
+          location_type: "Factory",
+          room_names: [],
+        });
+      } else {
+        toast.error(data.message);
+      }
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData);
+    mutate(formData);
   };
   return (
     <form onSubmit={handleSubmit}>
@@ -161,10 +180,12 @@ const CreateFacilityForm = () => {
           </div>
         )}
         <div className="flex gap-2 justify-end items-center">
-          <Button variant="ghost" type="button" asChild>
+          <Button variant="ghost" type="button" asChild disabled={isPending}>
             <Link href="/admin/facilities">Huỷ</Link>
           </Button>
-          <Button type="submit">Tạo</Button>
+          <Button type="submit" disabled={isPending}>
+            Tạo
+          </Button>
         </div>
       </div>
     </form>

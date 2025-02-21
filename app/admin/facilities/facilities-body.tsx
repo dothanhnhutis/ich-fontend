@@ -18,159 +18,40 @@ import {
   SlidersHorizontalIcon,
   Table2Icon,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { deleteFacilityById, Facility } from "./action";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 
-type Facility = {
-  id: string;
-  location_name: string;
-  address: string;
-  location_type: "Factory" | "Warehouse";
-  created_at: string;
-  updated_at: string;
-  rooms: {
-    id: string;
-    room_name: string;
-    location_id: string;
-    created_at: string;
-    updated_at: string;
-  }[];
+const convertData = {
+  Factory: "Nhà máy",
+  Warehouse: "Nhà kho",
 };
 
-const FacilitiesBody = () => {
+const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
 
-  const data: Facility[] = [
-    {
-      id: "1",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (facilityId: string) => {
+      return await deleteFacilityById(facilityId);
     },
-    {
-      id: "2",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
+    onSuccess(data) {
+      if (data.success) {
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
     },
-    {
-      id: "3",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-    {
-      id: "4",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-    {
-      id: "5",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-    {
-      id: "6",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-    {
-      id: "7",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-    {
-      id: "8",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-    {
-      id: "9",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-    {
-      id: "10",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-    {
-      id: "11",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-    {
-      id: "12",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-    {
-      id: "13",
-      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
-      address:
-        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
-      location_type: "Factory",
-      created_at: "",
-      updated_at: "",
-      rooms: [],
-    },
-  ];
+  });
   return (
     <div className="max-w-7xl mx-auto px-2 w-full py-4">
       <div className="bg-white rounded-lg p-2 px-3 shadow-md">
@@ -216,32 +97,61 @@ const FacilitiesBody = () => {
             <TableRow>
               <TableHead className="w-[300px]">Tên cơ sở</TableHead>
               <TableHead className="w-[300px]">Địa chỉ</TableHead>
-              <TableHead className="w-[300px]">Loại</TableHead>
-              <TableHead className="w-[300px]">Phòng ban</TableHead>
-              <TableHead className="w-[300px]"></TableHead>
+              <TableHead className="w-[150px]">Loại</TableHead>
+              <TableHead className="w-[100px]">Phòng ban</TableHead>
+              <TableHead className="w-[100px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((facility) => (
+            {initData.map((facility) => (
               <TableRow key={facility.id}>
                 <TableCell className="font-medium min-w-[300px]">
                   {facility.location_name}
                 </TableCell>
                 <TableCell className="w-[300px]">{facility.address}</TableCell>
-                <TableCell className="w-[300px]">
-                  {facility.location_type}
+                <TableCell className="w-[150px]">
+                  {convertData[facility.location_type]}
                 </TableCell>
-                <TableCell className="w-[300px]">
+                <TableCell className="w-[100px]">
                   {facility.rooms.length}
                 </TableCell>
-                <TableCell className="w-[300px]">
-                  <Button
-                    variant={"ghost"}
-                    size={"icon"}
-                    className="cursor-pointer"
-                  >
-                    <EllipsisIcon className="w-5 h-5 shrink-0" />
-                  </Button>
+                <TableCell className="w-[100px]">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <EllipsisIcon className="w-5 h-5 shrink-0 cursor-pointer" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuLabel>Action</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => {
+                            navigator.clipboard.writeText(facility.id);
+                            toast.info(
+                              "Đã sao chép ID thành công. ID: " + facility.id
+                            );
+                          }}
+                        >
+                          Sao chép ID
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            className="cursor-pointer"
+                            href={"/admin/facilities/" + facility.id + "/edit"}
+                          >
+                            Chỉnh sửa
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={isPending}
+                          onClick={() => mutate(facility.id)}
+                        >
+                          Xoá
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}

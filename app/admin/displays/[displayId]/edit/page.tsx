@@ -1,4 +1,5 @@
 import React from "react";
+import { Metadata } from "next";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,12 +10,14 @@ import {
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Metadata } from "next";
-import CreateFacilityForm from "./form";
 export const metadata: Metadata = {
-  title: "Tạo Cơ Sở",
+  title: "Chỉnh sửa sản phẩm",
 };
-const CreateFacilityPage = () => {
+const UpdateDisplayOrderPage = async (props: {
+  params: Promise<{ productId: string }>;
+}) => {
+  const params = await props.params;
+
   return (
     <>
       <div className="bg-white flex shrink-0 items-center py-2 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -26,18 +29,20 @@ const CreateFacilityPage = () => {
           />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbItem className="hidden md:block ">
                 <BreadcrumbPage className="text-muted-foreground">
-                  Cơ sở
+                  Trình Chiếu TV
                 </BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbLink href="/admin/facilities">
-                Danh sách cơ sở
-              </BreadcrumbLink>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/admin/displays">
+                  Danh sách trình chiếu đơn hàng
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Tạo cơ sở mới</BreadcrumbPage>
+                <BreadcrumbPage>Chỉnh sửa trình chiếu đơn hàng</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -46,11 +51,10 @@ const CreateFacilityPage = () => {
       <div className="h-[calc(100vh_-_48px)] w-full overflow-y-scroll relative">
         <div className="max-w-3xl mx-auto px-2 w-full py-4">
           <div className="bg-white rounded-lg p-2 px-3 shadow-md">
-            <h3 className="font-bold lg:text-2xl text-lg">Tạo cơ sở mới</h3>
-            <p className="text-sm text-muted-foreground mb-2">
-              Điền các trường bên dưới để tạo cơ sở.
-            </p>
-            <CreateFacilityForm />
+            <h3 className="font-bold lg:text-2xl text-lg">
+              Chỉnh sửa trình chiếu đơn hàng
+            </h3>
+            form here {params.productId}
           </div>
         </div>
       </div>
@@ -58,4 +62,4 @@ const CreateFacilityPage = () => {
   );
 };
 
-export default CreateFacilityPage;
+export default UpdateDisplayOrderPage;

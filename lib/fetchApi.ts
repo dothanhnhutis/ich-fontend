@@ -42,14 +42,14 @@ export default class FetchAPI {
       : `${baseUrl}/${url}`;
 
     const res = await fetch(fullUrl, {
-      method,
+      ...this.options,
+      ...options,
       headers: {
         "Content-Type": "application/json",
         ...this.options?.headers,
         ...options?.headers,
       },
-      ...this.options,
-      ...options,
+      method,
       body: ["POST", "PUT", "PATCH"].includes(method)
         ? options?.body
         : undefined,
@@ -67,8 +67,8 @@ export default class FetchAPI {
     return result;
   }
 
-  async get(url: string, opt?: Omit<FetchApiOpts, "body">) {
-    return await this.core("GET", url, opt);
+  async get<T = unknown>(url: string, opt?: Omit<FetchApiOpts, "body">) {
+    return await this.core<T>("GET", url, opt);
   }
 
   async post<T = unknown>(url: string, body: object, opt?: FetchApiOpts) {
@@ -78,18 +78,21 @@ export default class FetchAPI {
     });
   }
 
-  async put(url: string, body: object, opt?: FetchApiOpts) {
-    return await this.core("PUT", url, { ...opt, body: JSON.stringify(body) });
-  }
-
-  async patch(url: string, body: object, opt?: FetchApiOpts) {
-    return await this.core("PATCH", url, {
+  async put<T = unknown>(url: string, body: object, opt?: FetchApiOpts) {
+    return await this.core<T>("PUT", url, {
       ...opt,
       body: JSON.stringify(body),
     });
   }
 
-  async delete(url: string, opt?: Omit<FetchApiOpts, "body">) {
-    return await this.core("DELETE", url, opt);
+  async patch<T = unknown>(url: string, body: object, opt?: FetchApiOpts) {
+    return await this.core<T>("PATCH", url, {
+      ...opt,
+      body: JSON.stringify(body),
+    });
+  }
+
+  async delete<T = unknown>(url: string, opt?: Omit<FetchApiOpts, "body">) {
+    return await this.core<T>("DELETE", url, opt);
   }
 }

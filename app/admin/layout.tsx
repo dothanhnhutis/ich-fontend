@@ -94,38 +94,7 @@ const AdminLayout = async ({
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <Collapsible className="group/collapsible">
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        tooltip={"Cơ sở"}
-                        className="[&>svg:first-child]:size-5"
-                      >
-                        <MapPinHouseIcon className="shrink-0" />
-                        <span>Cơ sở</span>
-                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <Link href={"/admin/facility/locations"}>
-                              <span>Địa điểm</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <Link href={"/admin/facility/departments"}>
-                              <span>Phòng ban</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
+
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild

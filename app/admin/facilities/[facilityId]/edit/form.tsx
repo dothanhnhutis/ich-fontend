@@ -15,6 +15,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { updateFacilityById } from "../../action";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type UpdateFacilityData = {
   id: string;
@@ -43,7 +47,29 @@ type UpdateFacilityBody = {
 };
 
 const UpdateFacilityForm = ({ data }: { data: UpdateFacilityData }) => {
+  const router = useRouter();
+
   const [formData, setFormData] = React.useState<UpdateFacilityData>(data);
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateFacilityBody;
+    }) => {
+      return await updateFacilityById(id, data);
+    },
+    onSuccess(data) {
+      if (data.success) {
+        toast.success(data.message);
+        router.push("/admin/facilities");
+      } else {
+        toast.error(data.message);
+      }
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,7 +107,7 @@ const UpdateFacilityForm = ({ data }: { data: UpdateFacilityData }) => {
         }
       }
     }
-    console.log(body);
+    mutate({ id: data.id, data: body });
   };
 
   const handleUpdateRoom = React.useCallback(
@@ -268,10 +294,12 @@ const UpdateFacilityForm = ({ data }: { data: UpdateFacilityData }) => {
           </div>
         )}
         <div className="flex gap-2 justify-end items-center">
-          <Button variant="ghost" type="button" asChild>
-            <Link href="/admin/facilities">Huỷ</Link>
+          <Button variant="ghost" type="button" asChild disabled={isPending}>
+            <Link href="/admin/facilities">Trở về</Link>
           </Button>
-          <Button type="submit">Tạo</Button>
+          <Button type="submit" className="cursor-pointer" disabled={isPending}>
+            Lưu
+          </Button>
         </div>
       </div>
     </form>

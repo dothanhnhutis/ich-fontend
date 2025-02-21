@@ -275,7 +275,9 @@ const AdminLayout = async ({
         <AdminSidebarFooter />
         <SidebarRail />
       </Sidebar>
-      <SidebarInset className="bg-transparent">{children}</SidebarInset>
+      <SidebarInset className="bg-transparent overflow-x-hidden">
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 };

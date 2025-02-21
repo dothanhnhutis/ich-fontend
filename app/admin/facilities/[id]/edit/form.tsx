@@ -3,7 +3,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Trash2Icon } from "lucide-react";
+import { RotateCcwIcon, Trash2Icon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -22,23 +22,143 @@ type UpdateFacilityData = {
   address: string;
   location_type: "Factory" | "Warehouse";
   rooms: {
+    type: "new" | "updated" | "init" | "deleted";
     room_id: string;
     room_name: string;
   }[];
 };
 
-const CreateFacilityForm = (data: UpdateFacilityData) => {
-  const [formData, setFormData] = React.useState<UpdateFacilityData>({
-    location_name: "",
-    address: "",
-    location_type: "Factory",
-    rooms: [],
-  });
+type UpdateFacilityBody = {
+  location_name?: string;
+  address?: string;
+  location_type?: "Factory" | "Warehouse";
+  rooms?: (
+    | {
+        room_id: string;
+        room_name: string;
+      }
+    | { room_id: string }
+    | { room_name: string }
+  )[];
+};
+
+const UpdateFacilityForm = ({ data }: { data: UpdateFacilityData }) => {
+  const [formData, setFormData] = React.useState<UpdateFacilityData>(data);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData);
+
+    const body: UpdateFacilityBody = {};
+
+    if (data.location_name != formData.location_name) {
+      body["location_name"] = formData.location_name;
+    }
+
+    if (data.address != formData.address) {
+      body["address"] = formData.address;
+    }
+
+    if (data.location_type != formData.location_type) {
+      body["location_type"] = formData.location_type;
+    }
+
+    if (formData.rooms.some((room) => room.type != "init")) {
+      body.rooms = [];
+      for (const room of formData.rooms) {
+        if (room.type == "updated") {
+          body.rooms.push({
+            room_id: room.room_id,
+            room_name: room.room_name,
+          });
+        } else if (room.type == "deleted") {
+          body.rooms.push({
+            room_id: room.room_id,
+          });
+        } else if (room.type == "new") {
+          body.rooms.push({
+            room_name: room.room_name,
+          });
+        }
+      }
+    }
+    console.log(body);
   };
+
+  const handleUpdateRoom = React.useCallback(
+    (currentIdx: number, value: string) => {
+      const oldData: UpdateFacilityData["rooms"][number] | undefined =
+        data.rooms[currentIdx];
+      setFormData((prev) => ({
+        ...prev,
+        rooms: prev.rooms.map((room, idx) =>
+          idx != currentIdx
+            ? room
+            : oldData
+            ? {
+                ...room,
+                type: oldData.room_name == value ? "init" : "updated",
+                room_name: value,
+              }
+            : {
+                ...room,
+                room_name: value,
+              }
+        ),
+      }));
+    },
+    [data.rooms]
+  );
+
+  const handleDelete = React.useCallback(
+    (
+      currentIdx: number,
+      currType: UpdateFacilityData["rooms"][number]["type"]
+    ) => {
+      if (currType == "new") {
+        setFormData((prev) => ({
+          ...prev,
+          rooms: prev.rooms.filter((_, idx) => idx != currentIdx),
+        }));
+      } else if (currType == "deleted") {
+        const oldData = data.rooms[currentIdx];
+        setFormData((prev) => ({
+          ...prev,
+          rooms: prev.rooms.map((room, idx) =>
+            idx != currentIdx
+              ? room
+              : {
+                  ...room,
+                  type:
+                    oldData.room_name == room.room_name ? "init" : "updated",
+                }
+          ),
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          rooms: prev.rooms.map((room, idx) =>
+            idx != currentIdx ? room : { ...room, type: "deleted" }
+          ),
+        }));
+      }
+    },
+    [data.rooms]
+  );
+
+  const handleAdd = () => {
+    setFormData((prev) => ({
+      ...prev,
+      rooms: [
+        ...prev.rooms,
+        {
+          type: "new",
+          room_name: "",
+          room_id: "",
+        },
+      ],
+    }));
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid gap-2">
@@ -100,64 +220,47 @@ const CreateFacilityForm = (data: UpdateFacilityData) => {
       <Separator className="my-2" />
       <div className="grid gap-2">
         <p className="text-sm font-semibold">Phòng thuộc cơ sở</p>
-        {formData.room_names.length == 0 ? (
+        {formData.rooms.length == 0 ? (
           <p className="w-full text-center text-sm text-muted-foreground">
             Chưa có phòng ban nào.{" "}
             <button
               type="button"
               className="font-bold underline cursor-pointer"
-              onClick={() => {
-                setFormData((prev) => ({
-                  ...prev,
-                  room_names: [""],
-                }));
-              }}
+              onClick={handleAdd}
             >
               Thêm
             </button>
           </p>
         ) : (
           <div className="grid gap-2">
-            {formData.room_names.map((room_name, idx) => (
+            {formData.rooms.map(({ type, room_name }, idx) => (
               <div key={idx} className="flex gap-2 items-center">
                 <Input
                   value={room_name}
                   onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      room_names: prev.room_names.map((room_names, index) =>
-                        idx == index ? e.target.value : room_names
-                      ),
-                    }));
+                    handleUpdateRoom(idx, e.target.value);
                   }}
                   placeholder="Tên phòng ban"
                   required
+                  disabled={type == "deleted"}
                 />
                 <button
                   type="button"
                   className="text-muted-foreground cursor-pointer"
-                  onClick={() => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      room_names: prev.room_names.filter(
-                        (_, index) => index != idx
-                      ),
-                    }));
-                  }}
+                  onClick={() => handleDelete(idx, type)}
                 >
-                  <Trash2Icon className="w-4 h-4 shrink-0" />
+                  {type == "deleted" ? (
+                    <RotateCcwIcon className="w-4 h-4 shrink-0" />
+                  ) : (
+                    <Trash2Icon className="w-4 h-4 shrink-0" />
+                  )}
                 </button>
               </div>
             ))}
 
             <button
               type="button"
-              onClick={() => {
-                setFormData((prev) => ({
-                  ...prev,
-                  room_names: [...prev.room_names, ""],
-                }));
-              }}
+              onClick={handleAdd}
               className="py-1 hover:bg-accent text-muted-foreground hover:text-accent-foreground rounded-lg cursor-pointer"
             >
               <p className="text-sm">Thêm</p>
@@ -175,4 +278,4 @@ const CreateFacilityForm = (data: UpdateFacilityData) => {
   );
 };
 
-export default CreateFacilityForm;
+export default UpdateFacilityForm;

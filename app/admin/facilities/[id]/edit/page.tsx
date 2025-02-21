@@ -10,6 +10,7 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
+import UpdateFacilityForm from "./form";
 export const metadata: Metadata = {
   title: "Cập Nhật Cơ Sở",
 };
@@ -44,8 +45,33 @@ const EditFacilityPage = () => {
       </header>
       <main className="max-w-3xl mx-auto px-2 w-full py-4">
         <div className="bg-white rounded-lg p-2 px-3 shadow-md">
-          <h3 className="font-bold lg:text-2xl text-lg">Cập nhật cơ sở mới</h3>
-          {/* <CreateFacilityForm /> */}
+          <h3 className="font-bold lg:text-2xl text-lg">Cập nhật cơ sở</h3>
+          <UpdateFacilityForm
+            data={{
+              address:
+                "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+              location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H	",
+              location_type: "Factory",
+              rooms: [
+                {
+                  room_id: "1",
+                  room_name: "phong 1",
+                  type: "init",
+                },
+                {
+                  room_id: "2",
+                  room_name: "phong 2",
+                  type: "init",
+                },
+                {
+                  room_id: "3",
+                  room_name: "phong 3",
+                  type: "init",
+                },
+              ],
+              id: "test-123",
+            }}
+          />
         </div>
       </main>
     </>

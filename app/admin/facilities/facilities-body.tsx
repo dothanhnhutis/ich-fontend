@@ -20,11 +20,159 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
+type Facility = {
+  id: string;
+  location_name: string;
+  address: string;
+  location_type: "Factory" | "Warehouse";
+  created_at: string;
+  updated_at: string;
+  rooms: {
+    id: string;
+    room_name: string;
+    location_id: string;
+    created_at: string;
+    updated_at: string;
+  }[];
+};
+
 const FacilitiesBody = () => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
 
+  const data: Facility[] = [
+    {
+      id: "1",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "2",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "3",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "4",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "5",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "6",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "7",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "8",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "9",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "10",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "11",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "12",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+    {
+      id: "13",
+      location_name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+      location_type: "Factory",
+      created_at: "",
+      updated_at: "",
+      rooms: [],
+    },
+  ];
   return (
-    <main className="max-w-7xl mx-auto px-2 w-full py-4">
+    <div className="max-w-7xl mx-auto px-2 w-full py-4">
       <div className="bg-white rounded-lg p-2 px-3 shadow-md">
         <div className="flex justify-between gap-2">
           <h3 className="font-bold lg:text-2xl text-lg">Danh sách sản phẩm</h3>
@@ -62,42 +210,45 @@ const FacilitiesBody = () => {
         10 kết quả
       </p>
 
-      <div className="bg-white rounded-lg p-2 px-3 shadow-md">
+      <div className="bg-white rounded-lg p-2 px-3 shadow-md max-w-full overflow-x-auto">
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-full">Tên cơ sở</TableHead>
-              <TableHead className="w-full">Địa chỉ</TableHead>
-              <TableHead className="w-[150px]">Loại</TableHead>
-              <TableHead className="w-[100px]">Phòng ban</TableHead>
-              <TableHead className="w-[100px]"></TableHead>
+              <TableHead className="w-[300px]">Tên cơ sở</TableHead>
+              <TableHead className="w-[300px]">Địa chỉ</TableHead>
+              <TableHead className="w-[300px]">Loại</TableHead>
+              <TableHead className="w-[300px]">Phòng ban</TableHead>
+              <TableHead className="w-[300px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow>
-              <TableCell className="font-medium">
-                Công ty TNHH MTV TM Sản Xuất I.C.H
-              </TableCell>
-              <TableCell>
-                Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng,
-                Tỉnh Sóc Trăng
-              </TableCell>
-              <TableCell>Factory</TableCell>
-              <TableCell>2</TableCell>
-              <TableCell>
-                <Button
-                  variant={"ghost"}
-                  size={"icon"}
-                  className="cursor-pointer"
-                >
-                  <EllipsisIcon className="w-5 h-5 shrink-0" />
-                </Button>
-              </TableCell>
-            </TableRow>
+            {data.map((facility) => (
+              <TableRow key={facility.id}>
+                <TableCell className="font-medium min-w-[300px]">
+                  {facility.location_name}
+                </TableCell>
+                <TableCell className="w-[300px]">{facility.address}</TableCell>
+                <TableCell className="w-[300px]">
+                  {facility.location_type}
+                </TableCell>
+                <TableCell className="w-[300px]">
+                  {facility.rooms.length}
+                </TableCell>
+                <TableCell className="w-[300px]">
+                  <Button
+                    variant={"ghost"}
+                    size={"icon"}
+                    className="cursor-pointer"
+                  >
+                    <EllipsisIcon className="w-5 h-5 shrink-0" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>
-    </main>
+    </div>
   );
 };
 

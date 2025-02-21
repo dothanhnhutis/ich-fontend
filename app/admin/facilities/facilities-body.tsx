@@ -91,15 +91,15 @@ const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
         10 kết quả
       </p>
 
-      <div className="bg-white rounded-lg p-2 px-3 shadow-md max-w-full overflow-x-auto">
-        <Table className="table-fixed">
+      <div className="bg-white rounded-lg shadow-md max-w-full overflow-x-auto">
+        <Table className="table-fixed p-2 px-3">
           <TableHeader>
             <TableRow>
               <TableHead className="w-[300px]">Tên cơ sở</TableHead>
               <TableHead className="w-[300px]">Địa chỉ</TableHead>
               <TableHead className="w-[150px]">Loại</TableHead>
               <TableHead className="w-[100px]">Phòng ban</TableHead>
-              <TableHead className="w-[100px]"></TableHead>
+              <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -115,7 +115,7 @@ const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
                 <TableCell className="w-[100px]">
                   {facility.rooms.length}
                 </TableCell>
-                <TableCell className="w-[100px]">
+                <TableCell className="w-[50px]">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <EllipsisIcon className="w-5 h-5 shrink-0 cursor-pointer" />
@@ -155,6 +155,16 @@ const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
                 </TableCell>
               </TableRow>
             ))}
+            {initData.length == 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="text-center text-muted-foreground"
+                >
+                  Chưa có cơ sở
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>

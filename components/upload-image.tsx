@@ -26,8 +26,7 @@ const UploadImage = ({
   children?: React.ReactNode;
   aspectRatios?: string[];
 }>) => {
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
-
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const [imageSrc, setImageSrc] = React.useState("");
   const [enableEditTool, setEnableEditTool] = React.useState<boolean>(false);
   const [aspectRatioImg, setAspectRatioImg] = React.useState<string>("");
@@ -44,14 +43,19 @@ const UploadImage = ({
   }, [aspectRatios]);
 
   React.useEffect(() => {
-    if (aspectRatioImg && aspectRatios && image) {
+    if (aspectRatioImg && aspectRatios) {
       if (!invalidAspectRatios.includes(aspectRatioImg)) {
-        drawCanvas(image);
-        console.log(image);
         setEnableEditTool(true);
       }
     }
-  }, [aspectRatioImg, aspectRatios, invalidAspectRatios, image]);
+  }, [aspectRatioImg, aspectRatios, invalidAspectRatios]);
+
+  React.useEffect(() => {
+    console.log("canvasRef", canvasRef);
+    if (enableEditTool && image) {
+      drawCanvas(image);
+    }
+  }, [enableEditTool, image]);
 
   // Xử lý upload ảnh
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,24 +86,25 @@ const UploadImage = ({
     }
   };
 
-  const drawCanvas = (img: HTMLImageElement) => {
+  const drawCanvas = React.useCallback((img: HTMLImageElement) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    console.log("canvas");
+
     // Kích thước canvas (lớn hơn ảnh 20% để làm background)
     const padding = 20;
-    canvas.width = img.width + padding * 2;
-    canvas.height = img.height + padding * 2;
+    canvas.width = 150;
+    canvas.height = 150;
 
-    // Vẽ background
-    ctx.fillStyle = "#00bc7d";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+    // // Vẽ background
+    // ctx.fillStyle = "#00bc7d";
+    // ctx.fillRect(0, 0, canvas.width, canvas.height);
     // Vẽ ảnh chính (căn giữa)
-    ctx.drawImage(img, padding, padding, img.width, img.height);
-  };
+    ctx.drawImage(img, padding, padding, 100, 100);
+  }, []);
 
   return (
     <label htmlFor="upload" className="">
@@ -132,7 +137,7 @@ const UploadImage = ({
             <DialogDescription>Công cụ chỉnh sửa hình ảnh</DialogDescription>
           </DialogHeader>
           <div className="flex gap-4 py-4 w-full">
-            <div className="border">
+            <div className="border p-2">
               <canvas ref={canvasRef} />
             </div>
 

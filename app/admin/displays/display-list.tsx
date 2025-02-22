@@ -119,15 +119,15 @@ const OrderGridItem = (data: OrderDisplay) => {
           Ưu tiên: <span className="font-bold text-black">{data.priority}</span>
         </p>
         {data.phone_number && (
-          <div className="flex gap-2 items-center text-muted-foreground">
-            <SmartphoneIcon className="size-4 shrink-0" />
-            <p className="lg:text-base text-sm">{data.phone_number}</p>
+          <div className="flex gap-2 items-center">
+            <SmartphoneIcon className="size-4 shrink-0 text-muted-foreground" />
+            <p className="lg:text-base text-sm ">{data.phone_number}</p>
           </div>
         )}
 
         {data.address && (
-          <div className="flex gap-2 items-center text-muted-foreground">
-            <MapPinHouseIcon className="size-4 shrink-0" />
+          <div className="flex gap-2 items-center">
+            <MapPinHouseIcon className="size-4 shrink-0 text-muted-foreground" />
             <p className="lg:text-base text-sm">{data.address}</p>
           </div>
         )}
@@ -159,7 +159,7 @@ const OrderGridItem = (data: OrderDisplay) => {
                   sizes="100vw"
                 />
               </div>
-              <div className="w-full text-muted-foreground">
+              <div className="w-full">
                 <p className="text-sm lg:text-base font-semibold line-clamp-2">
                   {product.prod_name}
                 </p>
@@ -183,10 +183,10 @@ const OrderGridItem = (data: OrderDisplay) => {
       )}
       <div className="flex items-center gap-2 mt-1">
         <p className="text-muted-foreground text-xs lg:text-sm">
-          Ngày tạo: 17/02/25 23:13
+          Ngày tạo: <span className="text-black">17/02/25 23:13</span>
         </p>
         <p className="text-muted-foreground text-xs lg:text-sm">
-          Ngày cập nhật: 17/02/25 23:13
+          Ngày cập nhật: <span className="text-black">17/02/25 23:13</span>
         </p>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import UploadImage from "@/components/upload-image";
 import { PlusIcon } from "lucide-react";
 import Image from "next/image";
 import React from "react";
@@ -35,6 +36,10 @@ const CreateProductForm = () => {
               </div>
             ))}
 
+            <UploadImage aspectRatios={["4:3", "16:9"]}>
+              <p>add</p>
+            </UploadImage>
+
             <label
               htmlFor="upload"
               className="flex text-muted-foreground hover:bg-accent cursor-pointer items-center justify-center h-[100px] w-[100px] border rounded-lg"
@@ -56,7 +61,15 @@ const CreateProductForm = () => {
         </div>
         <div>
           <Label>Quy cách đóng thùng</Label>
-          <Input required type="number" />
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Số sản phẩm trong một thùng khi giao cho khách hàng.
+            </p>
+            <div className="flex gap-1 items-center">
+              <Input required type="text" className="w-[50px]" />
+              <p className="text-xs text-muted-foreground">sản phẩm / thùng</p>
+            </div>
+          </div>
         </div>
         <div className="flex gap-2 justify-end items-center">
           <Button variant="ghost">Huỷ</Button>

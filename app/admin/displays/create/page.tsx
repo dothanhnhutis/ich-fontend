@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import CreateDisplayOrderForm from "./form";
 export const metadata: Metadata = {
   title: "Tạo sản phẩm",
 };
@@ -53,7 +54,7 @@ const CreateDisplayOrderPage = () => {
             <p className="text-muted-foreground text-sm">
               Đơn hàng sẽ được hiển thị trên màn hình tại địa điểm mình chỉ định
             </p>
-            form here
+            <CreateDisplayOrderForm />
           </div>
         </div>
       </div>

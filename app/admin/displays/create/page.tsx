@@ -51,7 +51,7 @@ const CreateDisplayOrderPage = () => {
             <h3 className="font-bold lg:text-2xl text-lg">
               Tạo trình chiếu đơn hàng
             </h3>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm mb-3">
               Đơn hàng sẽ được hiển thị trên màn hình tại địa điểm mình chỉ định
             </p>
             <CreateDisplayOrderForm />

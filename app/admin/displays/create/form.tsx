@@ -122,7 +122,7 @@ export const useDisplayOrder = () => {
 export const DisplayOrderProvider = ({
   children,
 }: Readonly<{ children?: React.ReactNode }>) => {
-  const [step, setStep] = React.useState<number>(3);
+  const [step, setStep] = React.useState<number>(1);
   const [data, setData] = React.useState<CreateDisplayOrderData>({
     id: null,
     address_list: null,
@@ -168,7 +168,12 @@ const Step1 = ({
 
   return (
     <div className="grid gap-2 items-center">
-      <Label htmlFor="cus_name">Khách hàng</Label>
+      <Label
+        htmlFor="cus_name"
+        className="after:ml-0.5 after:text-red-500 after:content-['*']"
+      >
+        Khách hàng
+      </Label>
       <Select
         value={data.id || undefined}
         onValueChange={(v) => {
@@ -232,7 +237,12 @@ const Step2 = () => {
       <h4 className="font-semibold mb-4">Thông tin khách hàng</h4>
       <div className="grid gap-2">
         <div className="grid gap-1">
-          <Label htmlFor="cus_name">Tên khách hàng</Label>
+          <Label
+            htmlFor="cus_name"
+            className="after:ml-0.5 after:text-red-500 after:content-['*']"
+          >
+            Tên khách hàng
+          </Label>
           <Input
             id="cus_name"
             required
@@ -362,6 +372,24 @@ const DisplayOrderProduct = ({
           ? {
               ...product,
               unit: value,
+              quantity: Math.min(product.quantity, 100),
+            }
+          : prod
+      ),
+    }));
+  };
+
+  const handleOnchangeProdSpec = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    const numbersOnly = rawValue.replace(/[^0-9]/g, "");
+    const processedValue = numbersOnly.replace(/^0+/, "") || "";
+    setData((prev) => ({
+      ...prev,
+      products: prev.products.map((prod) =>
+        prod.idx == product.idx
+          ? {
+              ...product,
+              pack_spec: Math.min(Number(processedValue), 1000),
             }
           : prod
       ),
@@ -378,7 +406,10 @@ const DisplayOrderProduct = ({
         prod.idx == product.idx
           ? {
               ...product,
-              quantity: Math.min(Number(processedValue), 100),
+              quantity: Math.min(
+                Number(processedValue),
+                product.unit == "CARTON" ? 100 : 100000
+              ),
             }
           : prod
       ),
@@ -456,7 +487,7 @@ const DisplayOrderProduct = ({
                   </p>
                   <Input
                     value={product.pack_spec}
-                    onChange={() => {}}
+                    onChange={handleOnchangeProdSpec}
                     placeholder={product.unit == "CARTON" ? "Quy cách" : ""}
                   />
                 </>
@@ -566,9 +597,9 @@ const DisplayOrderProductDialog = ({ products }: { products: Product[] }) => {
               product={product}
               selected={!!productSelected.find(({ id }) => product.id == id)}
               handleSelect={(product: Product) => {
-                const pro = productSelected.find(({ id }) => product.id == id);
+                const prod = productSelected.find(({ id }) => product.id == id);
 
-                if (!pro) {
+                if (!prod) {
                   setProductSelected((prev) => [...prev, product]);
                 } else {
                   setProductSelected((prev) =>
@@ -638,7 +669,7 @@ const Step4 = () => {
   };
   return (
     <div>
-      <h4 className="font-semibold mb-4">Thông tin đơn hàng</h4>
+      <h4 className="font-semibold mb-4">Cấu hình hiển thị</h4>
       <div className="grid gap-2">
         <div className="grid gap-1">
           <Label htmlFor="priority">Ưu tiên</Label>
@@ -695,9 +726,33 @@ const CreateDisplayOrderForm = () => {
     console.log(data);
   };
 
-  const disabledBtn = React.useMemo(() => {
-    return !data.id;
-  }, [data]);
+  const disabledNextBtn = React.useMemo(() => {
+    if (step == 1) {
+      return !data.id;
+    } else if (step == 2) {
+      return data.cus_name == "";
+    } else if (step == 3) {
+      return (
+        data.products.length == 0 ||
+        data.products.some(
+          (prod) =>
+            prod.prod_name == "" ||
+            prod.prod_img == "" ||
+            (prod.pack_spec == 0 && prod.unit == "CARTON") ||
+            prod.quantity == 0
+        )
+      );
+    }
+    return false;
+  }, [data, step]);
+
+  const handleBackBtn = () => {
+    setStep((prev) => (prev == 4 ? 3 : prev == 3 ? 2 : prev == 2 ? 1 : 1));
+  };
+
+  const handleNextBtn = () => {
+    setStep((prev) => (prev == 1 ? 2 : prev == 2 ? 3 : prev == 3 ? 4 : 4));
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -712,23 +767,17 @@ const CreateDisplayOrderForm = () => {
           Huỷ
         </Button>
         {step != 1 && (
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={() =>
-              setStep((prev) => (prev == 3 ? 2 : prev == 2 ? 1 : 1))
-            }
-          >
+          <Button variant="ghost" type="button" onClick={handleBackBtn}>
             Trở về
           </Button>
         )}
 
         <Button
-          disabled={disabledBtn}
-          onClick={() => setStep((prev) => (prev == 1 ? 2 : prev == 2 ? 3 : 1))}
+          disabled={disabledNextBtn}
+          onClick={handleNextBtn}
           type={step == 3 ? "submit" : "button"}
         >
-          {step == 1 || step == 2 ? "Next" : "Tạo"}
+          {step == 1 || step == 2 || step == 3 ? "Tiếp theo" : "Tạo"}
         </Button>
       </div>
     </form>

@@ -25,21 +25,23 @@ const CreateDisplayOrderPage = () => {
             className="data-[orientation=vertical]:h-4"
           />
           <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block ">
+            <BreadcrumbList className=" flex-nowrap">
+              <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbPage className="text-muted-foreground">
                   Trình Chiếu TV
                 </BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/admin/displays">
+                <BreadcrumbLink href="/admin/displays" className="line-clamp-1">
                   Danh sách trình chiếu đơn hàng
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Tạo trình chiếu đơn hàng</BreadcrumbPage>
+                <BreadcrumbPage className="line-clamp-1">
+                  Tạo trình chiếu đơn hàng
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

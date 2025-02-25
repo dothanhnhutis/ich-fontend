@@ -17,7 +17,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { EllipsisIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 const customers = [
   {
     id: "1",
@@ -62,6 +62,7 @@ type DisplayOrderProduct = {
 
 type CreateDisplayOrderData = {
   id: string | null;
+  address_list: string[] | null;
   cus_name: string;
   priority: number;
   status: "TO_DO" | "ON_PROGRESS" | "COMPLETED";
@@ -95,9 +96,10 @@ export const useDisplayOrder = () => {
 export const DisplayOrderProvider = ({
   children,
 }: Readonly<{ children?: React.ReactNode }>) => {
-  const [step, setStep] = React.useState<number>(1);
+  const [step, setStep] = React.useState<number>(3);
   const [data, setData] = React.useState<CreateDisplayOrderData>({
     id: null,
+    address_list: null,
     cus_name: "",
     phone_number: "",
     address: "",
@@ -142,16 +144,28 @@ const Step1 = ({
     <div className="grid gap-2 items-center">
       <Label htmlFor="cus_name">Khách hàng</Label>
       <Select
-        value={data.id || "other"}
+        value={data.id || undefined}
         onValueChange={(v) => {
-          const cus = customers.find((cus) => cus.id == v);
-          setData((prev) => ({
-            ...prev,
-            id: cus?.id || null,
-            cus_name: cus?.cus_name || "",
-            phone_number: cus?.cus_name || "",
-            address: cus?.address?.[0] || "",
-          }));
+          if (v == "null") {
+            setData((prev) => ({
+              ...prev,
+              id: "null",
+              address_list: null,
+              cus_name: "",
+              phone_number: "",
+              address: "",
+            }));
+          } else {
+            const cus = customers.find((cus) => cus.id == v);
+            setData((prev) => ({
+              ...prev,
+              id: cus?.id || null,
+              address_list: cus?.address || null,
+              cus_name: cus?.cus_name || "",
+              phone_number: cus?.phone_number || "",
+              address: cus?.address?.[0] || "",
+            }));
+          }
         }}
       >
         <SelectTrigger id="cus_name">
@@ -165,7 +179,7 @@ const Step1 = ({
                 {cus.cus_name}
               </SelectItem>
             ))}
-            <SelectItem value={"other"}>Khách hàng mới</SelectItem>
+            <SelectItem value={"null"}>Khách hàng mới</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -175,16 +189,26 @@ const Step1 = ({
 
 const Step2 = () => {
   const { step, data, setData } = useDisplayOrder();
+  const [addressInput, setAddressInput] = React.useState<string>("");
+  const [addressSelected, setAddressSelected] = React.useState<string>("");
+
+  React.useEffect(() => {
+    if (step == 2) {
+      setAddressInput("");
+      setAddressSelected(data.address_list ? data.address_list[0] : "");
+    }
+  }, [data.address_list, step]);
 
   if (step != 2) return;
+
   return (
     <>
-      <Separator className="my-2" />
       <h4 className="font-semibold mb-4">Thông tin khách hàng</h4>
       <div className="grid gap-2">
         <div className="grid gap-1">
-          <Label>Tên khách hàng</Label>
+          <Label htmlFor="cus_name">Tên khách hàng</Label>
           <Input
+            id="cus_name"
             required
             value={data.cus_name || ""}
             onChange={(e) =>
@@ -197,8 +221,9 @@ const Step2 = () => {
         </div>
 
         <div className="grid gap-1">
-          <Label>Số điện thoại</Label>
+          <Label htmlFor="phone_number">Số điện thoại</Label>
           <Input
+            id="phone_number"
             value={data.phone_number || ""}
             onChange={(e) =>
               setData((prev) => ({
@@ -218,13 +243,14 @@ const Step2 = () => {
                 ...prev,
                 address: v,
               }));
+
+              setAddressSelected(v);
             }}
-            value={selectdAddressId}
+            value={addressSelected}
             className="max-h-[144px] overflow-y-scroll"
           >
-            {cusSelected &&
-              cusSelected.address &&
-              cusSelected.address.map((address, idx) => (
+            {data.address_list &&
+              data.address_list.map((address, idx) => (
                 <Label
                   htmlFor={`address_${idx}`}
                   key={idx}
@@ -232,8 +258,8 @@ const Step2 = () => {
                 >
                   <RadioGroupItem
                     value={address}
-                    id={`address_${idx}`}
                     className="hidden"
+                    id={`address_${idx}`}
                   />
                   <p>{address}</p>
                 </Label>
@@ -241,27 +267,27 @@ const Step2 = () => {
           </RadioGroup>
           <Input
             className={cn(
-              "focus-visible:outline-0 focus-visible:ring-0",
-              selectdAddressId != "other"
+              "focus-visible:outline-0 focus-visible:ring-0 mt-2",
+              addressSelected != "null"
                 ? "text-muted-foreground"
-                : cusSelected
+                : data.address_list?.length || 0 > 0
                 ? "border-primary"
                 : ""
             )}
-            required={selectdAddressId == "other"}
-            placeholder="Địa chỉ khác"
+            required={addressSelected != "null"}
+            placeholder={data.address_list ? "Địa chỉ khác" : undefined}
             type="text"
             onFocus={() => {
-              setSelectedAddressId("other");
-              setFormData((prev) => ({
+              setAddressSelected("null");
+              setData((prev) => ({
                 ...prev,
-                address: addressOtherValue,
+                address: addressInput,
               }));
             }}
-            value={addressOtherValue}
+            value={addressInput}
             onChange={(e) => {
-              setAddressOtherValue(e.target.value);
-              setFormData((prev) => ({
+              setAddressInput(e.target.value);
+              setData((prev) => ({
                 ...prev,
                 address: e.target.value,
               }));
@@ -273,59 +299,76 @@ const Step2 = () => {
   );
 };
 
-const Step3 = () => {
-  const { step } = useDisplayOrder();
-
-  if (step != 3) return;
+const DisplayOrderProduct = ({
+  product,
+}: {
+  product: {
+    idx: number;
+    prod_img: string;
+    prod_name: string;
+    unit: "CARTON" | "PACKAGED_GOODS";
+    pack_spec: number;
+    quantity: number;
+  };
+}) => {
   return (
-    <div>
-      <h4 className="font-semibold mb-4">Thông tin đơn hàng</h4>
-      <div className="grid gap-2">
-        <div className="flex gap-2">
-          <div className="relative shrink-0 rounded-lg aspect-square h-16 w-16 overflow-hidden">
-            <Image
-              fill
-              src={product.prod_img}
-              alt={product.prod_name}
-              sizes="100vw"
-            />
-          </div>
-          <div className="w-full">
-            <p className="text-sm lg:text-base font-semibold line-clamp-2">
-              123
-            </p>
-            <p className="text-sm">
-              {product.quantity}{" "}
-              {product.unit == "CARTON" ? (
-                <span>
-                  thùng{" "}
-                  {`(${product.quantity}T x ${product.pack_spec}SP = ${
-                    product.quantity * product.pack_spec
-                  } SP)`}
-                </span>
-              ) : (
-                <span>sản phẩm</span>
+    <div className="flex gap-2 flex-col min-[400px]:flex-row pb-2 border-b last:border-0">
+      <div className="flex items-center min-[400px]:justify-end text-muted-foreground hover:bg-accent ">
+        {product.idx}
+      </div>
+      <div className="relative shrink-0 rounded-lg aspect-square h-20 w-20 overflow-hidden">
+        <Image
+          fill
+          src={product.prod_img}
+          alt={product.prod_name}
+          sizes="100vw"
+        />
+      </div>
+      <div className="grid gap-1 w-full">
+        <div>
+          <Label>Tên sản phẩm</Label>
+          <Input placeholder="Tên sản phẩm" />
+        </div>
+        <div>
+          <Label>Đơn vị tính</Label>
+          <div className="flex items-center gap-0.5">
+            <button
+              type="button"
+              className={cn(
+                "w-full rounded-md",
+                product.unit == "CARTON"
+                  ? "bg-accent"
+                  : "hover:bg-accent border border-accent"
               )}
-            </p>
-          </div>
-          <div>
-            <button className="text-muted-foreground cursor-pointer">
-              <EllipsisIcon className="h-5 w-5 shrink-0" />
+            >
+              Thùng
+            </button>
+            <button
+              type="button"
+              className={cn(
+                "w-full rounded-md",
+                product.unit == "PACKAGED_GOODS"
+                  ? "bg-accent"
+                  : "hover:bg-accent border border-accent"
+              )}
+            >
+              Sản phẩm
             </button>
           </div>
         </div>
-        <div className="flex gap-2">
-          <div className="relative shrink-0 rounded-lg aspect-square h-20 w-20 overflow-hidden">
-            <Image
-              fill
-              src={product.prod_img}
-              alt={product.prod_name}
-              sizes="100vw"
-            />
-          </div>
-          <div className="w-full">
-            <Input placeholder="Tên sản phẩm" />
-            <Input placeholder="Tên sản phẩm" />
+        <div>
+          <Label>Số lượng</Label>
+          <div className="flex items-center gap-0.5">
+            {product.unit == "CARTON" && (
+              <>
+                <Input placeholder="Số lượng thùng" />
+                <p className="text-muted-foreground text-sm shrink-0">
+                  thùng <span>/</span>
+                </p>
+              </>
+            )}
+            <Input placeholder={product.unit == "CARTON" ? "Quy cách" : ""} />
+            <p className="text-muted-foreground text-sm shrink-0">sản phẩm</p>
           </div>
         </div>
       </div>
@@ -333,10 +376,75 @@ const Step3 = () => {
   );
 };
 
+const Step3 = () => {
+  const { step } = useDisplayOrder();
+
+  if (step != 3) return;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="font-semibold">Thông tin đơn hàng</h4>
+        <button type="button" className="cursor-pointer text-muted-foreground">
+          <PlusIcon className="h-5 w-5 shrink-0" />
+        </button>
+      </div>
+      <div className="grid gap-2 ">
+        {/* <p className="text-muted-foreground text-center">
+          Chưa có sản phẩm.{" "}
+          <button type="button" className="font-bold cursor-pointer">
+            Thêm
+          </button>
+        </p> */}
+        <DisplayOrderProduct
+          product={{
+            idx: 1,
+            prod_img: product.prod_img,
+            prod_name: product.prod_name,
+            pack_spec: product.pack_spec,
+            quantity: 0,
+            unit: "CARTON",
+          }}
+        />
+        <DisplayOrderProduct
+          product={{
+            idx: 2,
+            prod_img: product.prod_img,
+            prod_name: product.prod_name,
+            pack_spec: product.pack_spec,
+            quantity: 0,
+            unit: "CARTON",
+          }}
+        />
+        <DisplayOrderProduct
+          product={{
+            idx: 3,
+            prod_img: product.prod_img,
+            prod_name: product.prod_name,
+            pack_spec: product.pack_spec,
+            quantity: 0,
+            unit: "CARTON",
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
 const Step4 = () => {
-  const { step, setData } = useDisplayOrder();
+  const { step, setData, data } = useDisplayOrder();
 
   if (step != 4) return;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    const numbersOnly = rawValue.replace(/[^0-9]/g, "");
+    const processedValue = numbersOnly.replace(/^0+/, "") || "";
+    setData((prev) => ({
+      ...prev,
+      priority: Math.min(Number(processedValue), 100),
+    }));
+  };
   return (
     <div>
       <h4 className="font-semibold mb-4">Thông tin đơn hàng</h4>
@@ -346,7 +454,7 @@ const Step4 = () => {
           <Input
             id="priority"
             required
-            value={formData.priority}
+            value={data.priority}
             onChange={handleChange}
           />
           <p className="text-muted-foreground text-xs">
@@ -389,23 +497,20 @@ const Step4 = () => {
 const CreateDisplayOrderForm = () => {
   const { step, setStep, data } = useDisplayOrder();
 
-  //   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //     const rawValue = e.target.value;
-  //     const numbersOnly = rawValue.replace(/[^0-9]/g, "");
-  //     const processedValue = numbersOnly.replace(/^0+/, "") || "";
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       priority: Math.min(Number(processedValue), 100),
-  //     }));
-  //   };
+  console.log(data);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(data);
   };
 
+  const disabledBtn = React.useMemo(() => {
+    return !data.id;
+  }, [data]);
+
   return (
     <form onSubmit={handleSubmit}>
+      <Separator className="my-2" />
       <Step1 customers={customers} />
       <Step2 />
       <Step3 />
@@ -428,6 +533,7 @@ const CreateDisplayOrderForm = () => {
         )}
 
         <Button
+          disabled={disabledBtn}
           onClick={() => setStep((prev) => (prev == 1 ? 2 : prev == 2 ? 3 : 1))}
           type={step == 3 ? "submit" : "button"}
         >

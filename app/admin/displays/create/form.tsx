@@ -12,12 +12,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { PlusIcon } from "lucide-react";
+import { cn, generateUniqueID } from "@/lib/utils";
+import { PlusIcon, TrashIcon } from "lucide-react";
 const customers = [
   {
     id: "1",
@@ -37,22 +46,39 @@ const customers = [
   },
 ];
 
-const product: {
-  prod_name: string;
-  prod_img: string;
-  unit: "PACKAGED_GOODS" | "CARTON";
-  pack_spec: number;
-  quantity: number;
-} = {
-  pack_spec: 10,
-  prod_img:
-    "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg",
-  prod_name: "Face / Kem Face",
-  quantity: 10,
-  unit: "CARTON",
-};
+const products: Product[] = [
+  {
+    id: "1",
+    pack_spec: 100,
+    prod_img:
+      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg",
+    prod_name: "Face / Kem Face",
+  },
+  {
+    id: "2",
+    pack_spec: 10,
+    prod_img:
+      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg",
+    prod_name: "Rau ma",
+  },
+  {
+    id: "3",
+    pack_spec: 0,
+    prod_img:
+      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg",
+    prod_name: "TONE UP SUNCREEN",
+  },
+  {
+    id: "4",
+    pack_spec: 0,
+    prod_img:
+      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg",
+    prod_name: "GEL CLEANSER COLLAGEN",
+  },
+];
 
 type DisplayOrderProduct = {
+  idx: string;
   prod_name: string;
   prod_img: string;
   unit: "PACKAGED_GOODS" | "CARTON";
@@ -301,74 +327,143 @@ const Step2 = () => {
 
 const DisplayOrderProduct = ({
   product,
+  index,
 }: {
-  product: {
-    idx: number;
-    prod_img: string;
-    prod_name: string;
-    unit: "CARTON" | "PACKAGED_GOODS";
-    pack_spec: number;
-    quantity: number;
-  };
+  product: DisplayOrderProduct;
+  index: number;
 }) => {
+  const { setData } = useDisplayOrder();
+  const handleRemove = () => {
+    setData((prev) => ({
+      ...prev,
+      products: prev.products.filter(({ idx }) => product.idx != idx),
+    }));
+  };
+
+  const handleOnchangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setData((prev) => ({
+      ...prev,
+      products: prev.products.map((prod) =>
+        prod.idx == product.idx
+          ? {
+              ...product,
+              prod_name: e.target.value,
+            }
+          : prod
+      ),
+    }));
+  };
+
+  const handleOnchangeUnit = (value: "PACKAGED_GOODS" | "CARTON") => {
+    setData((prev) => ({
+      ...prev,
+      products: prev.products.map((prod) =>
+        prod.idx == product.idx
+          ? {
+              ...product,
+              unit: value,
+            }
+          : prod
+      ),
+    }));
+  };
+
+  const handleOnchangeQuality = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    const numbersOnly = rawValue.replace(/[^0-9]/g, "");
+    const processedValue = numbersOnly.replace(/^0+/, "") || "";
+    setData((prev) => ({
+      ...prev,
+      products: prev.products.map((prod) =>
+        prod.idx == product.idx
+          ? {
+              ...product,
+              quantity: Math.min(Number(processedValue), 100),
+            }
+          : prod
+      ),
+    }));
+  };
+
   return (
-    <div className="flex gap-2 flex-col min-[400px]:flex-row pb-2 border-b last:border-0">
-      <div className="flex items-center min-[400px]:justify-end text-muted-foreground hover:bg-accent ">
-        {product.idx}
+    <div className="flex gap-1 border-b last:border-0 pb-2 relative">
+      <button
+        onClick={handleRemove}
+        className="absolute top-0 right-0 cursor-pointer text-muted-foreground"
+      >
+        <TrashIcon className="shrink-0 h-4 w-4" />
+      </button>
+      <div className="flex items-center rounded-md px-0.5 cursor-pointer min-[400px]:justify-end text-muted-foreground hover:bg-accent shrink-0">
+        {index}
       </div>
-      <div className="relative shrink-0 rounded-lg aspect-square h-20 w-20 overflow-hidden">
-        <Image
-          fill
-          src={product.prod_img}
-          alt={product.prod_name}
-          sizes="100vw"
-        />
-      </div>
-      <div className="grid gap-1 w-full">
-        <div>
-          <Label>Tên sản phẩm</Label>
-          <Input placeholder="Tên sản phẩm" />
+      <div className="flex gap-2 flex-col min-[400px]:flex-row w-full">
+        <div className="relative shrink-0 rounded-lg aspect-square h-20 w-20 overflow-hidden">
+          <Image
+            fill
+            src={product.prod_img}
+            alt={product.prod_name}
+            sizes="100vw"
+          />
         </div>
-        <div>
-          <Label>Đơn vị tính</Label>
-          <div className="flex items-center gap-0.5">
-            <button
-              type="button"
-              className={cn(
-                "w-full rounded-md",
-                product.unit == "CARTON"
-                  ? "bg-accent"
-                  : "hover:bg-accent border border-accent"
-              )}
-            >
-              Thùng
-            </button>
-            <button
-              type="button"
-              className={cn(
-                "w-full rounded-md",
-                product.unit == "PACKAGED_GOODS"
-                  ? "bg-accent"
-                  : "hover:bg-accent border border-accent"
-              )}
-            >
-              Sản phẩm
-            </button>
+        <div className="grid gap-1 w-full">
+          <div>
+            <Label>Tên sản phẩm</Label>
+            <Input
+              value={product.prod_name}
+              onChange={handleOnchangeName}
+              placeholder="Tên sản phẩm"
+            />
           </div>
-        </div>
-        <div>
-          <Label>Số lượng</Label>
-          <div className="flex items-center gap-0.5">
-            {product.unit == "CARTON" && (
-              <>
-                <Input placeholder="Số lượng thùng" />
-                <p className="text-muted-foreground text-sm shrink-0">
-                  thùng <span>/</span>
-                </p>
-              </>
-            )}
-            <Input placeholder={product.unit == "CARTON" ? "Quy cách" : ""} />
-            <p className="text-muted-foreground text-sm shrink-0">sản phẩm</p>
+          <div>
+            <Label>Đơn vị tính</Label>
+            <div className="flex items-center gap-0.5">
+              <button
+                onClick={() => handleOnchangeUnit("CARTON")}
+                type="button"
+                className={cn(
+                  "w-full rounded-md border border-accent",
+                  product.unit == "CARTON" ? "bg-accent" : "hover:bg-accent"
+                )}
+              >
+                Thùng
+              </button>
+              <button
+                onClick={() => handleOnchangeUnit("PACKAGED_GOODS")}
+                type="button"
+                className={cn(
+                  "w-full rounded-md border border-accent",
+                  product.unit == "PACKAGED_GOODS"
+                    ? "bg-accent"
+                    : "hover:bg-accent"
+                )}
+              >
+                Sản phẩm
+              </button>
+            </div>
+          </div>
+          <div>
+            <Label>Số lượng</Label>
+            <div className="flex items-center gap-0.5">
+              <Input
+                value={product.quantity}
+                onChange={handleOnchangeQuality}
+                placeholder="Số lượng thùng"
+              />
+              {product.unit == "CARTON" && (
+                <>
+                  <p className="text-muted-foreground text-sm shrink-0">
+                    thùng <span>/</span>
+                  </p>
+                  <Input
+                    value={product.pack_spec}
+                    onChange={() => {}}
+                    placeholder={product.unit == "CARTON" ? "Quy cách" : ""}
+                  />
+                </>
+              )}
+
+              <p className="text-muted-foreground text-sm shrink-0">sản phẩm</p>
+            </div>
           </div>
         </div>
       </div>
@@ -376,8 +471,132 @@ const DisplayOrderProduct = ({
   );
 };
 
+const ProductCard = ({
+  product,
+  selected,
+  handleSelect,
+}: {
+  product: Product;
+  selected: boolean;
+  handleSelect: (product: Product) => void;
+}) => {
+  return (
+    <div
+      className={cn(
+        "grid items-center justify-center border gap-1 py-2 rounded-lg cursor-pointer ",
+        selected ? "border-primary" : "hover:bg-accent"
+      )}
+      onClick={() => handleSelect(product)}
+    >
+      <div className="mx-auto relative shrink-0 rounded-lg aspect-square h-20 w-20 overflow-hidden">
+        <Image
+          fill
+          src={product.prod_img}
+          alt={product.prod_name}
+          sizes="100vw"
+        />
+      </div>
+      <div className="text-muted-foreground text-center px-2">
+        <p className="line-clamp-2 text-sm">{product.prod_name}</p>
+        {product.pack_spec != 0 && (
+          <p className="text-xs">{product.pack_spec} sp/thùng</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+type Product = {
+  id: string;
+  prod_name: string;
+  prod_img: string;
+  pack_spec: number;
+};
+
+const DisplayOrderProductDialog = ({ products }: { products: Product[] }) => {
+  const [open, setOpen] = React.useState<boolean>(false);
+  const { setData } = useDisplayOrder();
+
+  const [productSelected, setProductSelected] = React.useState<Product[]>([]);
+
+  React.useEffect(() => {
+    if (!open) {
+      setProductSelected([]);
+    }
+  }, [open]);
+
+  const handleAdd = () => {
+    const newProd: CreateDisplayOrderData["products"] = productSelected.map(
+      (prod) => ({
+        idx: generateUniqueID(),
+        prod_name: prod.prod_name,
+        prod_img: prod.prod_img,
+        pack_spec: prod.pack_spec,
+        quantity: 1,
+        unit: prod.pack_spec == 0 ? "PACKAGED_GOODS" : "CARTON",
+      })
+    );
+
+    setData((prev) => ({
+      ...prev,
+      products: [...prev.products, ...newProd],
+    }));
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button type="button" className="cursor-pointer text-muted-foreground">
+          <PlusIcon className="h-5 w-5 shrink-0" />
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Danh sách sản phẩm</DialogTitle>
+          <DialogDescription>
+            Chọn các sản phẩm muốn thêm vào đơn hàng
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-1 min-[430px]:grid-cols-2 sm:grid-cols-3 gap-2 max-h-[324px] overflow-y-scroll">
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              selected={!!productSelected.find(({ id }) => product.id == id)}
+              handleSelect={(product: Product) => {
+                const pro = productSelected.find(({ id }) => product.id == id);
+
+                if (!pro) {
+                  setProductSelected((prev) => [...prev, product]);
+                } else {
+                  setProductSelected((prev) =>
+                    prev.filter((prod) => prod.id != product.id)
+                  );
+                }
+              }}
+            />
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button
+            type="submit"
+            className="cursor-pointer"
+            onClick={handleAdd}
+            disabled={productSelected.length == 0}
+          >
+            Thêm
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const Step3 = () => {
-  const { step } = useDisplayOrder();
+  const { step, data } = useDisplayOrder();
 
   if (step != 3) return;
 
@@ -385,47 +604,19 @@ const Step3 = () => {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h4 className="font-semibold">Thông tin đơn hàng</h4>
-        <button type="button" className="cursor-pointer text-muted-foreground">
-          <PlusIcon className="h-5 w-5 shrink-0" />
-        </button>
+        <DisplayOrderProductDialog products={products} />
       </div>
       <div className="grid gap-2 ">
-        {/* <p className="text-muted-foreground text-center">
-          Chưa có sản phẩm.{" "}
-          <button type="button" className="font-bold cursor-pointer">
-            Thêm
-          </button>
-        </p> */}
-        <DisplayOrderProduct
-          product={{
-            idx: 1,
-            prod_img: product.prod_img,
-            prod_name: product.prod_name,
-            pack_spec: product.pack_spec,
-            quantity: 0,
-            unit: "CARTON",
-          }}
-        />
-        <DisplayOrderProduct
-          product={{
-            idx: 2,
-            prod_img: product.prod_img,
-            prod_name: product.prod_name,
-            pack_spec: product.pack_spec,
-            quantity: 0,
-            unit: "CARTON",
-          }}
-        />
-        <DisplayOrderProduct
-          product={{
-            idx: 3,
-            prod_img: product.prod_img,
-            prod_name: product.prod_name,
-            pack_spec: product.pack_spec,
-            quantity: 0,
-            unit: "CARTON",
-          }}
-        />
+        {data.products.length == 0 && (
+          <p className="text-muted-foreground text-center">Chưa có sản phẩm.</p>
+        )}
+        {data.products.map((product, index) => (
+          <DisplayOrderProduct
+            index={index + 1}
+            key={product.idx}
+            product={product}
+          />
+        ))}
       </div>
     </div>
   );

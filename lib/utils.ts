@@ -107,3 +107,6 @@ export function caculatorPagination({
   }
   return result.filter((v, ix, arr) => v == -1 || arr.indexOf(v) === ix);
 }
+
+export const generateUniqueID = () =>
+  Date.now().toString(36) + Math.random().toString(36).slice(2, 6);

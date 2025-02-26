@@ -1,5 +1,14 @@
 "use client";
 import React from "react";
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -22,11 +31,24 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn, generateUniqueID } from "@/lib/utils";
-import { PlusIcon, TrashIcon } from "lucide-react";
+import {
+  ChevronRightIcon,
+  GripVerticalIcon,
+  MessageCircleWarningIcon,
+  PackageOpenIcon,
+  PackagePlusIcon,
+  PackageXIcon,
+  Trash2Icon,
+} from "lucide-react";
 const customers = [
   {
     id: "1",
@@ -78,12 +100,13 @@ const products: Product[] = [
 ];
 
 type DisplayOrderProduct = {
-  idx: string;
+  id: string;
   prod_name: string;
   prod_img: string;
   unit: "PACKAGED_GOODS" | "CARTON";
   pack_spec: number;
   quantity: number;
+  // note: string[];
 };
 
 type CreateDisplayOrderData = {
@@ -122,7 +145,7 @@ export const useDisplayOrder = () => {
 export const DisplayOrderProvider = ({
   children,
 }: Readonly<{ children?: React.ReactNode }>) => {
-  const [step, setStep] = React.useState<number>(1);
+  const [step, setStep] = React.useState<number>(3);
   const [data, setData] = React.useState<CreateDisplayOrderData>({
     id: null,
     address_list: null,
@@ -214,6 +237,10 @@ const Step1 = ({
           </SelectGroup>
         </SelectContent>
       </Select>
+
+      <p className="text-muted-foreground text-sm">
+        Chọn một khách hàng để tiếp tục
+      </p>
     </div>
   );
 };
@@ -343,10 +370,19 @@ const DisplayOrderProduct = ({
   index: number;
 }) => {
   const { setData } = useDisplayOrder();
+
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable(product);
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   const handleRemove = () => {
     setData((prev) => ({
       ...prev,
-      products: prev.products.filter(({ idx }) => product.idx != idx),
+      products: prev.products.filter(({ id }) => product.id != id),
     }));
   };
 
@@ -354,7 +390,7 @@ const DisplayOrderProduct = ({
     setData((prev) => ({
       ...prev,
       products: prev.products.map((prod) =>
-        prod.idx == product.idx
+        prod.id == product.id
           ? {
               ...product,
               prod_name: e.target.value,
@@ -368,7 +404,7 @@ const DisplayOrderProduct = ({
     setData((prev) => ({
       ...prev,
       products: prev.products.map((prod) =>
-        prod.idx == product.idx
+        prod.id == product.id
           ? {
               ...product,
               unit: value,
@@ -386,7 +422,7 @@ const DisplayOrderProduct = ({
     setData((prev) => ({
       ...prev,
       products: prev.products.map((prod) =>
-        prod.idx == product.idx
+        prod.id == product.id
           ? {
               ...product,
               pack_spec: Math.min(Number(processedValue), 1000),
@@ -403,7 +439,7 @@ const DisplayOrderProduct = ({
     setData((prev) => ({
       ...prev,
       products: prev.products.map((prod) =>
-        prod.idx == product.idx
+        prod.id == product.id
           ? {
               ...product,
               quantity: Math.min(
@@ -417,14 +453,46 @@ const DisplayOrderProduct = ({
   };
 
   return (
-    <div className="flex gap-1 border-b last:border-0 pb-2 relative">
-      <button
-        onClick={handleRemove}
-        className="absolute top-0 right-0 cursor-pointer text-muted-foreground"
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex gap-1 border-b last:border-0 pb-2 relative"
+    >
+      <div className="absolute top-0 right-0 flex gap-2 items-center">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={handleRemove}
+              className="cursor-pointer text-muted-foreground"
+            >
+              <MessageCircleWarningIcon className="shrink-0 h-5 w-5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Thêm ghi chú </p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={handleRemove}
+              className="cursor-pointer text-muted-foreground"
+            >
+              <PackageXIcon className="shrink-0 h-5 w-5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Xoá sản phẩm</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div
+        {...listeners}
+        {...attributes}
+        className="flex items-center rounded-md px-0.5 cursor-grab min-[400px]:justify-end text-muted-foreground hover:bg-accent shrink-0"
       >
-        <TrashIcon className="shrink-0 h-4 w-4" />
-      </button>
-      <div className="flex items-center rounded-md px-0.5 cursor-pointer min-[400px]:justify-end text-muted-foreground hover:bg-accent shrink-0">
         {index}
       </div>
       <div className="flex gap-2 flex-col min-[400px]:flex-row w-full">
@@ -496,6 +564,41 @@ const DisplayOrderProduct = ({
               <p className="text-muted-foreground text-sm shrink-0">sản phẩm</p>
             </div>
           </div>
+          <div>
+            <Label>Ghi chú</Label>
+            <div className="grid gap-1">
+              <div className="flex items-center w-full grow gap-1">
+                <div className="flex gap-2 items-center border rounded-md w-full">
+                  <button
+                    type="button"
+                    className="text-muted-foreground cursor-grab px-1"
+                  >
+                    <GripVerticalIcon className="shrink h-4 w-4" />
+                  </button>
+                  <input
+                    className="h-10 w-full focus-visible:ring-0 focus-visible:outline-0 pr-2"
+                    type="text"
+                    name=""
+                    id=""
+                  />
+                </div>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="text-muted-foreground cursor-pointer px-1"
+                    >
+                      <Trash2Icon className="shrink h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Xoá ghi chú</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -559,7 +662,7 @@ const DisplayOrderProductDialog = ({ products }: { products: Product[] }) => {
   const handleAdd = () => {
     const newProd: CreateDisplayOrderData["products"] = productSelected.map(
       (prod) => ({
-        idx: generateUniqueID(),
+        id: generateUniqueID(),
         prod_name: prod.prod_name,
         prod_img: prod.prod_img,
         pack_spec: prod.pack_spec,
@@ -577,11 +680,21 @@ const DisplayOrderProductDialog = ({ products }: { products: Product[] }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button type="button" className="cursor-pointer text-muted-foreground">
-          <PlusIcon className="h-5 w-5 shrink-0" />
-        </button>
-      </DialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              className="cursor-pointer text-muted-foreground"
+            >
+              <PackagePlusIcon className="h-5 w-5 shrink-0" />
+            </button>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Thêm sản phẩm đã tạo</p>
+        </TooltipContent>
+      </Tooltip>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Danh sách sản phẩm</DialogTitle>
@@ -627,27 +740,72 @@ const DisplayOrderProductDialog = ({ products }: { products: Product[] }) => {
 };
 
 const Step3 = () => {
-  const { step, data } = useDisplayOrder();
+  const { step, data, setData } = useDisplayOrder();
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = data.products
+      .map((prod) => prod.id)
+      .indexOf(active.id as string);
+    const newIndex = data.products
+      .map((prod) => prod.id)
+      .indexOf(over.id as string);
+
+    setData((prev) => ({
+      ...prev,
+      products: arrayMove(data.products, oldIndex, newIndex),
+    }));
+  };
   if (step != 3) return;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="font-semibold">Thông tin đơn hàng</h4>
+      <div className="flex items-center gap-2 mb-4">
+        <h4 className="font-semibold w-full">Thông tin đơn hàng</h4>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="cursor-pointer text-muted-foreground"
+            >
+              <PackageOpenIcon className="h-5 w-5 shrink-0" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Thêm sản phẩm mới</p>
+          </TooltipContent>
+        </Tooltip>
+
         <DisplayOrderProductDialog products={products} />
       </div>
+
       <div className="grid gap-2 ">
-        {data.products.length == 0 && (
+        {data.products.length == 0 ? (
           <p className="text-muted-foreground text-center">Chưa có sản phẩm.</p>
+        ) : (
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={data.products}
+              strategy={verticalListSortingStrategy}
+            >
+              {data.products.map((product, index) => (
+                <DisplayOrderProduct
+                  index={index + 1}
+                  key={product.id}
+                  product={product}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         )}
-        {data.products.map((product, index) => (
-          <DisplayOrderProduct
-            index={index + 1}
-            key={product.idx}
-            product={product}
-          />
-        ))}
       </div>
     </div>
   );
@@ -755,32 +913,51 @@ const CreateDisplayOrderForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Separator className="my-2" />
-      <Step1 customers={customers} />
-      <Step2 />
-      <Step3 />
-      <Step4 />
+    <TooltipProvider>
+      <form onSubmit={handleSubmit}>
+        <div className="flex gap-1 items-center text-xs min-[430px]:text-sm text-muted-foreground">
+          <p className={step == 1 ? "text-black" : ""}>
+            Bước 1: Chọn khách hàng
+          </p>
+          <ChevronRightIcon className="shrink-0 w-4 h-4" />
+          <p className={step == 2 ? "text-black" : ""}>
+            Bước 2: Thông tin khách hàng
+          </p>
+          <ChevronRightIcon className="shrink-0 w-4 h-4" />
+          <p className={step == 3 ? "text-black" : ""}>
+            Bước 3: Thông tin đơn hàng
+          </p>
+          <ChevronRightIcon className="shrink-0 w-4 h-4" />
+          <p className={step == 4 ? "text-black" : ""}>
+            Bước 4: Cấu hình hiển thị
+          </p>
+        </div>
+        <Separator className="my-2" />
+        <Step1 customers={customers} />
+        <Step2 />
+        <Step3 />
+        <Step4 />
 
-      <div className="flex items-center justify-end gap-2 mt-4">
-        <Button variant="ghost" type="button">
-          Huỷ
-        </Button>
-        {step != 1 && (
-          <Button variant="ghost" type="button" onClick={handleBackBtn}>
-            Trở về
+        <div className="flex items-center justify-end gap-2 mt-4">
+          <Button variant="ghost" type="button">
+            Huỷ
           </Button>
-        )}
+          {step != 1 && (
+            <Button variant="ghost" type="button" onClick={handleBackBtn}>
+              Trở về
+            </Button>
+          )}
 
-        <Button
-          disabled={disabledNextBtn}
-          onClick={handleNextBtn}
-          type={step == 3 ? "submit" : "button"}
-        >
-          {step == 1 || step == 2 || step == 3 ? "Tiếp theo" : "Tạo"}
-        </Button>
-      </div>
-    </form>
+          <Button
+            disabled={disabledNextBtn}
+            onClick={handleNextBtn}
+            type={step == 3 ? "submit" : "button"}
+          >
+            {step == 1 || step == 2 || step == 3 ? "Kế tiếp" : "Tạo"}
+          </Button>
+        </div>
+      </form>
+    </TooltipProvider>
   );
 };
 

@@ -1,6 +1,11 @@
 "use client";
 import React from "react";
-import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  closestCenter,
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
@@ -106,7 +111,7 @@ type DisplayOrderProduct = {
   unit: "PACKAGED_GOODS" | "CARTON";
   pack_spec: number;
   quantity: number;
-  // note: string[];
+  notes: { id: string; value: string }[];
 };
 
 type CreateDisplayOrderData = {
@@ -362,6 +367,102 @@ const Step2 = () => {
   );
 };
 
+const Note = ({
+  note,
+  prod_id,
+}: {
+  prod_id: string;
+  note: {
+    id: string;
+    value: string;
+  };
+}) => {
+  const { setData } = useDisplayOrder();
+
+  const handleOnchange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setData((prev) => ({
+      ...prev,
+      products: prev.products.map((prod) =>
+        prod.id == prod_id
+          ? {
+              ...prod,
+              notes: prod.notes.map((n) =>
+                n.id != note.id
+                  ? n
+                  : {
+                      id: note.id,
+                      value: e.target.value,
+                    }
+              ),
+            }
+          : prod
+      ),
+    }));
+  };
+
+  const handleDelete = () => {
+    setData((prev) => ({
+      ...prev,
+      products: prev.products.map((prod) =>
+        prod.id == prod_id
+          ? {
+              ...prod,
+              notes: prod.notes.filter((n) => n.id != note.id),
+            }
+          : prod
+      ),
+    }));
+  };
+
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable(note);
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center w-full grow gap-1"
+    >
+      <div className="flex gap-2 items-center border rounded-md w-full">
+        <button
+          {...listeners}
+          {...attributes}
+          type="button"
+          className="text-muted-foreground cursor-grab px-1"
+        >
+          <GripVerticalIcon className="shrink h-4 w-4" />
+        </button>
+        <input
+          className="h-10 w-full focus-visible:ring-0 focus-visible:outline-0 pr-2"
+          type="text"
+          name=""
+          value={note.value}
+          onChange={handleOnchange}
+        />
+      </div>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={handleDelete}
+            type="button"
+            className="text-muted-foreground cursor-pointer px-1"
+          >
+            <Trash2Icon className="shrink h-4 w-4" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Xoá ghi chú</p>
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  );
+};
+
 const DisplayOrderProduct = ({
   product,
   index,
@@ -371,15 +472,35 @@ const DisplayOrderProduct = ({
 }) => {
   const { setData } = useDisplayOrder();
 
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable(product);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable(product);
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
-  const handleRemove = () => {
+  const handleAddProduct = () => {
+    setData((prev) => ({
+      ...prev,
+      products: prev.products.map((prod) =>
+        prod.id == product.id
+          ? {
+              ...product,
+              notes: [...product.notes, { id: generateUniqueID(), value: "" }],
+            }
+          : prod
+      ),
+    }));
+  };
+
+  const handleRemoveProduct = () => {
     setData((prev) => ({
       ...prev,
       products: prev.products.filter(({ id }) => product.id != id),
@@ -456,13 +577,16 @@ const DisplayOrderProduct = ({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex gap-1 border-b last:border-0 pb-2 relative"
+      className={cn(
+        "flex gap-1 border-b last:border-0 pb-2 relative p-2 bg-white",
+        isDragging ? "z-10 border rounded-md" : ""
+      )}
     >
-      <div className="absolute top-0 right-0 flex gap-2 items-center">
+      <div className="absolute top-2 right-2 flex gap-2 items-center">
         <Tooltip>
           <TooltipTrigger asChild>
             <button
-              onClick={handleRemove}
+              onClick={handleAddProduct}
               className="cursor-pointer text-muted-foreground"
             >
               <MessageCircleWarningIcon className="shrink-0 h-5 w-5" />
@@ -476,7 +600,7 @@ const DisplayOrderProduct = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <button
-              onClick={handleRemove}
+              onClick={handleRemoveProduct}
               className="cursor-pointer text-muted-foreground"
             >
               <PackageXIcon className="shrink-0 h-5 w-5" />
@@ -564,41 +688,21 @@ const DisplayOrderProduct = ({
               <p className="text-muted-foreground text-sm shrink-0">sản phẩm</p>
             </div>
           </div>
-          <div>
-            <Label>Ghi chú</Label>
-            <div className="grid gap-1">
-              <div className="flex items-center w-full grow gap-1">
-                <div className="flex gap-2 items-center border rounded-md w-full">
-                  <button
-                    type="button"
-                    className="text-muted-foreground cursor-grab px-1"
-                  >
-                    <GripVerticalIcon className="shrink h-4 w-4" />
-                  </button>
-                  <input
-                    className="h-10 w-full focus-visible:ring-0 focus-visible:outline-0 pr-2"
-                    type="text"
-                    name=""
-                    id=""
-                  />
-                </div>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="text-muted-foreground cursor-pointer px-1"
-                    >
-                      <Trash2Icon className="shrink h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Xoá ghi chú</p>
-                  </TooltipContent>
-                </Tooltip>
+          {product.notes.length > 0 && (
+            <div>
+              <Label>Ghi chú</Label>
+              <div className="grid gap-1">
+                <SortableContext
+                  items={product.notes}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {product.notes.map((note) => (
+                    <Note key={note.id} note={note} prod_id={product.id} />
+                  ))}
+                </SortableContext>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
@@ -668,6 +772,20 @@ const DisplayOrderProductDialog = ({ products }: { products: Product[] }) => {
         pack_spec: prod.pack_spec,
         quantity: 1,
         unit: prod.pack_spec == 0 ? "PACKAGED_GOODS" : "CARTON",
+        notes: [
+          {
+            id: generateUniqueID(),
+            value: "value 1",
+          },
+          {
+            id: generateUniqueID(),
+            value: "value 2",
+          },
+          {
+            id: generateUniqueID(),
+            value: "value 3",
+          },
+        ],
       })
     );
 
@@ -741,12 +859,27 @@ const DisplayOrderProductDialog = ({ products }: { products: Product[] }) => {
 
 const Step3 = () => {
   const { step, data, setData } = useDisplayOrder();
+
+  // const handleDragOver = (event: DragOverEvent) => {
+  //   const { active, over } = event;
+
+  //   if (!over || active.id === over.id) {
+  //     return;
+  //   }
+
+  //   console.log("handleDragOver active", active);
+  //   console.log("handleDragOver over", over);
+  // };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over || active.id === over.id) {
       return;
     }
+
+    console.log("handleDragEnd active", active);
+    console.log("handleDragEnd over", over);
 
     const oldIndex = data.products
       .map((prod) => prod.id)
@@ -760,6 +893,7 @@ const Step3 = () => {
       products: arrayMove(data.products, oldIndex, newIndex),
     }));
   };
+
   if (step != 3) return;
 
   return (

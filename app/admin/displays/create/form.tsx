@@ -415,7 +415,12 @@ const Note = ({
   };
 
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable(note);
+    useSortable({
+      ...note,
+      data: {
+        type: "note",
+      },
+    });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -479,7 +484,12 @@ const DisplayOrderProduct = ({
     transform,
     transition,
     isDragging,
-  } = useSortable(product);
+  } = useSortable({
+    ...product,
+    data: {
+      type: "product",
+    },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -881,17 +891,44 @@ const Step3 = () => {
     console.log("handleDragEnd active", active);
     console.log("handleDragEnd over", over);
 
-    const oldIndex = data.products
-      .map((prod) => prod.id)
-      .indexOf(active.id as string);
-    const newIndex = data.products
-      .map((prod) => prod.id)
-      .indexOf(over.id as string);
+    if (
+      active.data.current &&
+      active.data.current.type == "product" &&
+      over.data.current &&
+      over.data.current.type == "product"
+    ) {
+      console.log("product");
+      const oldIndex = data.products
+        .map((prod) => prod.id)
+        .indexOf(active.id as string);
+      const newIndex = data.products
+        .map((prod) => prod.id)
+        .indexOf(over.id as string);
 
-    setData((prev) => ({
-      ...prev,
-      products: arrayMove(data.products, oldIndex, newIndex),
-    }));
+      setData((prev) => ({
+        ...prev,
+        products: arrayMove(data.products, oldIndex, newIndex),
+      }));
+    } else if (
+      active.data.current &&
+      active.data.current.type == "note" &&
+      over.data.current &&
+      over.data.current.type == "note"
+    ) {
+      console.log("note");
+    }
+
+    // const oldIndex = data.products
+    //   .map((prod) => prod.id)
+    //   .indexOf(active.id as string);
+    // const newIndex = data.products
+    //   .map((prod) => prod.id)
+    //   .indexOf(over.id as string);
+
+    // setData((prev) => ({
+    //   ...prev,
+    //   products: arrayMove(data.products, oldIndex, newIndex),
+    // }));
   };
 
   if (step != 3) return;

@@ -19,6 +19,10 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from "lucide-react";
+
+import { Cropper, ReactCropperElement } from "react-cropper";
+import "cropperjs/dist/cropper.css";
+
 const UploadImage = ({
   children,
   aspectRatios,
@@ -50,13 +54,6 @@ const UploadImage = ({
     }
   }, [aspectRatioImg, aspectRatios, invalidAspectRatios]);
 
-  React.useEffect(() => {
-    console.log("canvasRef", canvasRef);
-    if (enableEditTool && image) {
-      drawCanvas(image);
-    }
-  }, [enableEditTool, image]);
-
   // Xử lý upload ảnh
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -86,25 +83,11 @@ const UploadImage = ({
     }
   };
 
-  const drawCanvas = React.useCallback((img: HTMLImageElement) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    console.log("canvas");
-
-    // Kích thước canvas (lớn hơn ảnh 20% để làm background)
-    const padding = 20;
-    canvas.width = 150;
-    canvas.height = 150;
-
-    // // Vẽ background
-    // ctx.fillStyle = "#00bc7d";
-    // ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Vẽ ảnh chính (căn giữa)
-    ctx.drawImage(img, padding, padding, 100, 100);
-  }, []);
+  const cropperRef = React.useRef<ReactCropperElement | null>(null);
+  const onCrop = () => {
+    const cropper = cropperRef.current?.cropper;
+    console.log(cropper.getCroppedCanvas().toDataURL());
+  };
 
   return (
     <label htmlFor="upload" className="">
@@ -138,7 +121,16 @@ const UploadImage = ({
           </DialogHeader>
           <div className="flex gap-4 py-4 w-full">
             <div className="border p-2">
-              <canvas ref={canvasRef} />
+              <Cropper
+                ref={cropperRef}
+                src={imageSrc}
+                style={{ height: 400, width: "100%" }}
+                aspectRatio={1} // Adjust as needed
+                viewMode={1}
+                guides={true}
+                autoCropArea={0.8}
+                crop={onCrop}
+              />
             </div>
 
             <div className="grid fap-2 w-full">

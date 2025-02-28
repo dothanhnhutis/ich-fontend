@@ -113,3 +113,8 @@ export const generateUniqueID = () =>
 
 export const gcd = (a: number, b: number): number =>
   b === 0 ? a : gcd(b, a % b);
+
+export const isValidAspectRatio = (ratio: string): boolean => {
+  const aspectRatioRegex: RegExp = /^(\d+([.,]\d+)?)[:](\d+([.,]\d+)?)$/;
+  return aspectRatioRegex.test(ratio);
+};

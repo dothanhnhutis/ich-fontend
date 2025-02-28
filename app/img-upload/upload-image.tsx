@@ -4,6 +4,7 @@ import { gcd, isValidAspectRatio } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -102,7 +103,6 @@ const UploadImage = ({
         const divisor = gcd(width, height);
         const aspectRatio = `${width / divisor}:${height / divisor}`;
 
-        console.log(validateAspectRatios, aspectRatio);
         if (!validateAspectRatios.includes(aspectRatio)) {
           setImgUploadData((prev) => ({
             ...prev,
@@ -115,7 +115,8 @@ const UploadImage = ({
           setImgUploadData({
             src: null,
           });
-          // onSave({ base64Url: e.target!.result as string, blob: file });
+          if (onSave)
+            onSave({ base64Url: e.target!.result as string, blob: file });
         }
       };
       if (e.target && e.target.result && typeof e.target.result == "string") {
@@ -212,6 +213,7 @@ const UploadImage = ({
         <DialogContent className="sm:max-w-[640px] md:max-w-3xl lg:max-w-5xl">
           <DialogHeader>
             <DialogTitle>Chỉnh sửa hình ảnh</DialogTitle>
+            <DialogDescription className="hidden"></DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center rounded-lg bg-muted sm:items-start sm:rounded-none sm:bg-transparent sm:flex-row sm:gap-4 overflow-hidden ">
             {imgUploadData.src && (

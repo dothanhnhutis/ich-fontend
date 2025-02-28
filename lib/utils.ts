@@ -110,3 +110,6 @@ export function caculatorPagination({
 
 export const generateUniqueID = () =>
   Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+export const gcd = (a: number, b: number): number =>
+  b === 0 ? a : gcd(b, a % b);

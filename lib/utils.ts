@@ -118,3 +118,50 @@ export const isValidAspectRatio = (ratio: string): boolean => {
   const aspectRatioRegex: RegExp = /^(\d+([.,]\d+)?)[:](\d+([.,]\d+)?)$/;
   return aspectRatioRegex.test(ratio);
 };
+
+export type ImgDataUpload = {
+  src: string | null;
+  height?: number;
+  width?: number;
+  aspectRatio?: string;
+  file?: HTMLImageElement;
+  type?: string;
+  originalName?: string;
+};
+
+export const getDataFromImageFile = (file: File): Promise<ImgDataUpload> => {
+  return new Promise((resolve, reject) => {
+    if (!file.type.includes("image"))
+      resolve({
+        src: null,
+      });
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = () => {
+      const result = reader.result as string;
+
+      const img = new Image();
+      img.onload = () => {
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
+        const divisor = gcd(width, height);
+        const aspectRatio = `${width / divisor}:${height / divisor}`;
+        resolve({
+          src: result,
+          aspectRatio,
+          width,
+          height,
+          type: file.type,
+          originalName: file.name,
+          file: img,
+        });
+      };
+      img.src = result;
+      img.onerror = reject;
+    };
+
+    reader.onerror = reject;
+  });
+};

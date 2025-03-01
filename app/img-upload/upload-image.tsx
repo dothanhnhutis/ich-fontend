@@ -1,6 +1,6 @@
 import React from "react";
 import NextImage from "next/image";
-import { gcd, isValidAspectRatio } from "@/lib/utils";
+import { gcd, getDataFromImageFile, isValidAspectRatio } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -42,15 +42,6 @@ type Props = {
   onSave?: (data: { base64Url: string; blob: Blob | null }) => void;
 };
 
-type ImgUploadData = {
-  src: string | null;
-  height?: number;
-  width?: number;
-  aspectRatio?: string;
-  file?: HTMLImageElement;
-  type?: string;
-};
-
 const UploadImage = ({
   children,
   className,
@@ -84,7 +75,7 @@ const UploadImage = ({
     }
   }, [imgUploadData]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const file = e.target.files[0];
     if (!file) return;
@@ -93,43 +84,48 @@ const UploadImage = ({
       return;
     }
     e.target.value = "";
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const width = img.naturalWidth;
-        const height = img.naturalHeight;
-        const divisor = gcd(width, height);
-        const aspectRatio = `${width / divisor}:${height / divisor}`;
 
-        if (!validateAspectRatios.includes(aspectRatio)) {
-          setImgUploadData((prev) => ({
-            ...prev,
-            file: img,
-            width,
-            height,
-            aspectRatio,
-          }));
-        } else {
-          setImgUploadData({
-            src: null,
-          });
-          if (onSave)
-            onSave({ base64Url: e.target!.result as string, blob: file });
-        }
-      };
-      if (e.target && e.target.result && typeof e.target.result == "string") {
-        img.src = e.target.result;
-        setImgUploadData((prev) => ({
-          ...prev,
-          src: img.src,
-          type: file.type,
-        }));
-      } else {
-        console.log("onload Error");
-      }
-    };
+    console.log(file.name);
+
+    const kk = await getDataFromImageFile(file);
+    console.log(kk);
+    // const reader = new FileReader();
+    // reader.readAsDataURL(file);
+    // reader.onload = (e) => {
+    //   const img = new Image();
+    //   img.onload = () => {
+    //     const width = img.naturalWidth;
+    //     const height = img.naturalHeight;
+    //     const divisor = gcd(width, height);
+    //     const aspectRatio = `${width / divisor}:${height / divisor}`;
+
+    //     if (!validateAspectRatios.includes(aspectRatio)) {
+    //       setImgUploadData((prev) => ({
+    //         ...prev,
+    //         file: img,
+    //         width,
+    //         height,
+    //         aspectRatio,
+    //       }));
+    //     } else {
+    //       setImgUploadData({
+    //         src: null,
+    //       });
+    //       if (onSave)
+    //         onSave({ base64Url: e.target!.result as string, blob: file });
+    //     }
+    //   };
+    //   if (e.target && e.target.result && typeof e.target.result == "string") {
+    //     img.src = e.target.result;
+    //     setImgUploadData((prev) => ({
+    //       ...prev,
+    //       src: img.src,
+    //       type: file.type,
+    //     }));
+    //   } else {
+    //     console.log("onload Error");
+    //   }
+    // };
   };
 
   const handleZoomIn = () => {

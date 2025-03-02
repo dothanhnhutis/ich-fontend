@@ -10,7 +10,9 @@ import {
 import Image from "next/image";
 import { EllipsisIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-const DisplayList = () => {
+import { Product } from "./actions";
+import { cn } from "@/lib/utils";
+const DisplayList = ({ products }: { products: Product[] }) => {
   return (
     <div className="bg-white rounded-lg p-2 px-3 shadow-md">
       <Table className="table-fixed">
@@ -23,104 +25,51 @@ const DisplayList = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
+          {products.map((product) => (
+            <TableRow key={product.id}>
+              <TableCell className="font-medium">{product.prod_name}</TableCell>
+              <TableCell>
+                <div className="flex items-center">
+                  {product.images.map(
+                    (img, idx) =>
+                      idx < 3 && (
+                        <div
+                          key={idx}
+                          className={cn(
+                            "relative shrink-0 rounded-lg aspect-square h-10 w-10 overflow-hidden border-2 border-white",
+                            `-translate-x-${idx}`
+                          )}
+                        >
+                          <Image fill src={img} alt={""} sizes="100vw" />
+                        </div>
+                      )
+                  )}
+
+                  {product.images.length > 3 && (
+                    <div className="flex items-center justify-center rounded-lg shrink-0 h-10 w-10 bg-accent -translate-x-3 border-2 border-white">
+                      <p className="text-muted-foreground font-semibold">
+                        +{product.images.length - 3}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>{product.pack_spec}</TableCell>
+              <TableCell>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="cursor-pointer"
+                >
+                  <EllipsisIcon className="w-5 h-5 shrink-0" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+
           <TableRow>
-            <TableCell className="font-medium">TONE UP SUNCREEN</TableCell>
-            <TableCell>
-              <div className="flex items-center">
-                <div className="relative shrink-0 rounded-lg aspect-square h-10 w-10 overflow-hidden border-2 border-white -translate-x-0">
-                  <Image
-                    fill
-                    src={
-                      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg"
-                    }
-                    alt={""}
-                    sizes="100vw"
-                  />
-                </div>
-                <div className="relative shrink-0 rounded-lg aspect-square h-10 w-10 overflow-hidden border-2 border-white -translate-x-1">
-                  <Image
-                    fill
-                    src={
-                      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg"
-                    }
-                    alt={""}
-                    sizes="100vw"
-                  />
-                </div>
-                <div className="relative shrink-0 rounded-lg aspect-square h-10 w-10 overflow-hidden border-2 border-white -translate-x-2">
-                  <Image
-                    fill
-                    src={
-                      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg"
-                    }
-                    alt={""}
-                    sizes="100vw"
-                  />
-                </div>
-                <div className="flex items-center justify-center rounded-lg shrink-0 h-10 w-10 bg-accent -translate-x-3 border-2 border-white">
-                  <p className="text-muted-foreground font-semibold">+3</p>
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>123</TableCell>
-            <TableCell>
-              <Button
-                variant={"ghost"}
-                size={"icon"}
-                className="cursor-pointer"
-              >
-                <EllipsisIcon className="w-5 h-5 shrink-0" />
-              </Button>
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-medium">TONE UP SUNCREEN</TableCell>
-            <TableCell>
-              <div className="flex items-center">
-                <div className="relative shrink-0 rounded-lg aspect-square h-10 w-10 overflow-hidden border-2 border-white -translate-x-0">
-                  <Image
-                    fill
-                    src={
-                      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg"
-                    }
-                    alt={""}
-                    sizes="100vw"
-                  />
-                </div>
-                <div className="relative shrink-0 rounded-lg aspect-square h-10 w-10 overflow-hidden border-2 border-white -translate-x-1">
-                  <Image
-                    fill
-                    src={
-                      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg"
-                    }
-                    alt={""}
-                    sizes="100vw"
-                  />
-                </div>
-                <div className="relative shrink-0 rounded-lg aspect-square h-10 w-10 overflow-hidden border-2 border-white -translate-x-2">
-                  <Image
-                    fill
-                    src={
-                      "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6113933456468_cadbdc1dd04475224e7c8632416aaa5d_kfsyxj.jpg"
-                    }
-                    alt={""}
-                    sizes="100vw"
-                  />
-                </div>
-                <div className="flex items-center justify-center rounded-lg shrink-0 h-10 w-10 bg-accent -translate-x-3 border-2 border-white">
-                  <p className="text-muted-foreground font-semibold">+3</p>
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>123</TableCell>
-            <TableCell>
-              <Button
-                variant={"ghost"}
-                size={"icon"}
-                className="cursor-pointer"
-              >
-                <EllipsisIcon className="w-5 h-5 shrink-0" />
-              </Button>
+            <TableCell className="font-medium text-center" colSpan={4}>
+              Chưa có sản phẩm
             </TableCell>
           </TableRow>
         </TableBody>

@@ -11,12 +11,15 @@ import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
 
 import ProductBody from "./product-body";
+import { getProductsAction } from "./actions";
 
 export const metadata: Metadata = {
   title: "Danh sách sản phẩm",
 };
 
-const ProductsPage = () => {
+const ProductsPage = async () => {
+  const data = await getProductsAction();
+
   return (
     <>
       <div className="bg-white flex shrink-0 items-center py-2 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -42,7 +45,7 @@ const ProductsPage = () => {
         </div>
       </div>
       <div className="h-[calc(100vh_-_48px)] w-full overflow-y-scroll relative">
-        <ProductBody />
+        <ProductBody initData={data.data ?? []} />
       </div>
     </>
   );

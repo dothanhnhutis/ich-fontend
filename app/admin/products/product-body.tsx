@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import DisplayList from "./product-list";
 import Link from "next/link";
-const ProductBody = () => {
+import { Product } from "./actions";
+const ProductBody = ({ initData }: { initData: Product[] }) => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
 
   return (
@@ -53,7 +54,7 @@ const ProductBody = () => {
         10 kết quả
       </p>
 
-      <DisplayList />
+      <DisplayList products={initData} />
     </main>
   );
 };

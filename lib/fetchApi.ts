@@ -1,4 +1,5 @@
 type FetchApiOpts = Omit<RequestInit, "method">;
+type JSONObject = Record<string, unknown>;
 
 export class FetchError extends Error {
   status: number;
@@ -40,12 +41,13 @@ export default class FetchAPI {
     const fullUrl = url.startsWith("/")
       ? `${baseUrl}${url}`
       : `${baseUrl}/${url}`;
+    const isFormData = options?.body instanceof FormData;
 
     const res = await fetch(fullUrl, {
       ...this.options,
       ...options,
       headers: {
-        "Content-Type": "application/json",
+        ...(!isFormData && { "Content-Type": "application/json" }),
         ...this.options?.headers,
         ...options?.headers,
       },
@@ -71,24 +73,39 @@ export default class FetchAPI {
     return await this.core<T>("GET", url, opt);
   }
 
-  async post<T = unknown>(url: string, body: object, opt?: FetchApiOpts) {
+  async post<T = unknown>(
+    url: string,
+    body: JSONObject | FormData,
+    opt?: FetchApiOpts
+  ) {
+    const isFormData = body instanceof FormData;
     return await this.core<T>("POST", url, {
       ...opt,
-      body: JSON.stringify(body),
+      body: isFormData ? body : JSON.stringify(body),
     });
   }
 
-  async put<T = unknown>(url: string, body: object, opt?: FetchApiOpts) {
+  async put<T = unknown>(
+    url: string,
+    body: JSONObject | FormData,
+    opt?: FetchApiOpts
+  ) {
+    const isFormData = body instanceof FormData;
     return await this.core<T>("PUT", url, {
       ...opt,
-      body: JSON.stringify(body),
+      body: isFormData ? body : JSON.stringify(body),
     });
   }
 
-  async patch<T = unknown>(url: string, body: object, opt?: FetchApiOpts) {
+  async patch<T = unknown>(
+    url: string,
+    body: JSONObject | FormData,
+    opt?: FetchApiOpts
+  ) {
+    const isFormData = body instanceof FormData;
     return await this.core<T>("PATCH", url, {
       ...opt,
-      body: JSON.stringify(body),
+      body: isFormData ? body : JSON.stringify(body),
     });
   }
 

@@ -59,7 +59,6 @@ const CreateProductForm = () => {
       });
     },
     onSuccess(data) {
-      console.log(data);
       if (data.success) {
         toast.success(data.message);
         router.push("/admin/products");

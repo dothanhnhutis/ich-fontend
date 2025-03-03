@@ -164,3 +164,39 @@ export const getProductsAction = async () => {
 
   return { success: false, message: "hmmmmmmm", data: null };
 };
+
+export const getProductByIdAction = async (id: string) => {
+  try {
+    const allCookie = (await cookies())
+      .getAll()
+      .map((c) => `${c.name}=${encodeURIComponent(c.value)}`)
+      .join("; ");
+
+    const res = await productInstance.get<{
+      success: boolean;
+      message: string;
+      data: Product;
+    }>("/" + id, {
+      headers: {
+        Cookie: allCookie,
+      },
+    });
+
+    return {
+      success: res.data.success,
+      message: res.data.message,
+      data: res.data.data,
+    };
+  } catch (error: unknown) {
+    if (error instanceof FetchError) {
+      return {
+        success: false,
+        message: error.message,
+        data: null,
+      };
+    }
+    console.log(error);
+  }
+
+  return { success: false, message: "hmmmmmmm", data: null };
+};

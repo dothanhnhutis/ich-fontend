@@ -35,18 +35,27 @@ const DisplayList = ({ products }: { products: Product[] }) => {
                       idx < 3 && (
                         <div
                           key={idx}
+                          style={{
+                            transform:
+                              idx > 0 ? `translateX(-${idx * 0.5}rem)` : "",
+                          }}
                           className={cn(
-                            "relative shrink-0 rounded-lg aspect-square h-10 w-10 overflow-hidden border-2 border-white",
-                            `-translate-x-${idx}`
+                            `relative shrink-0 rounded-lg aspect-square h-10 w-10 overflow-hidden border-2 border-white`
                           )}
                         >
-                          <Image fill src={img} alt={""} sizes="100vw" />
+                          <Image
+                            fill
+                            src={img}
+                            alt={""}
+                            sizes="100vw"
+                            className="object-contain"
+                          />
                         </div>
                       )
                   )}
 
                   {product.images.length > 3 && (
-                    <div className="flex items-center justify-center rounded-lg shrink-0 h-10 w-10 bg-accent -translate-x-3 border-2 border-white">
+                    <div className="flex items-center justify-center rounded-lg shrink-0 h-10 w-10 bg-accent -translate-x-6 border-2 border-white">
                       <p className="text-muted-foreground font-semibold">
                         +{product.images.length - 3}
                       </p>

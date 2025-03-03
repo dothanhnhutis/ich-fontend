@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { getProductByIdAction } from "../../actions";
+import { notFound } from "next/navigation";
+import UpdateProductForm from "./form";
 export const metadata: Metadata = {
   title: "Chỉnh sửa sản phẩm",
 };
@@ -17,6 +20,8 @@ const UpdateProductPage = async (props: {
   params: Promise<{ productId: string }>;
 }) => {
   const params = await props.params;
+  const { data } = await getProductByIdAction(params.productId);
+  if (!data) return notFound();
 
   return (
     <>
@@ -54,7 +59,7 @@ const UpdateProductPage = async (props: {
             <h3 className="font-bold lg:text-2xl text-lg">
               Chỉnh sửa sản phẩm
             </h3>
-            form here {params.productId}
+            <UpdateProductForm product={data} />
           </div>
         </div>
       </div>

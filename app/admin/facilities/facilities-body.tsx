@@ -88,7 +88,7 @@ const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
         </div>
       </div>
       <p className="text-muted-foreground px-2 py-1 lg:text-base text-sm">
-        10 kết quả
+        {initData.length} kết quả
       </p>
 
       <div className="bg-white rounded-lg shadow-md max-w-full overflow-x-auto">
@@ -157,10 +157,7 @@ const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
             ))}
             {initData.length == 0 && (
               <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="text-center text-muted-foreground"
-                >
+                <TableCell className="font-medium text-center" colSpan={5}>
                   Chưa có cơ sở
                 </TableCell>
               </TableRow>

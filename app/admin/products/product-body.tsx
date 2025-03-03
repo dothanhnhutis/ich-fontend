@@ -51,7 +51,7 @@ const ProductBody = ({ initData }: { initData: Product[] }) => {
         </div>
       </div>
       <p className="text-muted-foreground px-2 py-1 lg:text-base text-sm">
-        10 kết quả
+        {initData.length} kết quả
       </p>
 
       <DisplayList products={initData} />

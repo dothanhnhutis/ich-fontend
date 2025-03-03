@@ -14,17 +14,34 @@ import React from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Product } from "../../actions";
+import { Product, updateProductAction } from "../../actions";
 import { cn, convertUrlToFile } from "@/lib/utils";
+import Link from "next/link";
 
-type UpdateProductImage = {
-  type: "new" | "init" | "updated" | "deleted";
-  url?: string;
-  srcUpload?: string;
-  fileUpload?: File;
-  srcCropped?: string;
-  fileCropped?: File;
-};
+type UpdateProductImage =
+  | {
+      type: "init";
+      url: string;
+    }
+  | {
+      type: "new";
+      srcUpload: string;
+      fileUpload: File;
+      srcCropped: string;
+      fileCropped: File;
+    }
+  | {
+      type: "deleted";
+      url: string;
+    }
+  | {
+      type: "updated";
+      url: string;
+      srcUpload: string;
+      fileUpload: File;
+      srcCropped: string;
+      fileCropped: File;
+    };
 
 type UpdateProductFormData = {
   prod_name: string;
@@ -80,8 +97,8 @@ const UpdateProductForm = ({ product }: { product: Product }) => {
         images: prev.images.map((img, idx) =>
           index == idx
             ? {
-                ...img,
                 type: "deleted",
+                url: img.type != "new" ? img.url : "",
               }
             : img
         ),
@@ -95,13 +112,8 @@ const UpdateProductForm = ({ product }: { product: Product }) => {
       images: prev.images.map((img, idx) =>
         index == idx
           ? {
-              ...img,
-              type:
-                img.url && img.srcUpload
-                  ? "updated"
-                  : img.srcUpload && !img.url
-                  ? "new"
-                  : "init",
+              type: "init",
+              url: img.type == "deleted" ? img.url : "",
             }
           : img
       ),
@@ -110,34 +122,33 @@ const UpdateProductForm = ({ product }: { product: Product }) => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: UpdateProductFormData) => {
-      // const images = data.images.map((image) => image.fileCropped);
-      // return await createProductAction({
-      //   pack_spec: data.pack_spec,
-      //   prod_name: data.prod_name,
-      //   images,
-      // });
+      const images = formData.images
+        .filter((image) => image.type != "deleted")
+        .map((image) => (image.type == "init" ? image.url : image.fileCropped));
+      return await updateProductAction(product.id, {
+        pack_spec: data.pack_spec,
+        prod_name: data.prod_name,
+        images,
+      });
     },
     onSuccess(data) {
-      // if (data.success) {
-      //   toast.success(data.message);
-      //   router.push("/admin/products");
-      //   setFormData({
-      //     pack_spec: 0,
-      //     prod_name: "",
-      //     images: [],
-      //   });
-      // } else {
-      //   toast.error(data.message);
-      // }
+      if (data.success) {
+        toast.success(data.message);
+        router.push("/admin/products");
+        setFormData({
+          pack_spec: 0,
+          prod_name: "",
+          images: [],
+        });
+      } else {
+        toast.error(data.message);
+      }
     },
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    console.log(formData);
-
-    // mutate(formData);
+    mutate(formData);
   };
 
   return (
@@ -190,6 +201,7 @@ const UpdateProductForm = ({ product }: { product: Product }) => {
                           } else if (img.type == "new") {
                             handleEditImage(idx, img.fileUpload!);
                           } else if (img.type == "updated") {
+                            handleEditImage(idx, img.fileUpload);
                           }
                         }}
                         type="button"
@@ -203,7 +215,11 @@ const UpdateProductForm = ({ product }: { product: Product }) => {
                 <NextImage
                   priority
                   className="object-contain"
-                  src={img.type == "init" ? img.url! : img.srcCropped!}
+                  src={
+                    img.type == "init" || img.type == "deleted"
+                      ? img.url
+                      : img.srcCropped
+                  }
                   alt={`image-${idx}`}
                   sizes="100wv"
                   fill
@@ -221,11 +237,15 @@ const UpdateProductForm = ({ product }: { product: Product }) => {
                     images: prev.images.map((image, idx) =>
                       idx != imageSelected.index
                         ? image
+                        : image.type == "new"
+                        ? {
+                            type: "new",
+                            ...data,
+                          }
                         : {
-                            ...image,
                             type: "updated",
-                            srcCropped: data.srcCropped,
-                            fileCropped: data.fileCropped,
+                            url: image.url,
+                            ...data,
                           }
                     ),
                   }));
@@ -285,10 +305,11 @@ const UpdateProductForm = ({ product }: { product: Product }) => {
             <div className="flex gap-1 items-center">
               <Input
                 required
-                type="text"
+                type="number"
                 className="w-[100px]"
                 value={formData.pack_spec}
                 onChange={(e) => {
+                  console.log(e);
                   const rawValue = e.target.value;
                   const numbersOnly = rawValue.replace(/[^0-9]/g, "");
                   const processedValue = numbersOnly.replace(/^0+/, "") || "";
@@ -305,8 +326,8 @@ const UpdateProductForm = ({ product }: { product: Product }) => {
           </div>
         </div>
         <div className="flex gap-2 justify-end items-center">
-          <Button type="button" variant="ghost" disabled={isPending}>
-            Huỷ
+          <Button variant="ghost" type="button" asChild disabled={isPending}>
+            <Link href="/admin/products">Huỷ</Link>
           </Button>
           <Button disabled={formData.prod_name == "" || isPending}>Lưu</Button>
         </div>

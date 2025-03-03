@@ -10,6 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { createProductAction } from "../actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type CreateProductActionData = {
   prod_name: string;
@@ -75,7 +76,6 @@ const CreateProductForm = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     mutate(formData);
   };
 
@@ -183,7 +183,7 @@ const CreateProductForm = () => {
             <div className="flex gap-1 items-center">
               <Input
                 required
-                type="text"
+                type="number"
                 className="w-[100px]"
                 value={formData.pack_spec}
                 onChange={(e) => {
@@ -203,8 +203,8 @@ const CreateProductForm = () => {
           </div>
         </div>
         <div className="flex gap-2 justify-end items-center">
-          <Button type="button" variant="ghost" disabled={isPending}>
-            Huỷ
+          <Button variant="ghost" type="button" asChild disabled={isPending}>
+            <Link href="/admin/products">Huỷ</Link>
           </Button>
           <Button disabled={formData.prod_name == "" || isPending}>Tạo</Button>
         </div>

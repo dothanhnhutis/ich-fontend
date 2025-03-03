@@ -129,6 +129,73 @@ export const createProductAction = async (data: CreateProductActionData) => {
   return { success: false, message: "hmmmmmmm" };
 };
 
+type UpdateProductActionData = {
+  prod_name: string;
+  images: (string | File)[];
+  pack_spec: number;
+};
+
+export const updateProductAction = async (
+  productId: string,
+  data: UpdateProductActionData
+) => {
+  try {
+    const allCookie = (await cookies())
+      .getAll()
+      .map((c) => `${c.name}=${encodeURIComponent(c.value)}`)
+      .join("; ");
+
+    const imgUrls: string[] = [];
+
+    for (const img of data.images) {
+      if (img instanceof File) {
+        const { data } = await uploadImageAction(img);
+        if (data) {
+          imgUrls.push(data);
+        }
+      } else {
+        imgUrls.push(img);
+      }
+    }
+
+    const res = await productInstance.put<{
+      status: number;
+      success: boolean;
+      message: string;
+      data: Product;
+    }>(
+      "/" + productId,
+      {
+        prod_name: data.prod_name,
+        pack_spec: data.pack_spec,
+        images: imgUrls,
+      },
+      {
+        headers: {
+          Cookie: allCookie,
+        },
+      }
+    );
+    revalidatePath(`/admin/products/${productId}/edit`);
+
+    return {
+      success: res.data.success,
+      message: res.data.message,
+    };
+  } catch (error: unknown) {
+    if (error instanceof FetchError) {
+      return {
+        success: false,
+        message: error.message,
+        data: null,
+      };
+    }
+    console.log(error);
+  }
+
+  return { success: false, message: "hmmmmmmm", data: null };
+};
+
 export const getProductsAction = async () => {
   try {
     const allCookie = (await cookies())
@@ -186,6 +253,43 @@ export const getProductByIdAction = async (id: string) => {
       success: res.data.success,
       message: res.data.message,
       data: res.data.data,
+    };
+  } catch (error: unknown) {
+    if (error instanceof FetchError) {
+      return {
+        success: false,
+        message: error.message,
+        data: null,
+      };
+    }
+    console.log(error);
+  }
+
+  return { success: false, message: "hmmmmmmm", data: null };
+};
+
+export const deleteProductById = async (productId: string) => {
+  try {
+    const allCookie = (await cookies())
+      .getAll()
+      .map((c) => `${c.name}=${encodeURIComponent(c.value)}`)
+      .join("; ");
+
+    const res = await productInstance.delete<{
+      status: number;
+      success: boolean;
+      message: string;
+    }>("/" + productId, {
+      headers: {
+        Cookie: allCookie,
+      },
+    });
+
+    revalidatePath("/admin/facilities/" + productId + "/edit");
+
+    return {
+      success: res.data.success,
+      message: res.data.message,
     };
   } catch (error: unknown) {
     if (error instanceof FetchError) {

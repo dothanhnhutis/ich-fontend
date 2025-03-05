@@ -23,7 +23,7 @@ type CreateProductActionData = {
   pack_spec: number;
 };
 
-const CreateProductForm = () => {
+const CreateCustomerForm = () => {
   const router = useRouter();
   const [formData, setFormData] = React.useState<CreateProductActionData>({
     prod_name: "",
@@ -213,4 +213,4 @@ const CreateProductForm = () => {
   );
 };
 
-export default CreateProductForm;
+export default CreateCustomerForm;

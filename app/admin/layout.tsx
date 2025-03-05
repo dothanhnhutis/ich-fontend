@@ -25,9 +25,9 @@ import {
   NewspaperIcon,
   ShoppingBagIcon,
   SirenIcon,
-  SprayCanIcon,
   TvIcon,
   UsersIcon,
+  UsersRoundIcon,
 } from "lucide-react";
 import {
   Collapsible,
@@ -111,9 +111,9 @@ const AdminLayout = async ({
                     asChild
                     className="[&>svg:first-child]:size-5"
                   >
-                    <Link href={"/admin/products"}>
-                      <SprayCanIcon />
-                      <span>Sản phẩm</span>
+                    <Link href={"/admin/customers"}>
+                      <UsersRoundIcon />
+                      <span>Khách hàng</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

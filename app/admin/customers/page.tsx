@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "Danh sách sản phẩm",
 };
 
-const ProductsPage = async () => {
+const CustomerPage = async () => {
   const data = await getProductsAction();
 
   return (
@@ -33,12 +33,12 @@ const ProductsPage = async () => {
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block ">
                 <BreadcrumbPage className="text-muted-foreground">
-                  Sản phẩm
+                  Khách hàng
                 </BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Danh sách sản phẩm</BreadcrumbPage>
+                <BreadcrumbPage>Danh sách khách hàng</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -51,4 +51,4 @@ const ProductsPage = async () => {
   );
 };
 
-export default ProductsPage;
+export default CustomerPage;

@@ -3,7 +3,7 @@ import React from "react";
 
 export type CreateCustomerFormData = {
   cus_name: string;
-  storage: {
+  storages: {
     storekeeper: string;
     phone_number: string;
     address: string;
@@ -25,7 +25,14 @@ type CreateCustomerContextType = {
   hasNext: boolean;
   next: () => void;
   back: () => void;
+  disableNext: boolean;
   setCusName: (value: string) => void;
+  addStorage: (storage: CreateCustomerFormData["storages"][number]) => void;
+  editStorage: (
+    idx: number,
+    newStorage: CreateCustomerFormData["storages"][number]
+  ) => void;
+  removeStorage: (idx: number) => void;
   formData: CreateCustomerFormData;
 };
 
@@ -48,7 +55,7 @@ export const CreateCustomerProvider = ({
   const [step, setStep] = React.useState<number>(1);
   const [formData, setFormData] = React.useState<CreateCustomerFormData>({
     cus_name: "",
-    storage: [],
+    storages: [],
     products: [],
   });
 
@@ -59,6 +66,14 @@ export const CreateCustomerProvider = ({
   const next = React.useCallback(() => {
     if (hasNext) setStep(step + 1);
   }, [step, hasNext]);
+
+  const disableNext = React.useMemo(() => {
+    if (step == 1 && formData.cus_name == "") {
+      return true;
+    }
+
+    return false;
+  }, [step, formData]);
 
   const back = React.useCallback(() => {
     if (step > 1) setStep(step - 1);
@@ -71,6 +86,32 @@ export const CreateCustomerProvider = ({
     }));
   };
 
+  const addStorage = (storage: CreateCustomerFormData["storages"][number]) => {
+    setFormData((prev) => ({
+      ...prev,
+      storages: [...prev.storages, storage],
+    }));
+  };
+
+  const editStorage = (
+    idx: number,
+    newStorage: CreateCustomerFormData["storages"][number]
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      storages: prev.storages.map((storage, index) =>
+        idx == index ? newStorage : storage
+      ),
+    }));
+  };
+
+  const removeStorage = (idx: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      storages: prev.storages.filter((_, index) => index != idx),
+    }));
+  };
+
   const contextValue = React.useMemo(
     () => ({
       step,
@@ -79,8 +120,12 @@ export const CreateCustomerProvider = ({
       next,
       back,
       setCusName,
+      disableNext,
+      addStorage,
+      editStorage,
+      removeStorage,
     }),
-    [step, hasNext, formData, next, back]
+    [step, hasNext, formData, next, back, disableNext]
   );
 
   return (

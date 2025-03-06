@@ -52,10 +52,16 @@ export const useCreateCustomer = () => {
 export const CreateCustomerProvider = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
-  const [step, setStep] = React.useState<number>(1);
+  const [step, setStep] = React.useState<number>(3);
   const [formData, setFormData] = React.useState<CreateCustomerFormData>({
-    cus_name: "",
-    storages: [],
+    cus_name: "Thanh Nhut",
+    storages: [
+      {
+        address: "das",
+        phone_number: "as",
+        storekeeper: "asdsa",
+      },
+    ],
     products: [],
   });
 
@@ -69,6 +75,14 @@ export const CreateCustomerProvider = ({
 
   const disableNext = React.useMemo(() => {
     if (step == 1 && formData.cus_name == "") {
+      return true;
+    }
+
+    if (step == 2 && formData.storages.length == 0) {
+      return true;
+    }
+
+    if (step == 3 && formData.products.length == 0) {
       return true;
     }
 

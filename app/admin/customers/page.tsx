@@ -12,6 +12,12 @@ import { Metadata } from "next";
 
 import ProductBody from "./product-body";
 import { getProductsAction } from "./actions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const metadata: Metadata = {
   title: "Danh sách sản phẩm",
@@ -31,14 +37,16 @@ const CustomerPage = async () => {
           />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block ">
-                <BreadcrumbPage className="text-muted-foreground">
-                  Khách hàng
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Danh sách khách hàng</BreadcrumbPage>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center gap-1">
+                    Khách hàng
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem>Cở sở</DropdownMenuItem>
+                    <DropdownMenuItem>Trình chiếu TV</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

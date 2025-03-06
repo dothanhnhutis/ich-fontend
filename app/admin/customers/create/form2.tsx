@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
+import Image from "next/image";
 
 const Step1 = () => {
   const { step, formData, setCusName } = useCreateCustomer();
@@ -55,21 +56,22 @@ const StorageForm = ({
   onCloseModal?: () => void;
 }) => {
   const { addStorage, editStorage } = useCreateCustomer();
-  const [open, setOpen] = React.useState<boolean>(false);
+  const [open, setOpen] = React.useState<boolean>(!!editData);
 
   const [storage, setStorage] = React.useState<
     CreateCustomerFormData["storages"][number]
-  >({
-    storekeeper: "",
-    phone_number: "",
-    address: "",
-  });
-
-  console.log("storage", storage);
+  >(
+    editData
+      ? editData.data
+      : {
+          storekeeper: "",
+          phone_number: "",
+          address: "",
+        }
+  );
 
   React.useEffect(() => {
-    if (open) {
-    } else {
+    if (!open) {
       if (onCloseModal) onCloseModal();
       setStorage({
         storekeeper: "",
@@ -78,14 +80,6 @@ const StorageForm = ({
       });
     }
   }, [onCloseModal, open]);
-
-  React.useEffect(() => {
-    if (editData) {
-      console.log("check");
-      setStorage(editData.data);
-      setOpen(true);
-    }
-  }, [editData]);
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setStorage((prev) => ({
@@ -104,8 +98,10 @@ const StorageForm = ({
     setOpen(false);
   };
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
+  let btn: React.JSX.Element | undefined;
+
+  if (!editData) {
+    btn = (
       <DialogTrigger asChild>
         <button
           type="button"
@@ -115,6 +111,12 @@ const StorageForm = ({
           <span className="text-xs hidden sm:inline">Thêm kho</span>
         </button>
       </DialogTrigger>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      {btn}
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
@@ -182,21 +184,23 @@ const Step2 = () => {
     data: CreateCustomerFormData["storages"][number];
   }>();
 
-  console.log("selectStorage", selectStorage);
-
   if (step != 2) return;
 
   return (
     <>
       <div className="flex items-center justify-between gap-1">
         <Label>Danh sách kho</Label>
+        <StorageForm />
+      </div>
+
+      {selectStorage ? (
         <StorageForm
           editData={selectStorage}
           onCloseModal={() => {
             setSelectStorage(undefined);
           }}
         />
-      </div>
+      ) : null}
 
       <div className="grid">
         {storages.length == 0 ? (
@@ -261,6 +265,256 @@ const Step2 = () => {
   );
 };
 
+const Step3 = () => {
+  const {
+    step,
+    formData: { products },
+  } = useCreateCustomer();
+
+  if (step != 3) return;
+
+  return (
+    <>
+      <div className="flex items-center justify-between gap-1">
+        <Label>Danh sách sản phẩm</Label>
+        <div>Thêm sản phẩm</div>
+      </div>
+
+      <div className="grid">
+        <p className="text-muted-foreground text-sm text-center ">
+          Chưa có sản phẩm nào.
+        </p>
+        <div className="relative grid gap-1 border-b group px-2 py-1 ">
+          <div className="flex flex-col gap-2">
+            <div>
+              <Label>Hình ảnh</Label>
+              {/* <div className="flex items-center flex-wrap min-[324px]:grid min-[324px]:grid-cols-4 gap-1 min-[324px]:w-[268px] ">
+                <div className="relative overflow-hidden h-16 w-16 min-[324px]:h-32 min-[324px]:w-32 min-[324px]:col-span-2 min-[324px]:row-span-2 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="128px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+              </div> */}
+
+              <div className="flex items-center flex-wrap gap-1 min-[324px]:grid min-[324px]:grid-cols-4 min-[324px]:w-[268px]">
+                <div className="relative overflow-hidden h-16 w-16 rounded-md min-[324px]:h-[132px] min-[324px]:w-[132px] min-[324px]:col-span-2 min-[324px]:row-span-2">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="128px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="relative overflow-hidden h-16 w-16 rounded-md">
+                  <Image
+                    className="object-contain"
+                    priority
+                    fill
+                    src="https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z5974402587004_71c5e83969511daeadd3003bbbfdfce4_hrr11j.jpg"
+                    alt="product"
+                    sizes="64px"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <div>
+                <Label>Tên sản phẩm</Label>
+                <p>ádasd</p>
+              </div>
+              <div>
+                <Label>Quy cách</Label>
+                <p>ádasd</p>
+              </div>
+            </div>
+          </div>
+          <div className="absolute top-0 right-0 flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="cursor-pointer p-1 text-center text-muted-foreground"
+                >
+                  <EllipsisIcon className="shrink w-5 h-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="bottom" align="end">
+                <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Chỉnh sửa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Xoá
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 const CreateCustomerForm = () => {
   const { step, hasNext, back, next, disableNext } = useCreateCustomer();
 
@@ -281,6 +535,7 @@ const CreateCustomerForm = () => {
       <div className="grid gap-2">
         <Step1 />
         <Step2 />
+        <Step3 />
         <div className="flex gap-2 justify-end items-center">
           <Button variant="ghost" type="button" asChild>
             <Link href="/admin/products">Huỷ</Link>

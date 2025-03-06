@@ -7,11 +7,21 @@ import {
   SlidersHorizontalIcon,
   Table2Icon,
 } from "lucide-react";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import DisplayList from "./product-list";
-import Link from "next/link";
 import { Product } from "./actions";
+import { Label } from "@/components/ui/label";
 const ProductBody = ({ initData }: { initData: Product[] }) => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
 
@@ -22,11 +32,30 @@ const ProductBody = ({ initData }: { initData: Product[] }) => {
           <h3 className="font-bold lg:text-2xl text-lg">
             Danh sách khách hàng
           </h3>
-          <Button size="icon" variant="ghost" asChild>
-            <Link href="/admin/customers/create">
-              <PlusIcon className="size-4 shrink-0" />
-            </Link>
-          </Button>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="icon" variant="ghost">
+                <PlusIcon className="size-4 shrink-0" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className=" min-[456px]:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Tạo khách hàng mới</DialogTitle>
+                <DialogDescription>
+                  Tạo hồ sơ khách hàng để quản lý sản phẩm mà khách muốn gia
+                  công
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-2">
+                <Label htmlFor="cus_name">Tên khách hàng</Label>
+                <Input id="cus_name" />
+              </div>
+              <DialogFooter>
+                <Button type="submit">Tạo</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
         <Separator className="my-1 h-4" />
         <p className="text-sm lg:text-base text-muted-foreground">Bộ lọc</p>

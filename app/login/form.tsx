@@ -11,77 +11,27 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signInAction } from "@/actions/signin";
 import { useMutation } from "@tanstack/react-query";
-import FetchAPI from "@/lib/fetchApi";
 import { LoaderCircleIcon } from "lucide-react";
+import { logIn, LogInActionData } from "./action";
+import { useRouter } from "next/navigation";
 
-export const SignInServerActionForm = () => {
-  const [state, formAction, pending] = React.useActionState<
-    {
-      message: string | null;
-    },
-    FormData
-  >(signInAction, {
-    message: null,
-  });
-
-  return (
-    <form className="grid gap-2" action={formAction}>
-      <Input
-        name="email"
-        type="email"
-        id="email"
-        placeholder="abc@example.com"
-        disabled={pending}
-      />
-      <Input
-        name="password"
-        type="password"
-        id="password"
-        placeholder="******"
-        disabled={pending}
-      />
-      {state.message && <p>{state.message}</p>}
-
-      <Button disabled={pending}>Sign In</Button>
-    </form>
-  );
-};
-
-type SignInFormData = {
-  email: string;
-  password: string;
-};
-
-const authApi = FetchAPI.createInstance({
-  baseUrl: "http://localhost:4000" + "/api/v1/users",
-  credentials: "include",
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
-});
-
-export const SignInForm = ({
+export const LoginForm = ({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) => {
-  const [formData, setFormData] = React.useState<SignInFormData>({
+  const router = useRouter();
+  const [formData, setFormData] = React.useState<LogInActionData>({
     email: "",
     password: "",
   });
 
   const { error, mutate, isPending, reset } = useMutation({
     mutationFn: async () => {
-      await authApi.post<{
-        status: number;
-        success: boolean;
-        message: string;
-      }>("/signin", formData);
+      return await logIn(formData);
     },
-    onSuccess() {
-      console.log("first");
+    onSuccess({ success }) {
+      if (success) router.refresh();
     },
     onSettled() {
       setFormData({

@@ -1,47 +1,24 @@
-"use client";
 import React from "react";
-import { login } from "./actiom";
-
-const LoginPage = () => {
-  const [data, setData] = React.useState<{
-    email: string;
-    password: string;
-  }>({
-    email: "",
-    password: "",
-  });
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    await login(data);
-  };
-
+import { GalleryVerticalEnd } from "lucide-react";
+import { Metadata } from "next";
+import { LoginForm } from "./form";
+export const metadata: Metadata = {
+  title: "Đăng Nhập",
+};
+const LogInPage = () => {
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={data.email}
-        onChange={(e) => {
-          setData((prev) => ({
-            ...prev,
-            email: e.target.value,
-          }));
-        }}
-      />
-      <input
-        type="text"
-        value={data.password}
-        onChange={(e) => {
-          setData((prev) => ({
-            ...prev,
-            password: e.target.value,
-          }));
-        }}
-      />
-      <button type="submit">login</button>
-    </form>
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+      <div className="flex w-full max-w-sm flex-col gap-6">
+        <a href="#" className="flex items-center gap-2 self-center font-medium">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <GalleryVerticalEnd className="size-4" />
+          </div>
+          I.C.H Inc.
+        </a>
+        <LoginForm />
+      </div>
+    </div>
   );
 };
 
-export default LoginPage;
+export default LogInPage;

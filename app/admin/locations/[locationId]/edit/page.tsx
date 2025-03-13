@@ -10,20 +10,23 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
-import UpdateFacilityForm from "./form";
-import { getFacilityById } from "../../action";
+import UpdateLocationForm from "./form";
+import { getLocationByIdAction, getRoomsOfLocationAction } from "../../action";
 import { notFound } from "next/navigation";
 export const metadata: Metadata = {
   title: "Chỉnh Sửa Cơ Sở",
 };
-const UpdateFacilityPage = async (props: {
-  params: Promise<{ facilityId: string }>;
+const UpdateLocationPage = async (props: {
+  params: Promise<{ locationId: string }>;
 }) => {
   const params = await props.params;
 
-  const facility = await getFacilityById(params.facilityId);
+  const location = await getLocationByIdAction(params.locationId);
 
-  if (!facility.data) return notFound();
+  if (!location) return notFound();
+
+  const rooms = await getRoomsOfLocationAction(params.locationId);
+
   return (
     <>
       <div className="bg-white flex shrink-0 items-center py-2 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -41,7 +44,7 @@ const UpdateFacilityPage = async (props: {
                 </BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbLink href="/admin/facilities">
+              <BreadcrumbLink href="/admin/locations">
                 Danh sách cơ sở
               </BreadcrumbLink>
               <BreadcrumbSeparator />
@@ -59,15 +62,12 @@ const UpdateFacilityPage = async (props: {
             <p className="text-sm text-muted-foreground mb-2">
               Điền các trường bên dưới để chỉnh sửa cơ sở.
             </p>
-            <UpdateFacilityForm
+            <UpdateLocationForm
               data={{
-                id: facility.data.id,
-                location_name: facility.data.location_name,
-                address: facility.data.address,
-                location_type: facility.data.location_type,
-                rooms: facility.data.rooms.map((room) => ({
-                  room_id: room.id,
-                  room_name: room.room_name,
+                ...location,
+                rooms: rooms.map((room) => ({
+                  roomId: room.id,
+                  roomName: room.roomName,
                   type: "init",
                 })),
               }}
@@ -79,4 +79,4 @@ const UpdateFacilityPage = async (props: {
   );
 };
 
-export default UpdateFacilityPage;
+export default UpdateLocationPage;

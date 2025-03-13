@@ -88,7 +88,7 @@ const AdminLayout = async ({
                     asChild
                     className="[&>svg:first-child]:size-5"
                   >
-                    <Link href={"/admin/facilities"}>
+                    <Link href={"/admin/locations"}>
                       <MapPinHouseIcon />
                       <span>Cơ sở</span>
                     </Link>

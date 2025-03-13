@@ -10,11 +10,11 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
-import CreateFacilityForm from "./form";
+import CreateLocationForm from "./form";
 export const metadata: Metadata = {
   title: "Tạo Cơ Sở",
 };
-const CreateFacilityPage = () => {
+const CreateLocationPage = () => {
   return (
     <>
       <div className="bg-white flex shrink-0 items-center py-2 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -32,7 +32,7 @@ const CreateFacilityPage = () => {
                 </BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbLink href="/admin/facilities">
+              <BreadcrumbLink href="/admin/locations">
                 Danh sách cơ sở
               </BreadcrumbLink>
               <BreadcrumbSeparator />
@@ -50,7 +50,7 @@ const CreateFacilityPage = () => {
             <p className="text-sm text-muted-foreground mb-2">
               Điền các trường bên dưới để tạo cơ sở.
             </p>
-            <CreateFacilityForm />
+            <CreateLocationForm />
           </div>
         </div>
       </div>
@@ -58,4 +58,4 @@ const CreateFacilityPage = () => {
   );
 };
 
-export default CreateFacilityPage;
+export default CreateLocationPage;

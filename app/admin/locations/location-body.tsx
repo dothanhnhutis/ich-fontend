@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { deleteFacilityById, Facility } from "./action";
+import { deleteLocationByIdAction, Location } from "./action";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 
@@ -37,12 +37,12 @@ const convertData = {
   Warehouse: "Nhà kho",
 };
 
-const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
+const LocationBody = ({ initData }: { initData: Location[] }) => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (facilityId: string) => {
-      return await deleteFacilityById(facilityId);
+      return await deleteLocationByIdAction(facilityId);
     },
     onSuccess(data) {
       if (data.success) {
@@ -58,7 +58,7 @@ const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
         <div className="flex justify-between gap-2">
           <h3 className="font-bold lg:text-2xl text-lg">Danh sách sản phẩm</h3>
           <Button size="icon" variant="ghost" asChild>
-            <Link href="/admin/facilities/create">
+            <Link href="/admin/locations/create">
               <PlusIcon className="size-4 shrink-0" />
             </Link>
           </Button>
@@ -97,8 +97,7 @@ const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
             <TableRow>
               <TableHead className="w-[300px]">Tên cơ sở</TableHead>
               <TableHead className="w-[300px]">Địa chỉ</TableHead>
-              <TableHead className="w-[150px]">Loại</TableHead>
-              <TableHead className="w-[100px]">Phòng ban</TableHead>
+              <TableHead className="w-[100px]">Loại</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -106,15 +105,13 @@ const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
             {initData.map((facility) => (
               <TableRow key={facility.id}>
                 <TableCell className="font-medium min-w-[300px]">
-                  {facility.location_name}
+                  {facility.locationName}
                 </TableCell>
                 <TableCell className="w-[300px]">{facility.address}</TableCell>
-                <TableCell className="w-[150px]">
-                  {convertData[facility.location_type]}
-                </TableCell>
                 <TableCell className="w-[100px]">
-                  {facility.rooms.length}
+                  {convertData[facility.locationType]}
                 </TableCell>
+
                 <TableCell className="w-[50px]">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -138,7 +135,7 @@ const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
                         <DropdownMenuItem asChild>
                           <Link
                             className="cursor-pointer"
-                            href={"/admin/facilities/" + facility.id + "/edit"}
+                            href={"/admin/locations/" + facility.id + "/edit"}
                           >
                             Chỉnh sửa
                           </Link>
@@ -169,4 +166,4 @@ const FacilitiesBody = ({ initData }: { initData: Facility[] }) => {
   );
 };
 
-export default FacilitiesBody;
+export default LocationBody;

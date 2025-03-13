@@ -39,7 +39,6 @@ export const logIn = async (input: LogInActionData) => {
 
     const cookiesParse = string2Cookie(rawCookie);
     const c = await cookies();
-    console.log(cookiesParse);
     for (const { name, value, options } of cookiesParse) {
       c.set(name, value, options);
     }

@@ -6,6 +6,7 @@ import {
 
 import { cookies, headers } from "next/headers";
 import FetchAPI, { FetchError } from "./lib/fetchApi";
+import { DEFAULT_LOGIN_REDIRECT, isAdminRegex } from "./routes";
 
 // function redirect(request: NextRequest, path?: string) {
 //   const { nextUrl, url } = request;
@@ -140,9 +141,12 @@ export async function middleware(request: NextRequest) {
     const uniquePermission: string[] = permissions.filter(
       (permission, idx, permissions) => permissions.indexOf(permission) == idx
     );
-    console.log(uniquePermission);
-    if (nextUrl.pathname.startsWith("/login"))
-      return NextResponse.rewrite(new URL("/admin", url));
+    const isAdmin = uniquePermission.some((pre) => isAdminRegex.test(pre));
+
+    if (nextUrl.pathname.startsWith("/login")) {
+      const url_redirect = isAdmin ? "/admin" : DEFAULT_LOGIN_REDIRECT;
+      return NextResponse.rewrite(new URL(url_redirect, url));
+    }
   } else {
     if (nextUrl.pathname.startsWith("/admin"))
       return NextResponse.rewrite(new URL("/login", url));

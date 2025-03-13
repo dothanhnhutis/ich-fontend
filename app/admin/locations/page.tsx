@@ -9,15 +9,15 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
-import FacilitiesBody from "./facilities-body";
-import { getFacilitiesAction } from "./action";
+import LocationBody from "./location-body";
+import { getLocationsAction } from "./action";
 
 export const metadata: Metadata = {
   title: "Cơ sở",
 };
 
-const FacilitiesPage = async () => {
-  const data = await getFacilitiesAction();
+const LocationsPage = async () => {
+  const locations = await getLocationsAction();
   return (
     <>
       <div className="bg-white flex shrink-0 items-center py-2 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -43,10 +43,10 @@ const FacilitiesPage = async () => {
         </div>
       </div>
       <div className="h-[calc(100vh_-_48px)] w-full overflow-y-scroll relative">
-        <FacilitiesBody initData={data.data} />
+        <LocationBody initData={locations} />
       </div>
     </>
   );
 };
 
-export default FacilitiesPage;
+export default LocationsPage;

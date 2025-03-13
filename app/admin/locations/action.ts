@@ -55,12 +55,20 @@ export const createLocationAction = async (
   formData: CreateLocationActionData
 ) => {
   try {
+    const { roomNames, ...locationData } = formData;
     const res = await locationApi.post<{
       success: boolean;
       message: string;
-    }>("/", formData, {
+      data: Location;
+    }>("/", locationData, {
       headers: await getHeaders(),
     });
+
+    await Promise.all(
+      roomNames.map((roomName) =>
+        createRoomOfLocationAction(res.data.data.id, roomName)
+      )
+    );
 
     return {
       success: res.data.success,

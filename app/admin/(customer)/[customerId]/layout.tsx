@@ -35,10 +35,6 @@ const CustomerDetailPage = ({
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Danh sách khách hàng</BreadcrumbPage>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
                 <BreadcrumbPage>Nguyen Van A</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>

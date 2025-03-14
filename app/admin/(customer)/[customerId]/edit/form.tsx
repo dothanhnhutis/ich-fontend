@@ -14,7 +14,7 @@ import React from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Product, updateProductAction } from "../../actions";
+import { Product, updateProductAction } from "../../../customers/actions";
 import { cn, convertUrlToFile } from "@/lib/utils";
 import Link from "next/link";
 

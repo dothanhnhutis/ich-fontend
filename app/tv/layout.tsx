@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import AdminSidebarFooter from "../admin/siderbar-footer";
+import AdminSidebarFooter from "../admin/(admin)/siderbar-footer";
 const TvLayout = async ({
   children,
 }: Readonly<{

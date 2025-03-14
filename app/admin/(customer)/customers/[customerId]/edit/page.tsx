@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { getProductByIdAction } from "../../../../customers/actions";
+import { getProductByIdAction } from "../../../../(admin)/customers/actions";
 import { notFound } from "next/navigation";
 import UpdateProductForm from "./form";
 export const metadata: Metadata = {

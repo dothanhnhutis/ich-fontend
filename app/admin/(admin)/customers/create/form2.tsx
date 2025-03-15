@@ -266,10 +266,7 @@ const Step2 = () => {
 };
 
 const Step3 = () => {
-  const {
-    step,
-    formData: { products },
-  } = useCreateCustomer();
+  const { step } = useCreateCustomer();
 
   if (step != 3) return;
 

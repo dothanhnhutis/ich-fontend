@@ -155,7 +155,7 @@ const LocationBody = ({ initData }: { initData: Location[] }) => {
             {initData.length == 0 && (
               <TableRow>
                 <TableCell className="font-medium text-center" colSpan={5}>
-                  Chưa có cơ sở
+                  Không tìm thấy kết quả nào.
                 </TableCell>
               </TableRow>
             )}

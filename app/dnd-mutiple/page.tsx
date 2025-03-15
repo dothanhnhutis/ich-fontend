@@ -203,9 +203,9 @@ function DragOverlayWrapper({
       {draggingProduct && (
         <ProductCard
           product={draggingProduct}
-          // onDeleteProduct={handleDeleteProduct}
-          // onAddNote={handleAddNote}
-          // onDeleteNote={handleDeleteNote}
+          onDeleteProduct={() => {}}
+          onAddNote={() => {}}
+          onDeleteNote={() => {}}
         />
       )}
     </DragOverlay>,

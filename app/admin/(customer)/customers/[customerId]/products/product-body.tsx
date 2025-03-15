@@ -28,29 +28,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { deleteStorageOfCustomerAction, Storage } from "./actions";
+import { Product } from "./action";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
-
-const StorageBody = ({
+const ProductBody = ({
   customerId,
-  storages,
+  products,
 }: {
   customerId: string;
-  storages: Storage[];
+  products: Product[];
 }) => {
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (storageId: string) => {
-      return await deleteStorageOfCustomerAction(customerId, storageId);
-    },
-    onSuccess({ success, message }) {
-      if (success) {
-        toast.success(message);
-      } else {
-        toast.error(message);
-      }
-    },
-  });
   return (
     <div className="h-[calc(100vh_-_48px)] w-full overflow-y-scroll relative">
       <main className="max-w-7xl mx-auto px-2 w-full py-4">
@@ -60,7 +46,7 @@ const StorageBody = ({
               Danh sách sản phẩm
             </h3>
             <Button size="icon" variant="ghost" asChild>
-              <Link href={`/admin/customers/${customerId}/storages/create`}>
+              <Link href={`/admin/customers/${customerId}/products/create`}>
                 <PlusIcon className="size-4 shrink-0" />
               </Link>
             </Button>
@@ -90,26 +76,28 @@ const StorageBody = ({
         </p>
 
         <div className="bg-white rounded-lg shadow-md max-w-full overflow-x-auto whitespace-nowrap">
-          <Table className="p-2 px-3 table-auto">
+          <Table className="p-2 px-3">
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[200px] w-[calc(5/24 * 100%)]">
-                  Tên thủ kho
+                <TableHead className="min-w-[500px] w-[calc(5/12 * 100%)]">
+                  Tên sản phẩm
                 </TableHead>
-                <TableHead className="min-w-[200px] w-1/12">
-                  Số điện thoại
+                <TableHead className="min-w-[500px] w-[calc(5/12 * 100%)]">
+                  Hình
                 </TableHead>
-                <TableHead className="min-w-[400px] w-6/12">Địa chỉ</TableHead>
-                <TableHead className="min-w-[50px] w-[calc(1/24 * 100%)]"></TableHead>
+                <TableHead className="min-w-[100px] w-[calc(1/12 * 100%)]">
+                  Quy cách
+                </TableHead>
+                <TableHead className="min-w-[50px] w-[calc(1/12 * 100%)]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {storages.length > 0 ? (
-                storages.map((storage) => (
-                  <TableRow key={storage.id}>
-                    <TableCell>{storage.storekeeper}</TableCell>
-                    <TableCell>{storage.phoneNumber}</TableCell>
-                    <TableCell>{storage.address}</TableCell>
+              {products.length > 0 ? (
+                products.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>{product.prodName}</TableCell>
+                    <TableCell>imggggg</TableCell>
+                    <TableCell>{product.packSpec}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -122,9 +110,9 @@ const StorageBody = ({
                             <DropdownMenuItem
                               className="cursor-pointer"
                               onClick={() => {
-                                navigator.clipboard.writeText(storage.id);
+                                navigator.clipboard.writeText(product.id);
                                 toast.info(
-                                  "Đã sao chép ID thành công. ID: " + storage.id
+                                  "Đã sao chép ID thành công. ID: " + product.id
                                 );
                               }}
                             >
@@ -133,17 +121,12 @@ const StorageBody = ({
                             <DropdownMenuItem asChild>
                               <Link
                                 className="cursor-pointer"
-                                href={`/admin/customers/${customerId}/storages/${storage.id}/edit`}
+                                href={`/admin/customers/${customerId}/products/${product.id}/edit`}
                               >
                                 Chỉnh sửa
                               </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              disabled={isPending}
-                              onClick={() => mutate(storage.id)}
-                            >
-                              Xoá
-                            </DropdownMenuItem>
+                            <DropdownMenuItem>Xoá</DropdownMenuItem>
                           </DropdownMenuGroup>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -165,4 +148,4 @@ const StorageBody = ({
   );
 };
 
-export default StorageBody;
+export default ProductBody;

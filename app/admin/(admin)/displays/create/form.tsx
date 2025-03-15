@@ -1,11 +1,6 @@
 "use client";
 import React from "react";
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverEvent,
-  closestCenter,
-} from "@dnd-kit/core";
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,

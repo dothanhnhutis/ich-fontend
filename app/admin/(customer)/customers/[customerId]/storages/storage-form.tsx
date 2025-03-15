@@ -5,22 +5,41 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { CreateCustomerStorage, createCustomerStorageAction } from "./actions";
+import {
+  CustomerStorageData,
+  createCustomerStorageAction,
+  Storage,
+  updateCustomerStorageAction,
+} from "./actions";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-const StorageForm = ({ customerId }: { customerId: string }) => {
-  const [formData, setFormData] = React.useState<CreateCustomerStorage>({
-    storekeeper: "",
-    address: "",
-    phoneNumber: "",
+const StorageForm = ({
+  customerId,
+  storage,
+}: {
+  customerId: string;
+  storage?: Storage;
+}) => {
+  const [formData, setFormData] = React.useState<CustomerStorageData>({
+    storekeeper: storage?.storekeeper || "",
+    address: storage?.address || "",
+    phoneNumber: storage?.phoneNumber || "",
   });
 
   const router = useRouter();
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
-      return await createCustomerStorageAction(customerId, formData);
+      if (storage) {
+        return await updateCustomerStorageAction(
+          customerId,
+          storage.id,
+          formData
+        );
+      } else {
+        return await createCustomerStorageAction(customerId, formData);
+      }
     },
     onSuccess({ success, message }) {
       if (success) {
@@ -87,7 +106,7 @@ const StorageForm = ({ customerId }: { customerId: string }) => {
         <Button variant="ghost" type="button" asChild disabled={isPending}>
           <Link href={`/admin/customers/${customerId}/storages`}>Huỷ</Link>
         </Button>
-        <Button disabled={isPending}>Tạo</Button>
+        <Button disabled={isPending}> {storage ? "Lưu" : "Tạo"} </Button>
       </div>
     </form>
   );

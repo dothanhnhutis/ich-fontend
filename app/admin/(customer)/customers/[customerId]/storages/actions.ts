@@ -46,7 +46,7 @@ export const getStoragesOfCustomerAction = async (customerId: string) => {
   }
 };
 
-export type CreateCustomerStorage = {
+export type CustomerStorageData = {
   storekeeper: string;
   phoneNumber: string;
   address: string;
@@ -54,7 +54,7 @@ export type CreateCustomerStorage = {
 
 export const createCustomerStorageAction = async (
   customerId: string,
-  formData: CreateCustomerStorage
+  formData: CustomerStorageData
 ) => {
   try {
     const res = await customerStorageApi.post<{
@@ -98,8 +98,66 @@ export const deleteStorageOfCustomerAction = async (
       }
     );
     revalidatePath(`/admin/customers/${customerId}/storages`);
+    revalidatePath(`/admin/customers/${customerId}/storages/${storageId}`);
 
     return { success: data.success, message: data.message };
+  } catch (error: unknown) {
+    let mess = "unknown error";
+    if (error instanceof FetchError) {
+      mess = error.message;
+    } else if (error instanceof Error) {
+      mess = error.message;
+    }
+    return { success: false, message: mess };
+  }
+};
+
+export const getStorageOfCustomer = async (
+  customerId: string,
+  storageId: string
+) => {
+  try {
+    const res = await customerStorageApi.get<{
+      success: boolean;
+      message: string;
+      data: Storage;
+    }>(`/${customerId}/storages/${storageId}`, {
+      headers: await getHeaders(),
+    });
+    return res.data.data;
+  } catch (error: unknown) {
+    let mess = "unknown error";
+    if (error instanceof FetchError) {
+      mess = error.message;
+    } else if (error instanceof Error) {
+      mess = error.message;
+    }
+    console.log(mess);
+    return null;
+  }
+};
+
+export const updateCustomerStorageAction = async (
+  customerId: string,
+  storageId: string,
+  formData: CustomerStorageData
+) => {
+  try {
+    const res = await customerStorageApi.put<{
+      success: boolean;
+      message: string;
+      data: Location;
+    }>(`/${customerId}/storages/${storageId}`, formData, {
+      headers: await getHeaders(),
+    });
+
+    revalidatePath(`/admin/customers/${customerId}/storages`);
+    revalidatePath(`/admin/customers/${customerId}/storages/${storageId}`);
+
+    return {
+      success: res.data.success,
+      message: res.data.message,
+    };
   } catch (error: unknown) {
     let mess = "unknown error";
     if (error instanceof FetchError) {

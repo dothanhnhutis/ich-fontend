@@ -8,11 +8,13 @@ import {
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-const CreateProductPage = () => {
+
+import StorageForm from "../storage-form";
+const CreateProductPage = async (props: {
+  params: Promise<{ customerId: string }>;
+}) => {
+  const params = await props.params;
+
   return (
     <>
       <div className="bg-white flex shrink-0 items-center py-2 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -52,27 +54,7 @@ const CreateProductPage = () => {
             <p className="text-sm text-muted-foreground mb-2">
               Tạo kho đển nhà máy giao hàng đến
             </p>
-            <div className="grid gap-2 pb-5">
-              <div className="grid gap-2">
-                <Label>Tên thủ kho</Label>
-                <Input type="text" />
-              </div>
-              <div className="grid gap-2">
-                <Label>Số điện thoại</Label>
-                <Input type="text" />
-              </div>
-              <div className="grid gap-2">
-                <Label>Địa chỉ</Label>
-                <Input type="text" />
-              </div>
-            </div>
-            <Separator />
-            <div className="flex gap-2 justify-end items-center py-2">
-              <Button variant="ghost" type="button" asChild>
-                <Link href="/admin/products">Huỷ</Link>
-              </Button>
-              <Button>Tạo</Button>
-            </div>
+            <StorageForm customerId={params.customerId} />
           </div>
         </div>
       </div>

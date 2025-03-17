@@ -27,10 +27,12 @@ import {
 const CustomerManagerLayout = async (
   props: Readonly<{
     children: React.ReactNode;
+    params: Promise<{ customerId: string }>;
   }>
 ) => {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
+  const params = await props.params;
 
   return (
     <SidebarProvider defaultOpen={defaultOpen} className="bg-gray-100">
@@ -59,7 +61,9 @@ const CustomerManagerLayout = async (
                     asChild
                     className="[&>svg:first-child]:size-5"
                   >
-                    <Link href={"/admin"}>
+                    <Link
+                      href={`/admin/customers/${params.customerId}/products`}
+                    >
                       <SprayCanIcon />
                       <span>Sản phẩm</span>
                     </Link>
@@ -71,7 +75,9 @@ const CustomerManagerLayout = async (
                     asChild
                     className="[&>svg:first-child]:size-5"
                   >
-                    <Link href={"/admin/locations"}>
+                    <Link
+                      href={`/admin/customers/${params.customerId}/storages`}
+                    >
                       <WarehouseIcon />
                       <span>Kho</span>
                     </Link>
@@ -83,7 +89,7 @@ const CustomerManagerLayout = async (
                     asChild
                     className="[&>svg:first-child]:size-5"
                   >
-                    <Link href={"/admin/locations"}>
+                    <Link href={`/admin/customers/${params.customerId}/orders`}>
                       <ShoppingBagIcon />
                       <span>Đặt hàng</span>
                     </Link>

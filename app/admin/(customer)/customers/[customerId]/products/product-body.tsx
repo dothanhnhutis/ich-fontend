@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Product } from "./action";
 import { toast } from "sonner";
+import Image from "next/image";
 const ProductBody = ({
   customerId,
   products,
@@ -96,7 +97,21 @@ const ProductBody = ({
                 products.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>{product.prodName}</TableCell>
-                    <TableCell>imggggg</TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        {product.images.map((image) => (
+                          <div key={image.id} className="relative w-10 h-10">
+                            <Image
+                              priority
+                              alt={image.altText ?? ""}
+                              src={image.url}
+                              fill
+                              sizes="40px"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </TableCell>
                     <TableCell>{product.packSpec}</TableCell>
                     <TableCell>
                       <DropdownMenu>

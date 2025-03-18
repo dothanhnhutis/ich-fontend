@@ -23,6 +23,10 @@ export type Product = {
   images: {
     id: string;
     url: string;
+    priority: number;
+    width?: number;
+    height?: number;
+    altText?: string;
   }[];
 };
 

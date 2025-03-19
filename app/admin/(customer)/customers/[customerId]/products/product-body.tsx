@@ -40,7 +40,7 @@ const ProductBody = ({
 }) => {
   return (
     <div className="h-[calc(100vh_-_48px)] w-full overflow-y-scroll relative">
-      <main className="max-w-7xl mx-auto px-2 w-full py-4">
+      <main className="max-w-5xl mx-auto px-2 w-full py-4">
         <div className="bg-white rounded-lg p-2 px-3 shadow-md">
           <div className="flex justify-between gap-2">
             <h3 className="font-bold lg:text-2xl text-lg">
@@ -80,16 +80,16 @@ const ProductBody = ({
           <Table className="p-2 px-3">
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[500px] w-[calc(5/12 * 100%)]">
+                <TableHead className="min-w-[500px] w-[calc(8/12_*_100%)]">
                   Tên sản phẩm
                 </TableHead>
-                <TableHead className="min-w-[500px] w-[calc(5/12 * 100%)]">
+                <TableHead className="min-w-[200px] w-[calc(2/12_*_100%)]">
                   Hình
                 </TableHead>
-                <TableHead className="min-w-[100px] w-[calc(1/12 * 100%)]">
+                <TableHead className="min-w-[100px] w-[calc(1/12_*_100%)]">
                   Quy cách
                 </TableHead>
-                <TableHead className="min-w-[50px] w-[calc(1/12 * 100%)]"></TableHead>
+                <TableHead className="min-w-[50px] w-[calc(1/1_*_100%)]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -98,19 +98,44 @@ const ProductBody = ({
                   <TableRow key={product.id}>
                     <TableCell>{product.prodName}</TableCell>
                     <TableCell>
-                      <div className="flex items-center">
-                        {product.images.map((image) => (
-                          <div key={image.id} className="relative w-10 h-10">
-                            <Image
-                              priority
-                              alt={image.altText ?? ""}
-                              src={image.url}
-                              fill
-                              sizes="40px"
-                            />
-                          </div>
-                        ))}
-                      </div>
+                      {product.images.length == 0 ? (
+                        <p>No image</p>
+                      ) : (
+                        <div className="flex items-center">
+                          {product.images
+                            .filter((_, index) => index < 3)
+                            .map((image, idx) => (
+                              <div
+                                key={image.id}
+                                className="relative w-12 h-12 border-2 overflow-hidden border-white rounded-md"
+                                style={{
+                                  transform: `translateX(-${idx * 16}px)`,
+                                }}
+                              >
+                                <Image
+                                  className="object-contain bg-muted"
+                                  priority
+                                  alt={image.altText ?? ""}
+                                  src={image.url}
+                                  fill
+                                  sizes="48px"
+                                />
+                              </div>
+                            ))}
+                          {product.images.length > 3 ? (
+                            <div
+                              className="relative w-12 h-12 border-2 flex items-center justify-center overflow-hidden border-white rounded-md bg-muted"
+                              style={{
+                                transform: `translateX(-${3 * 16}px)`,
+                              }}
+                            >
+                              <p className="text-muted-foreground font-semibold">
+                                +{product.images.length - 3}
+                              </p>
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>{product.packSpec}</TableCell>
                     <TableCell>

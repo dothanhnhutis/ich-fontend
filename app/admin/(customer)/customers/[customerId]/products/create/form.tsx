@@ -9,6 +9,10 @@ import { Separator } from "@/components/ui/separator";
 import CropImage from "@/components/crop-image";
 import { cn } from "@/lib/utils";
 import { ImageIcon, ImageUpIcon, SquarePenIcon, TrashIcon } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { createCustomerProductAction } from "../action";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type CreateProductFormData = {
   prodName: string;
@@ -67,7 +71,7 @@ const ProductImage = ({
       {image ? (
         <>
           <Image
-            className="object-contain"
+            className="object-contain bg-accent"
             priority
             fill
             src={image.srcCropped}
@@ -96,7 +100,7 @@ const ProductImage = ({
         </>
       ) : isUpload ? (
         <CropImage
-          aspectRatios={["1:1"]}
+          aspectRatios={["1:1", "4:3", "3:4", "16:9", "9:16"]}
           minCropBoxHeight={80}
           minCropBoxWidth={80}
           fileAccess={["image/jpeg", "image/png", "image/jpg"]}
@@ -124,17 +128,46 @@ const ProductImage = ({
   );
 };
 
-const CreateProductForm = () => {
+const CreateProductForm = ({ customerId }: { customerId: string }) => {
   const [formData, setFormData] = React.useState<CreateProductFormData>({
-    prodName: "123",
-    packSpec: "123",
+    prodName: "",
+    packSpec: "",
     images: [],
   });
 
   const [editImageAt, setEditImageAt] = React.useState<number>(-1);
+  const router = useRouter();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async () => {
+      return await createCustomerProductAction(customerId, {
+        prodName: formData.prodName,
+        packSpec: parseInt(formData.packSpec),
+        images: formData.images.map((i) => i.fileCropped),
+      });
+    },
+    onSuccess(data) {
+      if (data.success) {
+        toast.success(data.message);
+        router.push(`/admin/customers/${customerId}/products`);
+        setFormData({
+          prodName: "",
+          packSpec: "",
+          images: [],
+        });
+      } else {
+        toast.error(data.message);
+      }
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    mutate();
+  };
 
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <div className="flex flex-col sm:flex-row gap-2 pb-5">
         <div className="grid gap-2 w-full">
           <Label>Hình sản phẩm</Label>
@@ -200,7 +233,7 @@ const CreateProductForm = () => {
       </div>
 
       <CropImage
-        aspectRatios={["1:1"]}
+        aspectRatios={["1:1", "4:3", "3:4", "16:9", "9:16"]}
         minCropBoxHeight={80}
         minCropBoxWidth={80}
         fileAccess={["image/jpeg", "image/png", "image/jpg"]}
@@ -225,10 +258,10 @@ const CreateProductForm = () => {
       />
       <Separator />
       <div className="flex gap-2 justify-end items-center py-2">
-        <Button variant="ghost" type="button" asChild>
-          <Link href="/admin/products">Huỷ</Link>
+        <Button variant="ghost" type="button" asChild disabled={isPending}>
+          <Link href={`/admin/customers/${customerId}/products`}>Huỷ</Link>
         </Button>
-        <Button>Tạo</Button>
+        <Button disabled={isPending || formData.images.length == 0}>Tạo</Button>
       </div>
     </form>
   );

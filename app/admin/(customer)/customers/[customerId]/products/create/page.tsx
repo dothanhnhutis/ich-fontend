@@ -10,7 +10,20 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 
 import CreateProductForm from "./form";
-const CreateProductPage = () => {
+import { getCustomerById } from "../../../actions";
+import { notFound } from "next/navigation";
+const CreateProductPage = async (
+  props: Readonly<{
+    children: React.ReactNode;
+    params: Promise<{ customerId: string }>;
+  }>
+) => {
+  const params = await props.params;
+
+  const customer = await getCustomerById(params.customerId);
+
+  if (!customer) return notFound();
+
   return (
     <>
       <div className="bg-white flex shrink-0 items-center py-2 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -50,7 +63,7 @@ const CreateProductPage = () => {
             <p className="text-sm text-muted-foreground mb-2">
               Tạo sản phẩm đã được gia công tại nhà máy
             </p>
-            <CreateProductForm />
+            <CreateProductForm customerId={customer.id} />
           </div>
         </div>
       </div>

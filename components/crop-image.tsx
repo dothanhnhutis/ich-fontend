@@ -185,6 +185,7 @@ const CropImage = ({
 
   const handleCancel = () => {
     setOpenModel(false);
+    if (onCloseModal) onCloseModal();
   };
 
   if (imageFile)
@@ -309,126 +310,129 @@ const CropImage = ({
     );
 
   return (
-    <label htmlFor={id} className={className}>
-      <input
-        type="file"
-        accept={fileAccess.join(", ")}
-        id={id}
-        className="hidden"
-        onChange={handleFileChange}
-      />
-      {children}
+    <>
+      <label htmlFor={id} className={className}>
+        <input
+          type="file"
+          accept={fileAccess.join(", ")}
+          id={id}
+          className="hidden"
+          onChange={handleFileChange}
+        />
+        {children}
 
-      <Dialog open={openModel} onOpenChange={setOpenModel}>
-        <DialogContent className="max-w-[640px]">
-          <DialogHeader>
-            <DialogTitle>Chỉnh sửa hình ảnh</DialogTitle>
-            <DialogDescription className="hidden"></DialogDescription>
-          </DialogHeader>
-          <div className="rounded-lg bg-muted overflow-hidden w-full">
-            {imgUploadData?.src && (
-              <Cropper
-                className="w-full cropperjs max-h-[400px]"
-                ref={cropperRef}
-                src={imgUploadData.src}
-                style={{ height: 400, width: "100%" }}
-                aspectRatio={
-                  validateAspectRatios.length > 0
-                    ? parseFloat(validateAspectRatios[0].split(":")[0]) /
-                      parseFloat(validateAspectRatios[0].split(":")[1])
-                    : undefined
-                }
-                dragMode={validateAspectRatios.length > 0 ? "move" : "crop"}
-                cropBoxMovable={false}
-                viewMode={1}
-                minCropBoxHeight={minCropBoxHeight ?? 100}
-                minCropBoxWidth={minCropBoxWidth ?? 100}
-                center={true}
-                zoomOnWheel={false}
-                background={false}
-                responsive={true}
-                autoCropArea={1}
-                checkOrientation={true}
-                guides={true}
-                toggleDragModeOnDblclick={true}
-              />
-            )}
-
-            <div className="flex flex-wrap items-center justify-center gap-2 h-10">
-              {validateAspectRatios.length > 1 && (
-                <Select
-                  defaultValue={validateAspectRatios[0]}
-                  onValueChange={(v) => {
-                    const value =
-                      parseFloat(v.split(":")[0]) / parseFloat(v.split(":")[1]);
-                    handleAspectRatio(value);
-                  }}
-                >
-                  <SelectTrigger className="w-[75px] shadow-none bg-white focus-visible:ring-transparent focus:ring-transparent focus:ring-offset-0 border-0">
-                    <SelectValue placeholder="Select a fruit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {aspectRatios.map((as, idx) => (
-                        <SelectItem key={idx} value={as}>
-                          {as}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+        <Dialog open={openModel} onOpenChange={setOpenModel}>
+          <DialogContent className="max-w-[640px]">
+            <DialogHeader>
+              <DialogTitle>Chỉnh sửa hình ảnh</DialogTitle>
+              <DialogDescription className="hidden"></DialogDescription>
+            </DialogHeader>
+            <div className="rounded-lg bg-muted overflow-hidden w-full">
+              {imgUploadData?.src && (
+                <Cropper
+                  className="w-full cropperjs max-h-[400px]"
+                  ref={cropperRef}
+                  src={imgUploadData.src}
+                  style={{ height: 400, width: "100%" }}
+                  aspectRatio={
+                    validateAspectRatios.length > 0
+                      ? parseFloat(validateAspectRatios[0].split(":")[0]) /
+                        parseFloat(validateAspectRatios[0].split(":")[1])
+                      : undefined
+                  }
+                  dragMode={validateAspectRatios.length > 0 ? "move" : "crop"}
+                  cropBoxMovable={false}
+                  viewMode={1}
+                  minCropBoxHeight={minCropBoxHeight ?? 100}
+                  minCropBoxWidth={minCropBoxWidth ?? 100}
+                  center={true}
+                  zoomOnWheel={false}
+                  background={false}
+                  responsive={true}
+                  autoCropArea={1}
+                  checkOrientation={true}
+                  guides={true}
+                  toggleDragModeOnDblclick={true}
+                />
               )}
 
-              <div className="rounded-md h-9 flex items-center bg-white">
-                <button
-                  type="button"
-                  className="px-3 py-2.5 disabled:opacity-50 h-full inline-flex items-center justify-center"
-                  onClick={handleZoomOut}
-                >
-                  <ZoomOutIcon className="w-4 h-4" />
-                </button>
-                <Separator orientation="vertical" className="h-4" />
-                <button
-                  type="button"
-                  className="px-3 py-2.5 disabled:opacity-50 h-full inline-flex items-center justify-center"
-                  onClick={handleZoomIn}
-                >
-                  <ZoomInIcon className="w-4 h-4" />
-                </button>
-              </div>
-              <button
-                type="button"
-                className="bg-white border-0 shadow-none h-9 w-9 flex justify-center items-center rounded-md cursor-pointer focus-visible:outline-0"
-                onClick={() => {
-                  handleRotate(90);
-                }}
-              >
-                <RotateCwIcon className="w-4 h-4" />
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-2 h-10">
+                {validateAspectRatios.length > 1 && (
+                  <Select
+                    defaultValue={validateAspectRatios[0]}
+                    onValueChange={(v) => {
+                      const value =
+                        parseFloat(v.split(":")[0]) /
+                        parseFloat(v.split(":")[1]);
+                      handleAspectRatio(value);
+                    }}
+                  >
+                    <SelectTrigger className="w-[75px] shadow-none bg-white focus-visible:ring-transparent focus:ring-transparent focus:ring-offset-0 border-0">
+                      <SelectValue placeholder="Select a fruit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {aspectRatios.map((as, idx) => (
+                          <SelectItem key={idx} value={as}>
+                            {as}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
 
-              <Button
-                type="button"
-                variant="ghost"
-                className="cursor-pointer"
-                onClick={() => {
-                  handleReset();
-                }}
-              >
-                <p className="text-primary">Reset</p>
-              </Button>
+                <div className="rounded-md h-9 flex items-center bg-white">
+                  <button
+                    type="button"
+                    className="px-3 py-2.5 disabled:opacity-50 h-full inline-flex items-center justify-center"
+                    onClick={handleZoomOut}
+                  >
+                    <ZoomOutIcon className="w-4 h-4" />
+                  </button>
+                  <Separator orientation="vertical" className="h-4" />
+                  <button
+                    type="button"
+                    className="px-3 py-2.5 disabled:opacity-50 h-full inline-flex items-center justify-center"
+                    onClick={handleZoomIn}
+                  >
+                    <ZoomInIcon className="w-4 h-4" />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="bg-white border-0 shadow-none h-9 w-9 flex justify-center items-center rounded-md cursor-pointer focus-visible:outline-0"
+                  onClick={() => {
+                    handleRotate(90);
+                  }}
+                >
+                  <RotateCwIcon className="w-4 h-4" />
+                </button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="cursor-pointer"
+                  onClick={() => {
+                    handleReset();
+                  }}
+                >
+                  <p className="text-primary">Reset</p>
+                </Button>
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleCancel}>
-              Huỷ
-            </Button>
-            <Button type="button" onClick={handleSave}>
-              Lưu
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </label>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={handleCancel}>
+                Huỷ
+              </Button>
+              <Button type="button" onClick={handleSave}>
+                Lưu
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </label>
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
+"use server";
 import React from "react";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,17 +10,15 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-import { getCustomerProducts } from "./action";
-import ProductBody from "./product-body";
 import { getCustomerById } from "../../actions";
 import { notFound } from "next/navigation";
+import OrdersBody from "./order-body";
 
-const ProductPage = async (props: {
+const OrdersPage = async (props: {
   params: Promise<{ customerId: string }>;
 }) => {
   const params = await props.params;
 
-  const products = await getCustomerProducts(params.customerId);
   const customer = await getCustomerById(params.customerId);
   if (!customer) return notFound();
   return (
@@ -34,7 +32,7 @@ const ProductPage = async (props: {
           />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block ">
+              <BreadcrumbItem>
                 <BreadcrumbPage className="text-muted-foreground">
                   Khách hàng
                 </BreadcrumbPage>
@@ -47,15 +45,15 @@ const ProductPage = async (props: {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Sản phẩm</BreadcrumbPage>
+                <BreadcrumbPage>Đặt hàng</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </div>
-      <ProductBody customerId={params.customerId} products={products} />
+      <OrdersBody customer={customer} />
     </>
   );
 };
 
-export default ProductPage;
+export default OrdersPage;

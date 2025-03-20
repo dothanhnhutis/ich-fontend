@@ -12,6 +12,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { getStoragesOfCustomerAction } from "./actions";
 import StorageBody from "./storage-body";
+import { getCustomerById } from "../../actions";
+import { notFound } from "next/navigation";
 
 const StoragePage = async (props: {
   params: Promise<{ customerId: string }>;
@@ -19,7 +21,8 @@ const StoragePage = async (props: {
   const params = await props.params;
 
   const storages = await getStoragesOfCustomerAction(params.customerId);
-
+  const customer = await getCustomerById(params.customerId);
+  if (!customer) return notFound();
   return (
     <>
       <div className="bg-white flex shrink-0 items-center py-2 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -31,18 +34,20 @@ const StoragePage = async (props: {
           />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block ">
+              <BreadcrumbItem>
                 <BreadcrumbPage className="text-muted-foreground">
                   Khách hàng
                 </BreadcrumbPage>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Nguyen Van A</BreadcrumbPage>
+                <BreadcrumbPage className="text-muted-foreground">
+                  {customer.cusName}
+                </BreadcrumbPage>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Sản phẩm</BreadcrumbPage>
+                <BreadcrumbPage>Kho</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

@@ -31,6 +31,7 @@ import { Separator } from "@/components/ui/separator";
 import { Product } from "./action";
 import { toast } from "sonner";
 import Image from "next/image";
+
 const ProductBody = ({
   customerId,
   products,

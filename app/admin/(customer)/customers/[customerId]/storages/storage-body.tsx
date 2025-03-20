@@ -56,9 +56,7 @@ const StorageBody = ({
       <main className="max-w-7xl mx-auto px-2 w-full py-4">
         <div className="bg-white rounded-lg p-2 px-3 shadow-md">
           <div className="flex justify-between gap-2">
-            <h3 className="font-bold lg:text-2xl text-lg">
-              Danh sách sản phẩm
-            </h3>
+            <h3 className="font-bold lg:text-2xl text-lg">Danh sách kho</h3>
             <Button size="icon" variant="ghost" asChild>
               <Link href={`/admin/customers/${customerId}/storages/create`}>
                 <PlusIcon className="size-4 shrink-0" />

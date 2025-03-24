@@ -4,9 +4,10 @@ import {
   // userAgent
 } from "next/server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import FetchAPI, { FetchError } from "./lib/fetchApi";
 import { DEFAULT_LOGIN_REDIRECT, isAdminRegex } from "./routes";
+import { getHeaders } from "./lib/action";
 
 // function redirect(request: NextRequest, path?: string) {
 //   const { nextUrl, url } = request;
@@ -84,16 +85,6 @@ export type CurrentUser = {
 };
 
 const currrentUser = async () => {
-  const allCookie = (await cookies())
-    .getAll()
-    .map((c) => `${c.name}=${encodeURIComponent(c.value)}`)
-    .join("; ");
-
-  const headersList = await headers();
-  const userAgent = headersList.get("user-agent") || "Unknown";
-  const ipRaw = headersList.get("x-forwarded-for") || "127.0.0.1";
-  const clientIP = ipRaw.split(",")[0].trim();
-
   try {
     const {
       data: { data },
@@ -102,11 +93,7 @@ const currrentUser = async () => {
       message: string;
       data: CurrentUser;
     }>("/me", {
-      headers: {
-        Cookie: allCookie,
-        "x-forwarded-for": clientIP,
-        "user-agent": userAgent,
-      },
+      headers: await getHeaders(),
     });
     return data;
   } catch (error: unknown) {

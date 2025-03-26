@@ -1,8 +1,8 @@
-"use server";
-
+import "server-only";
 import FetchAPI from "@/lib/fetchApi";
+import { getHeaders } from "./common";
 import { string2Cookie } from "@/lib/utils";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 
 const authApi = FetchAPI.createInstance({
   baseUrl: "http://localhost:4000" + "/api/v1/auth",
@@ -19,20 +19,13 @@ export type LogInActionData = {
 };
 
 export const logIn = async (input: LogInActionData) => {
-  const headersList = await headers();
-  const userAgent = headersList.get("user-agent") || "Unknown";
-  const ipRaw = headersList.get("x-forwarded-for") || "127.0.0.1";
-  const clientIP = ipRaw.split(",")[0].trim();
   try {
     const { data, headers } = await authApi.post<{
       status: number;
       success: boolean;
       message: string;
     }>("/signin", input, {
-      headers: {
-        "x-forwarded-for": clientIP,
-        "user-agent": userAgent,
-      },
+      headers: await getHeaders(),
     });
 
     const rawCookie = headers.get("set-cookie") ?? "";

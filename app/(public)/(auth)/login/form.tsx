@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { LoaderCircleIcon } from "lucide-react";
-import { logIn, LogInActionData } from "./action";
+import { logInAction, LogInActionData } from "./action";
 import { useRouter } from "next/navigation";
 
 export const LoginForm = ({
@@ -28,7 +28,7 @@ export const LoginForm = ({
 
   const { error, mutate, isPending, reset } = useMutation({
     mutationFn: async () => {
-      return await logIn(formData);
+      return await logInAction(formData);
     },
     onSuccess({ success }) {
       if (success) router.refresh();

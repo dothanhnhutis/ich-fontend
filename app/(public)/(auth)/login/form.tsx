@@ -13,15 +13,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { LoaderCircleIcon } from "lucide-react";
-import { logInAction, LogInActionData } from "./action";
+import { logInAction } from "./action";
 import { useRouter } from "next/navigation";
+import { LogInDataType } from "@/data/auth";
 
 export const LoginForm = ({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) => {
   const router = useRouter();
-  const [formData, setFormData] = React.useState<LogInActionData>({
+  const [formData, setFormData] = React.useState<LogInDataType>({
     email: "",
     password: "",
   });

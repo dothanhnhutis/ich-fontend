@@ -13,12 +13,12 @@ const authApi = FetchAPI.createInstance({
   },
 });
 
-export type LogInActionData = {
+export type LogInDataType = {
   email: string;
   password: string;
 };
 
-export const logIn = async (input: LogInActionData) => {
+export const logIn = async (input: LogInDataType) => {
   try {
     const { data, headers } = await authApi.post<{
       status: number;
@@ -29,7 +29,6 @@ export const logIn = async (input: LogInActionData) => {
     });
 
     const rawCookie = headers.get("set-cookie") ?? "";
-
     const cookiesParse = string2Cookie(rawCookie);
     const c = await cookies();
     for (const { name, value, options } of cookiesParse) {

@@ -1,4 +1,5 @@
 "use client";
+import PasswordInput from "@/components/password-input";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -79,7 +80,16 @@ const LogInModal = () => {
                     Quên mật khẩu?
                   </a>
                 </div>
-                <Input
+                {/* <Input
+                  id="password"
+                  type="password"
+                  name="password"
+                  autoComplete="off"
+                  placeholder="*********"
+                  required
+                /> */}
+
+                <PasswordInput
                   id="password"
                   type="password"
                   name="password"

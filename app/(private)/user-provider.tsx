@@ -19,7 +19,7 @@ export const useUser = () => {
 export const UserProvider = ({
   children,
   user,
-}: Readonly<{ children: React.ReactNode; user?: CurrentUser }>) => {
+}: Readonly<{ children: React.ReactNode; user?: CurrentUser | null }>) => {
   const [state, setState] = React.useState<CurrentUser | null>(user || null);
 
   const contextValue = React.useMemo<UserProvider>(

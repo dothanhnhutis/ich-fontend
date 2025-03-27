@@ -19,6 +19,9 @@ import React from "react";
 
 const LogInModal = () => {
   const router = useRouter();
+
+  const [open, setOpen] = React.useState<boolean>(true);
+
   return (
     <Dialog
       defaultOpen={true}
@@ -34,7 +37,13 @@ const LogInModal = () => {
             href="/"
             className="flex items-center gap-2 self-center font-medium"
           >
-            <Image src="/logo.png" alt="logo" width={100} height={100} />
+            <Image
+              src="/logo.png"
+              priority
+              alt="logo"
+              width={100}
+              height={100}
+            />
           </Link>
           <DialogTitle className="text-xl">Chào mừng trở lại</DialogTitle>
           <DialogDescription>
@@ -80,22 +89,14 @@ const LogInModal = () => {
                     Quên mật khẩu?
                   </a>
                 </div>
-                {/* <Input
-                  id="password"
-                  type="password"
-                  name="password"
-                  autoComplete="off"
-                  placeholder="*********"
-                  required
-                /> */}
-
                 <PasswordInput
                   id="password"
-                  type="password"
                   name="password"
                   autoComplete="off"
                   placeholder="*********"
                   required
+                  isPassword={open}
+                  onTypeChange={setOpen}
                 />
               </div>
               <Button type="submit" className="w-full cursor-pointer">

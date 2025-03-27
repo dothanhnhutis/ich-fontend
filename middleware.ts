@@ -5,9 +5,8 @@ import {
 } from "next/server";
 
 import { cookies } from "next/headers";
-import FetchAPI, { FetchError } from "./lib/fetchApi";
-import { DEFAULT_LOGIN_REDIRECT, isAdminRegex } from "./routes";
-import { getHeaders } from "./lib/action";
+import { DEFAULT_LOGIN_REDIRECT } from "./routes";
+import { CurrentUser, currrentUser } from "./data/user";
 
 // function redirect(request: NextRequest, path?: string) {
 //   const { nextUrl, url } = request;
@@ -39,75 +38,6 @@ import { getHeaders } from "./lib/action";
 //   }
 // }
 
-const middlewareAPI = FetchAPI.createInstance({
-  baseUrl: "http://localhost:4000" + "/api/v1/users",
-  credentials: "include",
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
-});
-
-type Avatar = {
-  id: string;
-  url: string;
-  fileName: string;
-  originalname: string;
-  width: number | null;
-  height: number | null;
-};
-
-type Session = {
-  id: string;
-  userId: string;
-};
-
-type Role = {
-  id: string;
-  name: string;
-  permissions: string[];
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type CurrentUser = {
-  id: string;
-  email: string;
-  emailVerified: Date | null;
-  password: string;
-  username: string;
-  avatar: Avatar | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  session: Session;
-  roles: Role[];
-};
-
-const currrentUser = async () => {
-  try {
-    const {
-      data: { data },
-    } = await middlewareAPI.get<{
-      success: boolean;
-      message: string;
-      data: CurrentUser;
-    }>("/me", {
-      headers: await getHeaders(),
-    });
-    return data;
-  } catch (error: unknown) {
-    let errMes = "unknown error";
-    if (error instanceof FetchError) {
-      errMes = error.message;
-    } else if (error instanceof Error) {
-      errMes = error.message;
-    }
-    console.log(errMes);
-    return null;
-  }
-};
-
 export async function middleware(request: NextRequest) {
   //   const isPrivateRoute = privateRegexRoutes.some((routes) =>
   //     routes.test(request.nextUrl.pathname)
@@ -122,21 +52,12 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user) {
-    const permissions: string[] = user.roles
-      .map((role) => role.permissions)
-      .flat(1);
-    const uniquePermission: string[] = permissions.filter(
-      (permission, idx, permissions) => permissions.indexOf(permission) == idx
-    );
-    const isAdmin = uniquePermission.some((pre) => isAdminRegex.test(pre));
-
     if (nextUrl.pathname.startsWith("/login")) {
-      const url_redirect = isAdmin ? "/admin" : DEFAULT_LOGIN_REDIRECT;
-      return NextResponse.rewrite(new URL(url_redirect, url));
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, url));
     }
   } else {
     if (nextUrl.pathname.startsWith("/admin"))
-      return NextResponse.rewrite(new URL("/login", url));
+      return NextResponse.redirect(new URL("/login", url));
   }
 }
 

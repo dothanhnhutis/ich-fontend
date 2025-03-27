@@ -16,6 +16,7 @@ import { LoaderCircleIcon } from "lucide-react";
 import { logInAction } from "./action";
 import { useRouter } from "next/navigation";
 import { LogInDataType } from "@/data/auth";
+import PasswordInput from "@/components/password-input";
 
 export const LoginForm = ({
   className,
@@ -106,9 +107,8 @@ export const LoginForm = ({
                       Quên mật khẩu?
                     </a>
                   </div>
-                  <Input
+                  <PasswordInput
                     id="password"
-                    type="password"
                     name="password"
                     autoComplete="off"
                     placeholder="*********"

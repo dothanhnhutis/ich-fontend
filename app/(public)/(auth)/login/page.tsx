@@ -14,7 +14,7 @@ const LogInPage = () => {
           href="/"
           className="flex items-center gap-2 self-center font-medium"
         >
-          <Image src="/logo2.png" alt="logo" width={350} height={100} />
+          <Image src="/logo2.png" priority alt="logo" width={300} height={85} />
         </Link>
         <LoginForm />
       </div>

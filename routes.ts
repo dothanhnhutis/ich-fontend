@@ -16,7 +16,7 @@ const tvRoutes: RegExp = /^\/(tv|tv1)$/;
 const adminRoutes: RegExp = /^\/admin/;
 
 export const isAdminRegex: RegExp =
-  /^(read|write|edit|delete):(role|location)*$/;
+  /^(create|read|update|delete):(Role|Location|User)*$/;
 
 export const privateRegexRoutes = [
   userRoutes,

@@ -2,7 +2,12 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 
-import { CheckIcon, LoaderPinwheelIcon, XIcon } from "lucide-react";
+import {
+  CheckIcon,
+  LoaderCircleIcon,
+  LoaderPinwheelIcon,
+  XIcon,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import {
@@ -10,17 +15,21 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 
 import PasswordInput from "@/components/password-input";
 
 export const PasswordModal = ({ hasPassword }: { hasPassword?: boolean }) => {
+  const [open, setOpen] = React.useState<boolean>(false);
   const [hiddenPassword, setHiddenPassword] = React.useState<boolean>(true);
   return (
-    <Dialog defaultOpen={true}>
-      <Button className="rounded-full " variant="outline">
-        {hasPassword ? "Thay đổi" : "Thiết lập"}
-      </Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="rounded-full cursor-pointer" variant="outline">
+          {hasPassword ? "Thay đổi" : "Thiết lập"}
+        </Button>
+      </DialogTrigger>
 
       <DialogContent className="sm:max-w-screen-sm">
         <DialogHeader>
@@ -113,7 +122,7 @@ export const PasswordModal = ({ hasPassword }: { hasPassword?: boolean }) => {
           </div>
           <div className="flex gap-4 flex-col sm:flex-row justify-end">
             <Button className="sm:order-last">
-              <LoaderPinwheelIcon className="h-4 w-4 animate-spin flex-shrink-0 mr-2 " />
+              <LoaderCircleIcon className="h-4 w-4 animate-spin flex-shrink-0 mr-2 " />
               Save
             </Button>
             <Button type="button" variant="outline">

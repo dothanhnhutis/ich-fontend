@@ -25,12 +25,22 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { cn } from "@/lib/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
 
+const MFAContext = React.createContext<null>(null);
+
+const useMFA = () => {
+  const context = React.useContext(MFAContext);
+  if (!context) throw new Error();
+};
+
+const MFAProvider = () => {
+  return <MFAContext value={null}></MFAContext>;
+};
+
 const MFASwitch = () => {
-  const { currentUser } = useAuthContext();
   const [open, setOpen] = React.useState<boolean>(false);
   const [step, setStep] = React.useState<number>(1);
   const [qRCodeMode, setQRCodeMode] = React.useState<boolean>(true);

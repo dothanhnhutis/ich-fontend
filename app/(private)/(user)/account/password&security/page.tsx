@@ -4,10 +4,14 @@ import React from "react";
 // import MFASwitch from "./mfa-switch";
 // import { PasswordBtn } from "./password-btn";
 // import ProviderList from "./provider-list";
-import { Trash2Icon } from "lucide-react";
+import { LoaderCircleIcon, LoaderPinwheelIcon, Trash2Icon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import EmailModal from "./email-modal";
-import { PasswordModal } from "./password-btn";
+import EmailModal from "./EmailModal";
+import { PasswordModal } from "./PasswordModal";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { FcGoogle } from "react-icons/fc";
+import DisableAccountModal from "./DisableAccountModal";
 
 const SecurityPage = () => {
   return (
@@ -27,7 +31,7 @@ const SecurityPage = () => {
           <EmailModal />
         </div>
       </div>
-      <div className="flex w-full gap-4 border-b py-4">
+      <div className="flex items-center w-full gap-4 border-b py-4">
         <div className="w-full">
           <p className="font-bold">Mật khẩu</p>
           <p className="text-xs font-normal leading-snug text-muted-foreground">
@@ -37,19 +41,35 @@ const SecurityPage = () => {
 
         <PasswordModal hasPassword />
       </div>
-      <div className="flex flex-col lg:flex-row w-full gap-4 border-b py-4">
-        <div className="w-full">
-          <p className="font-bold">Tài khoản được kết nối</p>
-          <p className="text-xs font-normal leading-snug text-muted-foreground">
-            Đăng nhập nhanh chóng bằng các tài khoản khác.
-          </p>
+      <div className="block w-full border-b py-4">
+        <p className="font-bold">Tài khoản được kết nối</p>
+        <p className="text-xs font-normal leading-snug text-muted-foreground">
+          Đăng nhập nhanh chóng bằng các tài khoản khác.
+        </p>
+        <div className="grid gap-2 mt-2">
+          <div className="flex items-center gap-4 justify-between">
+            <div className={cn("flex items-center gap-2")}>
+              <div className="p-0.5 bg-white rounded-full shadow dark:shadow-none text-primary">
+                <FcGoogle className="size-9" />
+              </div>
+              <p className="font-medium">Facebook</p>
+            </div>
+            <Button className="rounded-full cursor-pointer" variant="outline">
+              Ngắt kết nối
+            </Button>
+          </div>
+          <div className="flex items-center gap-4 justify-between">
+            <div className={cn("flex items-center gap-2", "opacity-50")}>
+              <div className="p-0.5 bg-white rounded-full shadow dark:shadow-none text-primary">
+                <FcGoogle className="size-9" />
+              </div>
+              <p className="font-medium">Facebook</p>
+            </div>
+            <Button className="rounded-full cursor-pointer" variant="outline">
+              Kết nối
+            </Button>
+          </div>
         </div>
-        {/* <ProviderList
-          oauthProviders={[
-            { id: "123123", provider: "google", providerId: "Asdasd" },
-            { id: "123123", provider: "facebook", providerId: "Asdasd" },
-          ]}
-        /> */}
       </div>
       <div className="flex w-full gap-4 border-b py-4">
         <div className="w-full">
@@ -60,7 +80,6 @@ const SecurityPage = () => {
             Bảo mật cao hơn với mã xác thực khi đăng nhập.
           </p>
         </div>
-
         {/* <MFASwitch /> */}
         <Switch />
       </div>
@@ -72,10 +91,7 @@ const SecurityPage = () => {
           </p>
         </div>
 
-        {/* <DeactivateBtn /> */}
-        <button>
-          <Trash2Icon className="text-red-500 shrink-0 size-5" />
-        </button>
+        <DisableAccountModal />
       </div>
     </div>
   );

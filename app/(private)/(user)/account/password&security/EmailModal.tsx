@@ -17,7 +17,7 @@ const EmailModal = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="rounded-full" variant="outline">
+        <Button className="rounded-full cursor-pointer" variant="outline">
           Thay đổi
         </Button>
       </DialogTrigger>

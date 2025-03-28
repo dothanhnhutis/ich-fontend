@@ -29,15 +29,119 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
 
-const MFAContext = React.createContext<null>(null);
+type MFAContext = {
+  step: number;
+  open: boolean;
+  next: () => void;
+  back: () => void;
+};
+
+const MFAContext = React.createContext<null | MFAContext>(null);
 
 const useMFA = () => {
   const context = React.useContext(MFAContext);
-  if (!context) throw new Error();
+  if (!context) throw new Error("useMFA must be used within a MFAProvider.");
+  return context;
 };
 
-const MFAProvider = () => {
-  return <MFAContext value={null}></MFAContext>;
+const MAX_STEP = 3;
+const MIN_STEP = 1;
+
+const MFAProvider = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+  const [step, setStep] = React.useState<number>(1);
+  const [open, setOpen] = React.useState<boolean>(false);
+
+  const handleNext = React.useCallback(() => {
+    setStep(step < MAX_STEP ? step + 1 : step);
+  }, [step]);
+
+  const handleBack = React.useCallback(() => {
+    setStep(step > MIN_STEP ? step - 1 : step);
+  }, [step]);
+
+  const handleOpenModal = () => {
+    
+  }
+
+  const contextValue = React.useMemo<MFAContext>(
+    () => ({
+      step,
+      open,
+      next: handleNext,
+      back: handleBack,
+    }),
+    [step, handleNext, handleBack, open]
+  );
+
+  return <MFAContext value={contextValue}>{children}</MFAContext>;
+};
+
+const StepOne = () => {
+  return <AlertDialog></AlertDialog>;
+};
+
+const MFAHeader = () => {
+  const { step } = useMFA();
+
+  return (
+    <AlertDialogHeader>
+      <AlertDialogTitle>Xác thực đa yếu tố (MFA)</AlertDialogTitle>
+      <Breadcrumb>
+        <BreadcrumbList className="flex-nowrap justify-center sm:justify-start">
+          <BreadcrumbItem
+            className={cn(step == 1 ? "font-normal text-foreground" : "")}
+          >
+            Bước 1: Nhập tên thiết bị
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem
+            className={cn(step == 2 ? "font-normal text-foreground" : "")}
+          >
+            Bước 2: Thiết lập liên kết
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem
+            className={cn(step == 3 ? "font-normal text-foreground" : "")}
+          >
+            Bước 3: Hoàn thành
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    </AlertDialogHeader>
+  );
+};
+
+const MFAFooter = () => {
+  const { step, next, back } = useMFA();
+
+  return (
+    <AlertDialogFooter>
+      <AlertDialogCancel disabled>Huỷ</AlertDialogCancel>
+      <AlertDialogAction>Tiếp tục</AlertDialogAction>
+    </AlertDialogFooter>
+  );
+};
+
+const MFAContainer = () => {
+  const { open } = useMFA();
+
+  return (
+    <AlertDialog open={open}>
+      <Switch onClick={() => } />
+      <AlertDialogContent>
+        <MFAHeader />
+        <MFAFooter />
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
+
+const MFAModal = () => {
+  return (
+    <MFAProvider>
+      <MFAContainer />
+    </MFAProvider>
+  );
 };
 
 const MFASwitch = () => {
@@ -463,4 +567,4 @@ const MFASwitch = () => {
   );
 };
 
-export default MFASwitch;
+export default MFAModal;

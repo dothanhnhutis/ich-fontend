@@ -1,17 +1,13 @@
 "use client";
 import React from "react";
-// import DeactivateBtn from "./deactivate-btn";
-// import MFASwitch from "./mfa-switch";
-// import { PasswordBtn } from "./password-btn";
-// import ProviderList from "./provider-list";
-import { LoaderCircleIcon, LoaderPinwheelIcon, Trash2Icon } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import EmailModal from "./EmailModal";
-import { PasswordModal } from "./PasswordModal";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
+
+import { Button } from "@/components/ui/button";
+import PasswordModal from "./PasswordModal";
+import EmailModal from "./EmailModal";
 import DisableAccountModal from "./DisableAccountModal";
+import MFAModal from "./MFAModal";
 
 const SecurityPage = () => {
   return (
@@ -81,7 +77,7 @@ const SecurityPage = () => {
           </p>
         </div>
         {/* <MFASwitch /> */}
-        <Switch />
+        <MFAModal />
       </div>
       <div className="flex w-full gap-4 py-4">
         <div className="w-full">

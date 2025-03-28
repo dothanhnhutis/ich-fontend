@@ -2,12 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 
-import {
-  CheckIcon,
-  LoaderCircleIcon,
-  LoaderPinwheelIcon,
-  XIcon,
-} from "lucide-react";
+import { CheckIcon, LoaderCircleIcon, XIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import {
@@ -20,7 +15,7 @@ import {
 
 import PasswordInput from "@/components/password-input";
 
-export const PasswordModal = ({ hasPassword }: { hasPassword?: boolean }) => {
+const PasswordModal = ({ hasPassword }: { hasPassword?: boolean }) => {
   const [open, setOpen] = React.useState<boolean>(false);
   const [hiddenPassword, setHiddenPassword] = React.useState<boolean>(true);
   return (
@@ -134,3 +129,4 @@ export const PasswordModal = ({ hasPassword }: { hasPassword?: boolean }) => {
     </Dialog>
   );
 };
+export default PasswordModal;

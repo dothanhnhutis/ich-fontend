@@ -34,21 +34,24 @@ const ProfileForm = () => {
             htmlFor="username"
             className="after:content-['*'] after:text-red-500"
           >
-            User name
+            Tên
           </Label>
           <Input id="username" name="username" />
         </div>
         <div>
-          <Label htmlFor="birthday">Email</Label>
+          <Label htmlFor="birthday">Số điện thoại</Label>
           <Input id="birthday" name="birthday" />
         </div>
         <div>
-          <Label htmlFor="birthday">Phone number</Label>
+          <Label htmlFor="birthday">Ngày sinh</Label>
           <Input id="birthday" name="birthday" />
         </div>
         <div>
-          <Label htmlFor="birthday">Birthday</Label>
+          <Label htmlFor="birthday">Giới tính</Label>
           <Input id="birthday" name="birthday" />
+        </div>
+        <div className="flex items-center justify-end">
+          <Button>Lưu thay đổi</Button>
         </div>
       </form>
     </div>

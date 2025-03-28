@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-interface CookieOpt {
+export interface CookieOpt {
   domain?: string | undefined;
   encode?(value: string): string;
   expires?: Date | undefined;

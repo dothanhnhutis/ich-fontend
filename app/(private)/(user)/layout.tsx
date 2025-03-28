@@ -27,29 +27,29 @@ import { useUser } from "../user-provider";
 
 const navs = [
   {
-    label: "Profile",
+    label: "Hồ sơ",
     link: "/account",
-    description: "Update your username and manage your account",
+    description: "Cập nhật tên người dùng và quản lý tài khoản của bạn",
   },
   {
-    label: "Password & Security",
+    label: "Mật khẩu & Bảo mật",
     link: "/account/password&security",
-    description: "Manage your password",
+    description: "Quản lý bảo mật tài khoản của bạn",
   },
   {
-    label: "Address",
+    label: "Địa chỉ",
     link: "/account/address",
-    description: "Manage your address",
+    description: "Quản lý địa chỉ của bạn",
   },
   {
-    label: "Notification",
+    label: "Thông báo",
     link: "/account/notification",
-    description: "Get notified of activity",
+    description: "Nhận thông báo về hoạt động",
   },
   {
-    label: "Sessions",
-    link: "/account/session",
-    description: "Manage your sessions",
+    label: "Phiên đăng nhập",
+    link: "/account/sessions",
+    description: "Quản lý phiên đăng nhập của bạn",
   },
 ];
 
@@ -71,90 +71,92 @@ const PrivateUserLayout = ({
 
   return (
     <div>
-      <div className="sticky top-0 left-0 right-0 flex items-center justify-between gap-2 px-2 sm:px-3 py-1 h-[64px] bg-accent-foreground">
-        <Link href={"/"}>
-          <Image
-            priority
-            className="object-cover"
-            src="/logo2.png"
-            alt="logo"
-            width={200}
-            height={56}
-          />
-        </Link>
+      <div className="sticky top-0 left-0 right-0 z-50 bg-accent-foreground">
+        <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between gap-2 px-2 sm:px-3 py-1 h-[64px] mx-auto max-w-7xl">
+          <Link href={"/"}>
+            <Image
+              priority
+              className="object-cover"
+              src="/logo2.png"
+              alt="logo"
+              width={200}
+              height={56}
+            />
+          </Link>
 
-        <div className="flex items-center gap-2">
-          <button type="button" className="p-2 bg-white rounded-full">
-            <ShoppingBagIcon className="shrink-0 w-5 h-5" />
-          </button>
-          <button type="button" className="p-2 bg-white rounded-full">
-            <BellIcon className="shrink-0 w-5 h-5 " />
-          </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Avatar className="h-9 w-9 rounded-full">
-                <AvatarImage
-                  src={currentUser?.image || "/user-picture.jpg"}
-                  alt={currentUser?.username}
-                />
-                <AvatarFallback className="h-9 w-9 rounded-full">
-                  CN
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="min-w-56 rounded-lg"
-              side={"bottom"}
-              align="end"
-            >
-              <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage
-                      src={currentUser?.image || "/user-picture.jpg"}
-                      alt={currentUser?.username}
-                    />
-                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {currentUser?.username}
-                    </span>
-                    <span className="truncate text-xs">
-                      {currentUser?.email}
-                    </span>
+          <div className="flex items-center gap-2">
+            <button type="button" className="p-2 bg-white rounded-full">
+              <ShoppingBagIcon className="shrink-0 w-5 h-5" />
+            </button>
+            <button type="button" className="p-2 bg-white rounded-full">
+              <BellIcon className="shrink-0 w-5 h-5 " />
+            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-9 w-9 rounded-full">
+                  <AvatarImage
+                    src={currentUser?.image || "/user-picture.jpg"}
+                    alt={currentUser?.username}
+                  />
+                  <AvatarFallback className="h-9 w-9 rounded-full">
+                    CN
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="min-w-56 rounded-lg"
+                side={"bottom"}
+                align="end"
+              >
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarImage
+                        src={currentUser?.image || "/user-picture.jpg"}
+                        alt={currentUser?.username}
+                      />
+                      <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">
+                        {currentUser?.username}
+                      </span>
+                      <span className="truncate text-xs">
+                        {currentUser?.email}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    <Sparkles />
+                    Upgrade to Pro
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    <SettingsIcon />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <CreditCard />
+                    Billing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Bell />
+                    Notifications
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Sparkles />
-                  Upgrade to Pro
+                  <LogOut />
+                  Log out
                 </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <SettingsIcon />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <CreditCard />
-                  Billing
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Bell />
-                  Notifications
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <LogOut />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
@@ -171,9 +173,20 @@ const PrivateUserLayout = ({
               </AvatarFallback>
             </Avatar>
             <div className="text-muted-foreground">
-              <h4 className="text-2xl font-bold text-black">
-                {state?.username}
-              </h4>
+              <div className="flex items-center gap-2">
+                <p className="text-xl font-semibold text-black">
+                  {state?.username}
+                  {nav ? (
+                    <>
+                      <span className="mx-2 text-lg text-muted-foreground">
+                        /
+                      </span>
+                      <span>{nav.label}</span>
+                    </>
+                  ) : null}
+                </p>
+              </div>
+
               <p className="text-sm">{nav?.description}</p>
             </div>
           </div>

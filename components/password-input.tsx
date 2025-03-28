@@ -9,12 +9,14 @@ const PasswordInput = ({
   onTypeChange,
   defaultPassword,
   disabled,
+  isError,
   ...props
 }: Omit<React.ComponentPropsWithoutRef<"input">, "type"> &
   Partial<{
     defaultPassword: boolean;
     isPassword: boolean;
     onTypeChange: (isPassword: boolean) => void;
+    isError?: boolean;
   }>) => {
   const [hiddenPassword, setHiddenPassword] = React.useState<boolean>(
     defaultPassword ?? true
@@ -29,6 +31,7 @@ const PasswordInput = ({
       className={cn(
         "flex items-center gap-2 border h-9 rounded-md px-3 py-1 group focus-within:ring-4 focus-within:outline-1 ring-ring/10 ",
         disabled ? "cursor-not-allowed opacity-50" : "",
+        isError ? "border-red-500 bg-red-50 outline-red-50 ring-red-50" : "",
         className
       )}
     >

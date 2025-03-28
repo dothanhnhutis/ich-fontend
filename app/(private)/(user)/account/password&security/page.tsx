@@ -1,12 +1,13 @@
 "use client";
 import React from "react";
-import { Button } from "@/components/ui/button";
 // import DeactivateBtn from "./deactivate-btn";
 // import MFASwitch from "./mfa-switch";
 // import { PasswordBtn } from "./password-btn";
 // import ProviderList from "./provider-list";
 import { Trash2Icon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import EmailModal from "./email-modal";
+import { PasswordModal } from "./password-btn";
 
 const SecurityPage = () => {
   return (
@@ -23,9 +24,7 @@ const SecurityPage = () => {
             <p className="font-medium">gaconght@gmail.com</p>
             <div className="text-green-500">Verified</div>
           </div>
-          <Button className="rounded-full" variant="outline">
-            Change
-          </Button>
+          <EmailModal />
         </div>
       </div>
       <div className="flex w-full gap-4 border-b py-4">
@@ -36,7 +35,7 @@ const SecurityPage = () => {
           </p>
         </div>
 
-        {/* <PasswordBtn /> */}
+        <PasswordModal hasPassword />
       </div>
       <div className="flex flex-col lg:flex-row w-full gap-4 border-b py-4">
         <div className="w-full">

@@ -12,6 +12,15 @@ const middlewareAPI = FetchAPI.createInstance({
   },
 });
 
+export type MFA = {
+  userId: string;
+  secretKey: string;
+  backupCode: string[];
+  codeExpires: string[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 type Avatar = {
   id: string;
   url: string;

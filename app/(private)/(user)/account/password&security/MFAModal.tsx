@@ -28,10 +28,16 @@ import { cn } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
+import { MFA } from "@/data/user";
 
 type MFAContext = {
   step: number;
-  open: boolean;
+  isOpenModal: boolean;
+  isCheckedSwitch: boolean;
+  deviceName: string;
+  handleDeviceName: (deviceName: string) => void;
+  handleOpenModal: (open: boolean) => void;
+  handleCheckSwitch: (checked: boolean) => void;
   next: () => void;
   back: () => void;
 };
@@ -47,9 +53,14 @@ const useMFA = () => {
 const MAX_STEP = 3;
 const MIN_STEP = 1;
 
-const MFAProvider = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+const MFAProvider = ({
+  children,
+  mfa,
+}: Readonly<{ children: React.ReactNode; mfa?: MFA }>) => {
   const [step, setStep] = React.useState<number>(1);
-  const [open, setOpen] = React.useState<boolean>(false);
+  const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false);
+  const [isCheckedSwitch, setIsCheckedSwitch] = React.useState<boolean>(false);
+  const [deviceName, setDeviceName] = React.useState<string>("");
 
   const handleNext = React.useCallback(() => {
     setStep(step < MAX_STEP ? step + 1 : step);
@@ -59,25 +70,217 @@ const MFAProvider = ({ children }: Readonly<{ children: React.ReactNode }>) => {
     setStep(step > MIN_STEP ? step - 1 : step);
   }, [step]);
 
-  const handleOpenModal = () => {
-    
-  }
+  const handleCheckSwitch = (checked: boolean) => {
+    if (checked) {
+      setIsOpenModal(true);
+    }
+    setIsCheckedSwitch(checked);
+  };
+
+  const handleOpenModal = (open: boolean) => {
+    setIsOpenModal(open);
+  };
+
+  const handleDeviceName = (deviceName: string) => {
+    setDeviceName(deviceName);
+  };
 
   const contextValue = React.useMemo<MFAContext>(
     () => ({
       step,
-      open,
+      isOpenModal,
+      isCheckedSwitch,
+      deviceName,
+      handleDeviceName,
+      handleCheckSwitch,
+      handleOpenModal,
       next: handleNext,
       back: handleBack,
     }),
-    [step, handleNext, handleBack, open]
+    [step, isOpenModal, isCheckedSwitch, deviceName, handleNext, handleBack]
   );
 
   return <MFAContext value={contextValue}>{children}</MFAContext>;
 };
 
 const StepOne = () => {
-  return <AlertDialog></AlertDialog>;
+  const { deviceName, handleDeviceName } = useMFA();
+  const isError = useMemo(() => {
+    return deviceName.length > 0
+      ? !z
+          .string({
+            invalid_type_error: "deviceName must be string",
+            required_error: "deviceName is required",
+          })
+          .max(128, "deviceName maximin 128 characters.")
+          .regex(/^[\d\w+=,.@\-_][\d\w\s+=,.@\-_]*$/, "deviceName ")
+          .safeParse(deviceName).success
+      : false;
+  }, [deviceName]);
+
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="grid gap-1">
+        <Label htmlFor="deviceName" className="text-sm font-semibold">
+          Tên thiết bị
+        </Label>
+        <div
+          className={cn(
+            "flex items-center gap-2 border rounded-md h-9 px-3 py-1 focus-within:ring-4 focus-within:outline-1 ring-ring/10",
+            isError ? "border-red-500 bg-red-50 outline-red-50 ring-red-50" : ""
+          )}
+        >
+          <input
+            type="text"
+            name="deviceName"
+            id="deviceName"
+            autoComplete="off"
+            autoCapitalize="off"
+            autoCorrect="off"
+            maxLength={128}
+            className={cn(
+              "text-base md:text-sm w-full h-full focus-visible:outline-0 focus-visible:ring-0"
+            )}
+            value={deviceName}
+            onChange={(e) => {
+              handleDeviceName(e.target.value);
+            }}
+          />
+          <span className="text-muted-foreground text-xs">
+            {deviceName.length}/128
+          </span>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          Nhập tên có ý nghĩa để nhận dạng thiết bị này.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Tối đa 128 ký tự không dấu. Hỗ trợ các ký tự +=,.@-_
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2 border p-2 rounded">
+        <MonitorSmartphoneIcon className="size-16" />
+        <div>
+          <p className="text-sm font-medium">Ứng dụng xác thực</p>
+          <p className="text-xs text-muted-foreground">
+            Xác thực bằng mã được tạo bởi ứng dụng được cài đặt trên thiết bị di
+            động hoặc máy tính của bạn
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const StepTwo = () => {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
+        <div className="hidden sm:block size-16 mx-auto rounded-full bg-muted">
+          <p className="text-center">
+            <span className="inline-block align-middle p-5">1</span>
+          </p>
+        </div>
+
+        <div className="col-span-6 sm:col-span-5">
+          <p className="text-muted-foreground text-sm">
+            <span className="sm:hidden">1. </span>
+            Install a compatible application such as Google Authenticator, Duo
+            Mobile or Authy app on your mobile device or computer.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
+        <div className="hidden sm:block size-16 mx-auto rounded-full bg-muted">
+          <p className="text-center">
+            <span className="inline-block align-middle p-5">2</span>
+          </p>
+        </div>
+        <div className="col-span-6 sm:col-span-5 grid gap-3">
+          <p className="text-muted-foreground text-sm">
+            <span className="sm:hidden">2. </span>
+            Open your authenticator app, chose{" "}
+            <span className="font-bold text-foreground">Show QR code</span> on
+            this page, then use the app to scan the code. Alternatively, you can
+            type a secret key.
+            <span className="ml-1 text-primary cursor-pointer">
+              {true ? "Show secret key" : "Show QR code"}
+            </span>
+          </p>
+          {true ? (
+            <button className="size-[200px] border border-primary text-sm text-center text-primary">
+              {true ? (
+                <span className="align-middle h-full">Show QR code</span>
+              ) : true ? (
+                <span>
+                  <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline mr-2" />
+                  Loading ...
+                </span>
+              ) : (
+                <img src={dataGenerateMFA?.data?.qrCodeUrl} alt="MFA QR code" />
+              )}
+            </button>
+          ) : (
+            <p className="font-medium text-sm text-muted-foreground break-words">
+              Secret key:{" "}
+              {true ? (
+                <span className="text-primary underline cursor-pointer">
+                  take
+                </span>
+              ) : true ? (
+                <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline" />
+              ) : (
+                <span className="text-foreground text-base ">
+                  {dataGenerateMFA?.data?.totp.base32}
+                </span>
+              )}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
+        <div className="hidden sm:block size-16 mx-auto rounded-full bg-muted">
+          <p className="text-center">
+            <span className="inline-block align-middle p-5">3</span>
+          </p>
+        </div>
+        <div className="col-span-6 sm:col-span-5">
+          <p className="text-muted-foreground text-sm">
+            <span className="sm:hidden">3. </span>
+            Enter the code from your authenticator app.
+          </p>
+          <div className="flex flex-row mt-3">
+            <div>
+              <div className="grid gap-2">
+                <Label htmlFor="mfa_code1" className="text-sm">
+                  MFA code 1
+                </Label>
+                <Input
+                  id="mfa_code1"
+                  name="mfa_code1"
+                  maxLength={6}
+                  placeholder="MFA code 1"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="mfa_code2" className="text-sm">
+                  MFA code 2
+                </Label>
+                <Input
+                  id="mfa_code2"
+                  name="mfa_code2"
+                  maxLength={6}
+                  placeholder="MFA code 2"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const MFAHeader = () => {
@@ -86,6 +289,7 @@ const MFAHeader = () => {
   return (
     <AlertDialogHeader>
       <AlertDialogTitle>Xác thực đa yếu tố (MFA)</AlertDialogTitle>
+      <AlertDialogDescription className="hidden"></AlertDialogDescription>
       <Breadcrumb>
         <BreadcrumbList className="flex-nowrap justify-center sm:justify-start">
           <BreadcrumbItem
@@ -111,34 +315,53 @@ const MFAHeader = () => {
   );
 };
 
+const MFABody = () => {
+  const { step } = useMFA();
+
+  if (step == 1) return <StepOne />;
+  if (step == 2) return <StepTwo />;
+  return null;
+};
+
 const MFAFooter = () => {
   const { step, next, back } = useMFA();
 
   return (
     <AlertDialogFooter>
-      <AlertDialogCancel disabled>Huỷ</AlertDialogCancel>
-      <AlertDialogAction>Tiếp tục</AlertDialogAction>
+      <AlertDialogCancel>Huỷ</AlertDialogCancel>
+      {step > MIN_STEP ? (
+        <AlertDialogCancel onClick={back}>Trở về</AlertDialogCancel>
+      ) : null}
+      <AlertDialogAction onClick={next}>
+        {step == MAX_STEP ? "Đóng" : "Tiếp tục"}
+      </AlertDialogAction>
     </AlertDialogFooter>
   );
 };
 
 const MFAContainer = () => {
-  const { open } = useMFA();
+  const { isOpenModal, handleOpenModal, isCheckedSwitch, handleCheckSwitch } =
+    useMFA();
 
   return (
-    <AlertDialog open={open}>
-      <Switch onClick={() => } />
-      <AlertDialogContent>
+    <AlertDialog open={isOpenModal}>
+      <Switch
+        className="cursor-pointer"
+        checked={isCheckedSwitch}
+        onCheckedChange={handleCheckSwitch}
+      />
+      <AlertDialogContent className="sm:max-w-[calc(100%-2rem)] md:max-w-2xl">
         <MFAHeader />
+        <MFABody />
         <MFAFooter />
       </AlertDialogContent>
     </AlertDialog>
   );
 };
 
-const MFAModal = () => {
+const MFAModal = ({ mfa }: { mfa?: MFA }) => {
   return (
-    <MFAProvider>
+    <MFAProvider mfa={mfa}>
       <MFAContainer />
     </MFAProvider>
   );

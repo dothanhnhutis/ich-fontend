@@ -7,6 +7,7 @@ import {
 import { cookies } from "next/headers";
 import { DEFAULT_LOGIN_REDIRECT } from "./routes";
 import { CurrentUser, currrentUser } from "./data/user";
+import { clearSid } from "./data/auth";
 
 // function redirect(request: NextRequest, path?: string) {
 //   const { nextUrl, url } = request;
@@ -44,11 +45,14 @@ export async function middleware(request: NextRequest) {
   //   );
   //   const isAuthRoute = authRoutes.test(request.nextUrl.pathname);
   const { nextUrl, url } = request;
-  const { get } = await cookies();
-  const hasSession = get("sid");
+  const cookieStore = await cookies();
+  const hasSession = cookieStore.get("sid");
   let user: CurrentUser | null = null;
   if (hasSession) {
     user = await currrentUser();
+    if (!user) {
+      cookieStore.delete("sid");
+    }
   }
 
   if (user) {

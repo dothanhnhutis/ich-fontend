@@ -2,6 +2,7 @@ import "server-only";
 import FetchAPI, { FetchError } from "@/lib/fetchApi";
 import { getHeaders } from "./common";
 import { CookieOpt } from "@/lib/utils";
+import { clearSid } from "./auth";
 
 const middlewareAPI = FetchAPI.createInstance({
   baseUrl: "http://localhost:4000" + "/api/v1/users",

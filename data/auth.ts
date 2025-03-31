@@ -45,3 +45,8 @@ export const logIn = async (input: LogInDataType) => {
     };
   }
 };
+
+export const clearSid = async () => {
+  const cookieStore = await cookies();
+  cookieStore.set("sid", "sss");
+};

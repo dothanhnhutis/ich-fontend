@@ -2,7 +2,6 @@ import "server-only";
 import FetchAPI, { FetchError } from "@/lib/fetchApi";
 import { getHeaders } from "./common";
 import { CookieOpt } from "@/lib/utils";
-import { clearSid } from "./auth";
 
 const middlewareAPI = FetchAPI.createInstance({
   baseUrl: "http://localhost:4000" + "/api/v1/users",
@@ -127,6 +126,66 @@ export const deleteSessionById = async (sessionId: string) => {
     }>(`/sessions/${sessionId}`, {
       headers: await getHeaders(),
     });
+    return data;
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof FetchError) {
+      errMes = error.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    console.log(errMes);
+    return {
+      success: false,
+      message: errMes,
+      data: null,
+    };
+  }
+};
+
+export const setupMFA = async (deviceName: string) => {
+  try {
+    const { data } = await middlewareAPI.post<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(
+      `/setup-mfa`,
+      { deviceName },
+      {
+        headers: await getHeaders(),
+      }
+    );
+    return data;
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof FetchError) {
+      errMes = error.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    console.log(errMes);
+    return {
+      success: false,
+      message: errMes,
+      data: null,
+    };
+  }
+};
+
+export const createMFA = async (codes: string[]) => {
+  try {
+    const { data } = await middlewareAPI.post<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(
+      `/mfa`,
+      { codes },
+      {
+        headers: await getHeaders(),
+      }
+    );
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";

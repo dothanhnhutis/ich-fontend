@@ -7,7 +7,6 @@ import {
 import { cookies } from "next/headers";
 import { DEFAULT_LOGIN_REDIRECT } from "./routes";
 import { CurrentUser, currrentUser } from "./data/user";
-import { clearSid } from "./data/auth";
 
 // function redirect(request: NextRequest, path?: string) {
 //   const { nextUrl, url } = request;
@@ -40,19 +39,13 @@ import { clearSid } from "./data/auth";
 // }
 
 export async function middleware(request: NextRequest) {
-  //   const isPrivateRoute = privateRegexRoutes.some((routes) =>
-  //     routes.test(request.nextUrl.pathname)
-  //   );
-  //   const isAuthRoute = authRoutes.test(request.nextUrl.pathname);
   const { nextUrl, url } = request;
-  const cookieStore = await cookies();
-  const hasSession = cookieStore.get("sid");
+
+  const sid = request.cookies.get("sid");
+
   let user: CurrentUser | null = null;
-  if (hasSession) {
+  if (sid) {
     user = await currrentUser();
-    if (!user) {
-      cookieStore.delete("sid");
-    }
   }
 
   if (user) {
@@ -60,9 +53,14 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, url));
     }
   } else {
-    if (nextUrl.pathname.startsWith("/admin"))
-      return NextResponse.redirect(new URL("/login", url));
+    if (nextUrl.pathname.startsWith("/account")) {
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      response.cookies.set("sid", "", { maxAge: 0, path: "/" });
+      return response;
+    }
   }
+
+  return NextResponse.next();
 }
 
 export const config = {

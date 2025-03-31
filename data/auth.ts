@@ -37,16 +37,10 @@ export const logIn = async (input: LogInDataType) => {
 
     return data;
   } catch (error: unknown) {
-    console.log(error);
     return {
       status: 400,
       success: false,
       message: "Email và mật khẩu không hợp lệ.",
     };
   }
-};
-
-export const clearSid = async () => {
-  const cookieStore = await cookies();
-  cookieStore.set("sid", "sss");
 };

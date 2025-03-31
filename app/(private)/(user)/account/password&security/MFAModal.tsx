@@ -29,15 +29,20 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
 import { MFA } from "@/data/user";
+import { createMFAAction, setupMFAAction } from "../actions";
 
 type MFAContext = {
+  viewMode: "qr-code" | "secret-key";
   step: number;
   isOpenModal: boolean;
   isCheckedSwitch: boolean;
   deviceName: string;
+  isDeviceNameError: boolean;
   handleDeviceName: (deviceName: string) => void;
   handleOpenModal: (open: boolean) => void;
   handleCheckSwitch: (checked: boolean) => void;
+  handleToggleViewMode: () => void;
+  handleReset: () => void;
   next: () => void;
   back: () => void;
 };
@@ -61,6 +66,18 @@ const MFAProvider = ({
   const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false);
   const [isCheckedSwitch, setIsCheckedSwitch] = React.useState<boolean>(false);
   const [deviceName, setDeviceName] = React.useState<string>("");
+  const [viewMode, setViewMode] =
+    React.useState<MFAContext["viewMode"]>("qr-code");
+
+  const handleReset = () => {
+    setStep(1);
+    setDeviceName("");
+    setViewMode("qr-code");
+  };
+
+  const handleToggleViewMode = () => {
+    setViewMode((prev) => (prev == "qr-code" ? "secret-key" : "qr-code"));
+  };
 
   const handleNext = React.useCallback(() => {
     setStep(step < MAX_STEP ? step + 1 : step);
@@ -85,27 +102,7 @@ const MFAProvider = ({
     setDeviceName(deviceName);
   };
 
-  const contextValue = React.useMemo<MFAContext>(
-    () => ({
-      step,
-      isOpenModal,
-      isCheckedSwitch,
-      deviceName,
-      handleDeviceName,
-      handleCheckSwitch,
-      handleOpenModal,
-      next: handleNext,
-      back: handleBack,
-    }),
-    [step, isOpenModal, isCheckedSwitch, deviceName, handleNext, handleBack]
-  );
-
-  return <MFAContext value={contextValue}>{children}</MFAContext>;
-};
-
-const StepOne = () => {
-  const { deviceName, handleDeviceName } = useMFA();
-  const isError = useMemo(() => {
+  const isDeviceNameError = useMemo(() => {
     return deviceName.length > 0
       ? !z
           .string({
@@ -118,6 +115,41 @@ const StepOne = () => {
       : false;
   }, [deviceName]);
 
+  const contextValue = React.useMemo<MFAContext>(
+    () => ({
+      viewMode,
+      step,
+      isOpenModal,
+      isCheckedSwitch,
+      deviceName,
+      handleDeviceName,
+      handleCheckSwitch,
+      handleOpenModal,
+      next: handleNext,
+      back: handleBack,
+      handleToggleViewMode,
+      isDeviceNameError,
+      handleReset,
+    }),
+    [
+      step,
+      isOpenModal,
+      isCheckedSwitch,
+      deviceName,
+      viewMode,
+      handleNext,
+      handleBack,
+      handleToggleViewMode,
+      handleReset,
+    ]
+  );
+
+  return <MFAContext value={contextValue}>{children}</MFAContext>;
+};
+
+const StepOne = () => {
+  const { deviceName, handleDeviceName, isDeviceNameError } = useMFA();
+
   return (
     <div className="flex flex-col gap-8">
       <div className="grid gap-1">
@@ -127,7 +159,9 @@ const StepOne = () => {
         <div
           className={cn(
             "flex items-center gap-2 border rounded-md h-9 px-3 py-1 focus-within:ring-4 focus-within:outline-1 ring-ring/10",
-            isError ? "border-red-500 bg-red-50 outline-red-50 ring-red-50" : ""
+            isDeviceNameError
+              ? "border-red-500 bg-red-50 outline-red-50 ring-red-50"
+              : ""
           )}
         >
           <input
@@ -174,6 +208,36 @@ const StepOne = () => {
 };
 
 const StepTwo = () => {
+  const { viewMode, handleToggleViewMode, deviceName } = useMFA();
+
+  const [codes, setCodes] = React.useState<string[]>(["", ""]);
+
+  const {
+    data: setupMFAData,
+    mutate: setupMFAMutate,
+    isPending: isPendingSetupMFA,
+  } = useMutation({
+    mutationFn: async (deviceName: string) => {
+      return await setupMFAAction(deviceName);
+    },
+    onSuccess(data) {
+      console.log(data);
+    },
+  });
+
+  const {
+    data: createMFAData,
+    mutate: createMFAMutate,
+    isPending: isPendingCreateMFA,
+  } = useMutation({
+    mutationFn: async () => {
+      return await createMFAAction(codes);
+    },
+    onSuccess(data) {
+      console.log(data);
+    },
+  });
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
@@ -186,8 +250,9 @@ const StepTwo = () => {
         <div className="col-span-6 sm:col-span-5">
           <p className="text-muted-foreground text-sm">
             <span className="sm:hidden">1. </span>
-            Install a compatible application such as Google Authenticator, Duo
-            Mobile or Authy app on your mobile device or computer.
+            Cài đặt ứng dụng tương thích như Google Authenticator, Microsoft
+            Authenticator, Duo Mobile hoặc ứng dụng Authy trên thiết bị di động
+            hoặc máy tính của bạn.
           </p>
         </div>
       </div>
@@ -201,39 +266,49 @@ const StepTwo = () => {
         <div className="col-span-6 sm:col-span-5 grid gap-3">
           <p className="text-muted-foreground text-sm">
             <span className="sm:hidden">2. </span>
-            Open your authenticator app, chose{" "}
-            <span className="font-bold text-foreground">Show QR code</span> on
-            this page, then use the app to scan the code. Alternatively, you can
-            type a secret key.
-            <span className="ml-1 text-primary cursor-pointer">
-              {true ? "Show secret key" : "Show QR code"}
+            Mở ứng dụng xác thực của bạn, chọn{" "}
+            <span className="font-bold text-foreground">
+              Hiển thị mã QR
+            </span>{" "}
+            trên trang này, sau đó sử dụng ứng dụng để quét mã. Ngoài ra, bạn có
+            thể nhập khóa bí mật.
+            <span
+              onClick={handleToggleViewMode}
+              className="ml-1 text-primary cursor-pointer"
+            >
+              {viewMode == "qr-code"
+                ? "Hiển thị khóa bí mật"
+                : "Hiển thị mã QR"}
             </span>
           </p>
-          {true ? (
-            <button className="size-[200px] border border-primary text-sm text-center text-primary">
-              {true ? (
-                <span className="align-middle h-full">Show QR code</span>
-              ) : true ? (
+          {viewMode == "qr-code" ? (
+            <button
+              onClick={() => setupMFAMutate(deviceName)}
+              className="cursor-pointer size-[200px] border border-primary text-sm text-center text-primary"
+            >
+              {setupMFAData && setupMFAData.data ? (
+                <img src={setupMFAData.data.qrCodeUrl} alt="MFA QR code" />
+              ) : isPendingSetupMFA ? (
                 <span>
                   <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline mr-2" />
                   Loading ...
                 </span>
               ) : (
-                <img src={dataGenerateMFA?.data?.qrCodeUrl} alt="MFA QR code" />
+                <span className="align-middle h-full">Hiển thị mã QR</span>
               )}
             </button>
           ) : (
             <p className="font-medium text-sm text-muted-foreground break-words">
-              Secret key:{" "}
-              {true ? (
-                <span className="text-primary underline cursor-pointer">
-                  take
+              Khóa bí mật :{" "}
+              {setupMFAData && setupMFAData.data ? (
+                <span className="text-foreground text-base">
+                  {setupMFAData.data.base32}
                 </span>
-              ) : true ? (
+              ) : isPendingSetupMFA ? (
                 <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline" />
               ) : (
-                <span className="text-foreground text-base ">
-                  {dataGenerateMFA?.data?.totp.base32}
+                <span className="text-primary underline cursor-pointer">
+                  lấy mã
                 </span>
               )}
             </p>
@@ -249,32 +324,42 @@ const StepTwo = () => {
         <div className="col-span-6 sm:col-span-5">
           <p className="text-muted-foreground text-sm">
             <span className="sm:hidden">3. </span>
-            Enter the code from your authenticator app.
+            Nhập mã từ ứng dụng xác thực của bạn.
           </p>
-          <div className="flex flex-row mt-3">
-            <div>
-              <div className="grid gap-2">
-                <Label htmlFor="mfa_code1" className="text-sm">
-                  MFA code 1
-                </Label>
+          <div className="grid gap-2 py-2 sm:max-w-1/2">
+            <div className="flex items-center gap-4">
+              <Label htmlFor="code1" className="text-right text-sm shrink-0">
+                Mã 1
+              </Label>
+              <div className="w-full">
                 <Input
-                  id="mfa_code1"
-                  name="mfa_code1"
+                  id="code1"
+                  value={codes[0]}
+                  onChange={(e) => {
+                    setCodes((prev) => [e.target.value, prev[1]]);
+                  }}
+                  placeholder="123456"
                   maxLength={6}
-                  placeholder="MFA code 1"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="mfa_code2" className="text-sm">
-                  MFA code 2
-                </Label>
-                <Input
-                  id="mfa_code2"
-                  name="mfa_code2"
-                  maxLength={6}
-                  placeholder="MFA code 2"
-                />
-              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Chờ 30s để nhập mã thứ 2
+            </p>
+
+            <div className="flex items-center gap-4">
+              <Label htmlFor="code2" className="text-right text-sm shrink-0">
+                Mã 2
+              </Label>
+              <Input
+                id="code2"
+                value={codes[1]}
+                onChange={(e) => {
+                  setCodes((prev) => [prev[0], e.target.value]);
+                }}
+                placeholder="123456"
+                maxLength={6}
+              />
             </div>
           </div>
         </div>
@@ -324,15 +409,37 @@ const MFABody = () => {
 };
 
 const MFAFooter = () => {
-  const { step, next, back } = useMFA();
+  const {
+    step,
+    next,
+    deviceName,
+    isDeviceNameError,
+    back,
+    handleOpenModal,
+    handleCheckSwitch,
+    handleReset,
+  } = useMFA();
 
   return (
     <AlertDialogFooter>
-      <AlertDialogCancel>Huỷ</AlertDialogCancel>
+      <AlertDialogCancel
+        onClick={() => {
+          handleOpenModal(false);
+          if (step != 3) {
+            handleCheckSwitch(false);
+          }
+          handleReset();
+        }}
+      >
+        Huỷ
+      </AlertDialogCancel>
       {step > MIN_STEP ? (
         <AlertDialogCancel onClick={back}>Trở về</AlertDialogCancel>
       ) : null}
-      <AlertDialogAction onClick={next}>
+      <AlertDialogAction
+        disabled={step == 1 && (deviceName.length == 0 || isDeviceNameError)}
+        onClick={next}
+      >
         {step == MAX_STEP ? "Đóng" : "Tiếp tục"}
       </AlertDialogAction>
     </AlertDialogFooter>

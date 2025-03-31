@@ -1,8 +1,15 @@
 import React from "react";
 import { Metadata } from "next";
-import { LoginForm } from "./form";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { LoginForm } from "../../_components/forms/login";
 export const metadata: Metadata = {
   title: "Đăng Nhập",
 };
@@ -16,7 +23,24 @@ const LogInPage = () => {
         >
           <Image src="/logo2.png" priority alt="logo" width={300} height={85} />
         </Link>
-        <LoginForm />
+        <div className={"flex flex-col gap-6"}>
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-xl">Chào mừng trở lại</CardTitle>
+              <CardDescription>
+                Đăng nhập bằng tài khoản Google của bạn
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LoginForm />
+            </CardContent>
+          </Card>
+          <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary  ">
+            Bằng cách nhấp vào tiếp tục, bạn đồng ý với{" "}
+            <a href="#">Điều khoản dịch vụ</a> và{" "}
+            <a href="#">Chính sách bảo mật</a> của chúng tôi.
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -21,6 +21,15 @@ export type MFA = {
   updatedAt: Date;
 };
 
+export type TOTPAuth = {
+  ascii: string;
+  hex: string;
+  base32: string;
+  oauthUrl: string;
+  deviceName: string;
+  qrCodeUrl: string;
+};
+
 type Avatar = {
   id: string;
   url: string;
@@ -148,7 +157,7 @@ export const setupMFA = async (deviceName: string) => {
     const { data } = await middlewareAPI.post<{
       success: boolean;
       message: string;
-      data: any;
+      data: TOTPAuth;
     }>(
       `/setup-mfa`,
       { deviceName },

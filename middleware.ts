@@ -4,7 +4,6 @@ import {
   // userAgent
 } from "next/server";
 
-import { cookies } from "next/headers";
 import { DEFAULT_LOGIN_REDIRECT } from "./routes";
 import { CurrentUser, currrentUser } from "./data/user";
 

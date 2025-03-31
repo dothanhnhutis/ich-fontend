@@ -14,9 +14,13 @@ import React, { useMemo } from "react";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import {
+  CopyIcon,
+  KeyIcon,
+  KeyRoundIcon,
   LoaderCircleIcon,
   LoaderPinwheelIcon,
   MonitorSmartphoneIcon,
+  RefreshCwIcon,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -28,8 +32,9 @@ import { cn } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
-import { MFA } from "@/data/user";
+import { MFA, TOTPAuth } from "@/data/user";
 import { createMFAAction, setupMFAAction } from "../actions";
+import Image from "next/image";
 
 type MFAContext = {
   viewMode: "qr-code" | "secret-key";
@@ -38,6 +43,8 @@ type MFAContext = {
   isCheckedSwitch: boolean;
   deviceName: string;
   isDeviceNameError: boolean;
+  totp: TOTPAuth | null;
+  handleTOTP: (totp: TOTPAuth | null) => void;
   handleDeviceName: (deviceName: string) => void;
   handleOpenModal: (open: boolean) => void;
   handleCheckSwitch: (checked: boolean) => void;
@@ -69,10 +76,17 @@ const MFAProvider = ({
   const [viewMode, setViewMode] =
     React.useState<MFAContext["viewMode"]>("qr-code");
 
+  const [totp, setTotp] = React.useState<null | TOTPAuth>(null);
+
   const handleReset = () => {
     setStep(1);
     setDeviceName("");
     setViewMode("qr-code");
+    setTotp(null);
+  };
+
+  const handleTOTP = (totp: null | TOTPAuth) => {
+    setTotp(totp);
   };
 
   const handleToggleViewMode = () => {
@@ -98,9 +112,13 @@ const MFAProvider = ({
     setIsOpenModal(open);
   };
 
-  const handleDeviceName = (deviceName: string) => {
-    setDeviceName(deviceName);
-  };
+  const handleDeviceName = React.useCallback(
+    (deviceName: string) => {
+      setDeviceName(deviceName);
+      if (totp) setTotp(null);
+    },
+    [totp]
+  );
 
   const isDeviceNameError = useMemo(() => {
     return deviceName.length > 0
@@ -122,6 +140,8 @@ const MFAProvider = ({
       isOpenModal,
       isCheckedSwitch,
       deviceName,
+      totp,
+      handleTOTP,
       handleDeviceName,
       handleCheckSwitch,
       handleOpenModal,
@@ -132,15 +152,16 @@ const MFAProvider = ({
       handleReset,
     }),
     [
+      viewMode,
       step,
       isOpenModal,
       isCheckedSwitch,
       deviceName,
-      viewMode,
+      totp,
       handleNext,
       handleBack,
-      handleToggleViewMode,
-      handleReset,
+      isDeviceNameError,
+      handleDeviceName,
     ]
   );
 
@@ -207,8 +228,159 @@ const StepOne = () => {
   );
 };
 
+const QRView = () => {
+  const { viewMode, deviceName, totp, handleTOTP } = useMFA();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async () => {
+      return await setupMFAAction(deviceName);
+    },
+    onSuccess({ data }) {
+      if (data) {
+        handleTOTP(data);
+      }
+    },
+  });
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex gap-2 items-center text-sm justify-between">
+        <p>{viewMode == "qr-code" ? "QR code:" : "Khóa bí mật:"}</p>
+
+        {totp ? (
+          <button
+            type="button"
+            className="flex items-center gap-1 hover:text-primary cursor-pointer text-muted-foreground"
+          >
+            <RefreshCwIcon className="w-3 h-3 shrink-0" />
+            <p>Làm mới</p>
+          </button>
+        ) : null}
+      </div>
+      {viewMode == "qr-code" ? (
+        totp ? (
+          <Image
+            src={totp.qrCodeUrl}
+            alt="MFA QR code"
+            width={150}
+            height={150}
+            className="border border-primary rounded-md"
+          />
+        ) : (
+          <button
+            onClick={() => mutate()}
+            className="cursor-pointer h-[200px] w-[200px] border border-primary text-sm text-center text-primary"
+          >
+            {isPending ? (
+              <span>
+                <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline mr-2" />
+                Loading ...
+              </span>
+            ) : (
+              <span className="align-middle h-full">Hiển thị mã QR</span>
+            )}
+          </button>
+        )
+      ) : totp ? (
+        <div className="flex items-center gap-1">
+          <KeyRoundIcon className="w-4 h-4 shrink-0" />
+          <p>{totp.base32}</p>
+          <button type="button">
+            <CopyIcon className="w-3 h-3 shrink-0" />
+          </button>
+        </div>
+      ) : (
+        <div>
+          <p>2</p>
+        </div>
+      )}
+    </div>
+  );
+
+  if (viewMode == "qr-code") {
+    return (
+      <div className="flex flex-col gap-1">
+        <div className="flex gap-2 items-center text-sm justify-between">
+          <p className="">QR code:</p>
+          <button
+            type="button"
+            className="flex items-center gap-1 hover:text-primary cursor-pointer text-muted-foreground"
+          >
+            <RefreshCwIcon className="w-3 h-3 shrink-0" />
+            <p>Làm mới</p>
+          </button>
+        </div>
+        {!totp ? (
+          <button
+            onClick={() => mutate()}
+            className="cursor-pointer h-[200px] w-[200px] border border-primary text-sm text-center text-primary"
+          >
+            {isPending ? (
+              <span>
+                <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline mr-2" />
+                Loading ...
+              </span>
+            ) : (
+              <span className="align-middle h-full">Hiển thị mã QR</span>
+            )}
+          </button>
+        ) : (
+          <Image
+            src={totp.qrCodeUrl}
+            alt="MFA QR code"
+            width={200}
+            height={200}
+            className="border border-primary"
+          />
+        )}
+      </div>
+    );
+  } else {
+    return (
+      <div className="flex items-center gap-1">
+        <p>Khóa bí mật: </p>
+        <button
+          type="button"
+          className="flex items-center gap-1 text-sm hover:text-primary cursor-pointer"
+        >
+          <CopyIcon className="w-3 h-3 shrink-0" />
+          <p>sao chép</p>
+        </button>
+        <button
+          type="button"
+          className="flex items-center gap-1 text-sm hover:text-primary cursor-pointer"
+        >
+          <RefreshCwIcon className="w-3 h-3 shrink-0" />
+          <p>Làm mới</p>
+        </button>
+      </div>
+    );
+  }
+};
+
+const QRView1 = () => {
+  const { viewMode, totp } = useMFA();
+
+  return (
+    <div className="">
+      <Image
+        src={totp!.qrCodeUrl}
+        alt="MFA QR code"
+        width={150}
+        height={150}
+        className="border border-primary rounded-md"
+      />
+      <p>hoặc nhập mã theo cách thủ công</p>
+      <div>
+        <p>{totp?.base32}</p>
+      </div>
+    </div>
+  );
+};
+
 const StepTwo = () => {
-  const { viewMode, handleToggleViewMode, deviceName } = useMFA();
+  const { viewMode, handleToggleViewMode, deviceName, totp, handleTOTP } =
+    useMFA();
 
   const [codes, setCodes] = React.useState<string[]>(["", ""]);
 
@@ -220,8 +392,11 @@ const StepTwo = () => {
     mutationFn: async (deviceName: string) => {
       return await setupMFAAction(deviceName);
     },
-    onSuccess(data) {
-      console.log(data);
+    onSuccess({ data }) {
+      if (data) {
+        console.log(data);
+        handleTOTP(data);
+      }
     },
   });
 
@@ -237,6 +412,8 @@ const StepTwo = () => {
       console.log(data);
     },
   });
+
+  console.log(totp);
 
   return (
     <div className="flex flex-col gap-4">
@@ -281,13 +458,20 @@ const StepTwo = () => {
                 : "Hiển thị mã QR"}
             </span>
           </p>
-          {viewMode == "qr-code" ? (
+
+          <QRView1 />
+          {/* {viewMode == "qr-code" ? (
             <button
               onClick={() => setupMFAMutate(deviceName)}
               className="cursor-pointer size-[200px] border border-primary text-sm text-center text-primary"
             >
-              {setupMFAData && setupMFAData.data ? (
-                <img src={setupMFAData.data.qrCodeUrl} alt="MFA QR code" />
+              {totp ? (
+                <Image
+                  src={totp.qrCodeUrl}
+                  alt="MFA QR code"
+                  width={200}
+                  height={200}
+                />
               ) : isPendingSetupMFA ? (
                 <span>
                   <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline mr-2" />
@@ -300,10 +484,8 @@ const StepTwo = () => {
           ) : (
             <p className="font-medium text-sm text-muted-foreground break-words">
               Khóa bí mật :{" "}
-              {setupMFAData && setupMFAData.data ? (
-                <span className="text-foreground text-base">
-                  {setupMFAData.data.base32}
-                </span>
+              {totp ? (
+                <span className="text-foreground text-base">{totp.base32}</span>
               ) : isPendingSetupMFA ? (
                 <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline" />
               ) : (
@@ -312,7 +494,7 @@ const StepTwo = () => {
                 </span>
               )}
             </p>
-          )}
+          )} */}
         </div>
       </div>
       <div className="grid grid-cols-6 items-center border-b last:border-none py-3">

@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { cn } from "@/lib/utils";
 import { FcGoogle } from "react-icons/fc";
@@ -7,9 +6,15 @@ import { Button } from "@/components/ui/button";
 import PasswordModal from "./PasswordModal";
 import EmailModal from "./EmailModal";
 import DisableAccountModal from "./DisableAccountModal";
-import MFAModal from "./MFAModal";
+import { MFAContainer, MFAProvider } from "./MFAModal";
+import { getMFA } from "@/data/user";
+import { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Mật khẩu & Bảo mật",
+};
+const SecurityPage = async () => {
+  const mfa = await getMFA();
 
-const SecurityPage = () => {
   return (
     <div className="w-full">
       <div className="flex flex-col lg:flex-row w-full gap-4 border-b py-4">
@@ -76,8 +81,10 @@ const SecurityPage = () => {
             Bảo mật cao hơn với mã xác thực khi đăng nhập.
           </p>
         </div>
-        {/* <MFASwitch /> */}
-        <MFAModal />
+
+        <MFAProvider mfa={mfa ? mfa : undefined}>
+          <MFAContainer />
+        </MFAProvider>
       </div>
       <div className="flex w-full gap-4 py-4">
         <div className="w-full">

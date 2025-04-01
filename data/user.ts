@@ -16,7 +16,9 @@ export type MFA = {
   userId: string;
   secretKey: string;
   backupCode: string[];
+  count: number;
   codeExpires: string[];
+  deviceName: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -209,5 +211,29 @@ export const createMFA = async (codes: string[]) => {
       message: errMes,
       data: null,
     };
+  }
+};
+
+export const getMFA = async () => {
+  try {
+    const {
+      data: { data },
+    } = await middlewareAPI.get<{
+      success: boolean;
+      message: string;
+      data: MFA;
+    }>("/mfa", {
+      headers: await getHeaders(),
+    });
+    return data;
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof FetchError) {
+      errMes = error.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    console.log(errMes);
+    return null;
   }
 };

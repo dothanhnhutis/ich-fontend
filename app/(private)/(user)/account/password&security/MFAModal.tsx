@@ -36,6 +36,7 @@ import { MFA, TOTPAuth } from "@/data/user";
 import { createMFAAction, setupMFAAction } from "../actions";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { useStore } from "@/hooks/use-store";
 
 type MFAContext = {
   step: number;
@@ -60,13 +61,13 @@ const useMFA = () => {
 const MAX_STEP = 3;
 const MIN_STEP = 1;
 
-const MFAProvider = ({
+export const MFAProvider = ({
   children,
   mfa,
 }: Readonly<{ children: React.ReactNode; mfa?: MFA }>) => {
-  const [step, setStep] = React.useState<number>(1);
+  const [step, setStep] = React.useState<number>(mfa ? 3 : 1);
   const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false);
-  const [isCheckedSwitch, setIsCheckedSwitch] = React.useState<boolean>(false);
+  const [isCheckedSwitch, setIsCheckedSwitch] = React.useState<boolean>(!!mfa);
 
   const [totp, setTotp] = React.useState<null | TOTPAuth>(null);
 
@@ -122,6 +123,8 @@ const StepOne = () => {
   const { handleCheckSwitch, handleOpenModal, handleTOTP, totp, next } =
     useMFA();
 
+  const [mfaStore, setMFAStore] = useStore("mfa");
+
   const [deviceName, setDeviceName] = React.useState<string>(
     totp?.deviceName ?? ""
   );
@@ -151,6 +154,11 @@ const StepOne = () => {
     },
     onSuccess({ data, message }) {
       if (data) {
+        setMFAStore(
+          JSON.stringify({
+            deviceName: new Date(),
+          })
+        );
         handleTOTP(data);
         next();
       } else {
@@ -161,10 +169,10 @@ const StepOne = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!!totp && totp.deviceName != deviceName) {
-      mutate();
-    } else {
+    if (!!totp && totp.deviceName == deviceName) {
       next();
+    } else {
+      mutate();
     }
   };
 
@@ -187,6 +195,7 @@ const StepOne = () => {
               required
               type="text"
               name="deviceName"
+              placeholder={totp?.deviceName ?? ""}
               id="deviceName"
               autoComplete="off"
               autoCapitalize="off"
@@ -234,11 +243,7 @@ const StepOne = () => {
         </Button>
         <Button
           className="cursor-pointer"
-          disabled={
-            isDeviceNameError ||
-            isPending ||
-            (!!totp && totp.deviceName != deviceName)
-          }
+          disabled={isDeviceNameError || isPending}
         >
           {isPending ? (
             <LoaderCircleIcon className="size-4 animate-spin" />
@@ -250,158 +255,8 @@ const StepOne = () => {
   );
 };
 
-const QRView = () => {
-  const { viewMode, deviceName, totp, handleTOTP } = useMFA();
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: async () => {
-      return await setupMFAAction(deviceName);
-    },
-    onSuccess({ data }) {
-      if (data) {
-        handleTOTP(data);
-      }
-    },
-  });
-
-  return (
-    <div className="flex flex-col gap-1">
-      <div className="flex gap-2 items-center text-sm justify-between">
-        <p>{viewMode == "qr-code" ? "QR code:" : "Khóa bí mật:"}</p>
-
-        {totp ? (
-          <button
-            type="button"
-            className="flex items-center gap-1 hover:text-primary cursor-pointer text-muted-foreground"
-          >
-            <RefreshCwIcon className="w-3 h-3 shrink-0" />
-            <p>Làm mới</p>
-          </button>
-        ) : null}
-      </div>
-      {viewMode == "qr-code" ? (
-        totp ? (
-          <Image
-            src={totp.qrCodeUrl}
-            alt="MFA QR code"
-            width={150}
-            height={150}
-            className="border border-primary rounded-md"
-          />
-        ) : (
-          <button
-            onClick={() => mutate()}
-            className="cursor-pointer h-[200px] w-[200px] border border-primary text-sm text-center text-primary"
-          >
-            {isPending ? (
-              <span>
-                <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline mr-2" />
-                Loading ...
-              </span>
-            ) : (
-              <span className="align-middle h-full">Hiển thị mã QR</span>
-            )}
-          </button>
-        )
-      ) : totp ? (
-        <div className="flex items-center gap-1">
-          <KeyRoundIcon className="w-4 h-4 shrink-0" />
-          <p>{totp.base32}</p>
-          <button type="button">
-            <CopyIcon className="w-3 h-3 shrink-0" />
-          </button>
-        </div>
-      ) : (
-        <div>
-          <p>2</p>
-        </div>
-      )}
-    </div>
-  );
-
-  if (viewMode == "qr-code") {
-    return (
-      <div className="flex flex-col gap-1">
-        <div className="flex gap-2 items-center text-sm justify-between">
-          <p className="">QR code:</p>
-          <button
-            type="button"
-            className="flex items-center gap-1 hover:text-primary cursor-pointer text-muted-foreground"
-          >
-            <RefreshCwIcon className="w-3 h-3 shrink-0" />
-            <p>Làm mới</p>
-          </button>
-        </div>
-        {!totp ? (
-          <button
-            onClick={() => mutate()}
-            className="cursor-pointer h-[200px] w-[200px] border border-primary text-sm text-center text-primary"
-          >
-            {isPending ? (
-              <span>
-                <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline mr-2" />
-                Loading ...
-              </span>
-            ) : (
-              <span className="align-middle h-full">Hiển thị mã QR</span>
-            )}
-          </button>
-        ) : (
-          <Image
-            src={totp.qrCodeUrl}
-            alt="MFA QR code"
-            width={200}
-            height={200}
-            className="border border-primary"
-          />
-        )}
-      </div>
-    );
-  } else {
-    return (
-      <div className="flex items-center gap-1">
-        <p>Khóa bí mật: </p>
-        <button
-          type="button"
-          className="flex items-center gap-1 text-sm hover:text-primary cursor-pointer"
-        >
-          <CopyIcon className="w-3 h-3 shrink-0" />
-          <p>sao chép</p>
-        </button>
-        <button
-          type="button"
-          className="flex items-center gap-1 text-sm hover:text-primary cursor-pointer"
-        >
-          <RefreshCwIcon className="w-3 h-3 shrink-0" />
-          <p>Làm mới</p>
-        </button>
-      </div>
-    );
-  }
-};
-
-const QRView1 = () => {
-  const { viewMode, totp } = useMFA();
-
-  return (
-    <div className="">
-      <Image
-        src={totp!.qrCodeUrl}
-        alt="MFA QR code"
-        width={150}
-        height={150}
-        className="border border-primary rounded-md"
-      />
-      <p>hoặc nhập mã theo cách thủ công</p>
-      <div>
-        <p>{totp?.base32}</p>
-      </div>
-    </div>
-  );
-};
-
 const StepTwo = () => {
-  const { totp, handleOpenModal, handleCheckSwitch, back, handleTOTP } =
+  const { totp, handleOpenModal, handleCheckSwitch, back, next, handleTOTP } =
     useMFA();
 
   const [codes, setCodes] = React.useState<string[]>(["", ""]);
@@ -409,8 +264,13 @@ const StepTwo = () => {
     mutationFn: async () => {
       return await createMFAAction(codes);
     },
-    onSuccess(data) {
-      console.log(data);
+    onSuccess({ data, message }) {
+      if (data) {
+        console.log(data);
+        next();
+      } else {
+        toast.error(message);
+      }
     },
   });
 
@@ -425,8 +285,13 @@ const StepTwo = () => {
     back();
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    mutate();
+  };
+
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
           <div className="hidden sm:block size-16 mx-auto rounded-full bg-muted">
@@ -469,7 +334,7 @@ const StepTwo = () => {
             <div className="inline-flex items-center gap-2 border h-9 px-3 py-1 overflow-hidden rounded-md max-w-[430px]">
               <KeyRoundIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
               <p className="select-none truncate w-full h-full text-muted-foreground font-semibold focus-visible:outline-0 focus-visible:ring-0">
-                {totp!.base32}
+                {totp?.base32}
               </p>
               <button
                 type="button"
@@ -503,6 +368,7 @@ const StepTwo = () => {
                 <div className="w-full">
                   <Input
                     id="code1"
+                    required
                     value={codes[0]}
                     onChange={(e) => {
                       setCodes((prev) => [e.target.value, prev[1]]);
@@ -522,6 +388,7 @@ const StepTwo = () => {
                 </Label>
                 <Input
                   id="code2"
+                  required
                   value={codes[1]}
                   onChange={(e) => {
                     setCodes((prev) => [prev[0], e.target.value]);
@@ -549,15 +416,19 @@ const StepTwo = () => {
         >
           Trở về
         </Button>
-        <Button>
-          {/* {isPending ? (
+        <Button className="cursor-pointer">
+          {isPending ? (
             <LoaderCircleIcon className="size-4 animate-spin" />
-          ) : null} */}
+          ) : null}
           <p>Liên kết</p>
         </Button>
       </div>
     </form>
   );
+};
+
+const StepThree = () => {
+  return <div>ádsa</div>;
 };
 
 const MFAHeader = () => {
@@ -594,52 +465,14 @@ const MFAHeader = () => {
 
 const MFABody = () => {
   const { step } = useMFA();
-
   if (step == 1) return <StepOne />;
   if (step == 2) return <StepTwo />;
+  if (step == 3) return <StepThree />;
   return null;
 };
 
-const MFAFooter = () => {
-  const {
-    step,
-    next,
-    deviceName,
-    back,
-    handleOpenModal,
-    handleCheckSwitch,
-    handleReset,
-  } = useMFA();
-
-  return (
-    <AlertDialogFooter>
-      <AlertDialogCancel
-        onClick={() => {
-          handleOpenModal(false);
-          if (step != 3) {
-            handleCheckSwitch(false);
-          }
-          handleReset();
-        }}
-      >
-        Huỷ
-      </AlertDialogCancel>
-      {step > MIN_STEP ? (
-        <AlertDialogCancel onClick={back}>Trở về</AlertDialogCancel>
-      ) : null}
-      <AlertDialogAction
-        disabled={step == 1 && deviceName.length == 0}
-        onClick={next}
-      >
-        {step == MAX_STEP ? "Đóng" : "Tiếp tục"}
-      </AlertDialogAction>
-    </AlertDialogFooter>
-  );
-};
-
-const MFAContainer = () => {
-  const { isOpenModal, handleOpenModal, isCheckedSwitch, handleCheckSwitch } =
-    useMFA();
+export const MFAContainer = () => {
+  const { isOpenModal, isCheckedSwitch, handleCheckSwitch } = useMFA();
 
   return (
     <AlertDialog open={isOpenModal}>
@@ -651,17 +484,8 @@ const MFAContainer = () => {
       <AlertDialogContent className="sm:max-w-[calc(100%-2rem)] lg:max-w-3xl">
         <MFAHeader />
         <MFABody />
-        {/* <MFAFooter /> */}
       </AlertDialogContent>
     </AlertDialog>
-  );
-};
-
-const MFAModal = ({ mfa }: { mfa?: MFA }) => {
-  return (
-    <MFAProvider mfa={mfa}>
-      <MFAContainer />
-    </MFAProvider>
   );
 };
 
@@ -1087,5 +911,3 @@ const MFASwitch = () => {
     </AlertDialog>
   );
 };
-
-export default MFAModal;

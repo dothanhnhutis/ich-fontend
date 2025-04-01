@@ -35,21 +35,16 @@ import { toast } from "sonner";
 import { MFA, TOTPAuth } from "@/data/user";
 import { createMFAAction, setupMFAAction } from "../actions";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 type MFAContext = {
-  viewMode: "qr-code" | "secret-key";
   step: number;
   isOpenModal: boolean;
   isCheckedSwitch: boolean;
-  deviceName: string;
-  isDeviceNameError: boolean;
   totp: TOTPAuth | null;
   handleTOTP: (totp: TOTPAuth | null) => void;
-  handleDeviceName: (deviceName: string) => void;
   handleOpenModal: (open: boolean) => void;
   handleCheckSwitch: (checked: boolean) => void;
-  handleToggleViewMode: () => void;
-  handleReset: () => void;
   next: () => void;
   back: () => void;
 };
@@ -72,25 +67,11 @@ const MFAProvider = ({
   const [step, setStep] = React.useState<number>(1);
   const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false);
   const [isCheckedSwitch, setIsCheckedSwitch] = React.useState<boolean>(false);
-  const [deviceName, setDeviceName] = React.useState<string>("");
-  const [viewMode, setViewMode] =
-    React.useState<MFAContext["viewMode"]>("qr-code");
 
   const [totp, setTotp] = React.useState<null | TOTPAuth>(null);
 
-  const handleReset = () => {
-    setStep(1);
-    setDeviceName("");
-    setViewMode("qr-code");
-    setTotp(null);
-  };
-
   const handleTOTP = (totp: null | TOTPAuth) => {
     setTotp(totp);
-  };
-
-  const handleToggleViewMode = () => {
-    setViewMode((prev) => (prev == "qr-code" ? "secret-key" : "qr-code"));
   };
 
   const handleNext = React.useCallback(() => {
@@ -114,10 +95,35 @@ const MFAProvider = ({
 
   const handleDeviceName = React.useCallback(
     (deviceName: string) => {
-      setDeviceName(deviceName);
       if (totp) setTotp(null);
     },
     [totp]
+  );
+
+  const contextValue = React.useMemo<MFAContext>(
+    () => ({
+      step,
+      isOpenModal,
+      isCheckedSwitch,
+      totp,
+      handleTOTP,
+      handleCheckSwitch,
+      handleOpenModal,
+      next: handleNext,
+      back: handleBack,
+    }),
+    [step, isOpenModal, isCheckedSwitch, totp, handleNext, handleBack]
+  );
+
+  return <MFAContext value={contextValue}>{children}</MFAContext>;
+};
+
+const StepOne = () => {
+  const { handleCheckSwitch, handleOpenModal, handleTOTP, totp, next } =
+    useMFA();
+
+  const [deviceName, setDeviceName] = React.useState<string>(
+    totp?.deviceName ?? ""
   );
 
   const isDeviceNameError = useMemo(() => {
@@ -133,98 +139,114 @@ const MFAProvider = ({
       : false;
   }, [deviceName]);
 
-  const contextValue = React.useMemo<MFAContext>(
-    () => ({
-      viewMode,
-      step,
-      isOpenModal,
-      isCheckedSwitch,
-      deviceName,
-      totp,
-      handleTOTP,
-      handleDeviceName,
-      handleCheckSwitch,
-      handleOpenModal,
-      next: handleNext,
-      back: handleBack,
-      handleToggleViewMode,
-      isDeviceNameError,
-      handleReset,
-    }),
-    [
-      viewMode,
-      step,
-      isOpenModal,
-      isCheckedSwitch,
-      deviceName,
-      totp,
-      handleNext,
-      handleBack,
-      isDeviceNameError,
-      handleDeviceName,
-    ]
-  );
+  const handleCancel = () => {
+    handleOpenModal(false);
+    handleCheckSwitch(false);
+    if (!!totp) handleTOTP(null);
+  };
 
-  return <MFAContext value={contextValue}>{children}</MFAContext>;
-};
+  const { mutate, isPending } = useMutation({
+    mutationFn: async () => {
+      return await setupMFAAction(deviceName);
+    },
+    onSuccess({ data, message }) {
+      if (data) {
+        handleTOTP(data);
+        next();
+      } else {
+        toast.warning(message);
+      }
+    },
+  });
 
-const StepOne = () => {
-  const { deviceName, handleDeviceName, isDeviceNameError } = useMFA();
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!!totp && totp.deviceName != deviceName) {
+      mutate();
+    } else {
+      next();
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="grid gap-1">
-        <Label htmlFor="deviceName" className="text-sm font-semibold">
-          Tên thiết bị
-        </Label>
-        <div
-          className={cn(
-            "flex items-center gap-2 border rounded-md h-9 px-3 py-1 focus-within:ring-4 focus-within:outline-1 ring-ring/10",
-            isDeviceNameError
-              ? "border-red-500 bg-red-50 outline-red-50 ring-red-50"
-              : ""
-          )}
-        >
-          <input
-            type="text"
-            name="deviceName"
-            id="deviceName"
-            autoComplete="off"
-            autoCapitalize="off"
-            autoCorrect="off"
-            maxLength={128}
+    <form onSubmit={handleSubmit}>
+      <div className="flex flex-col gap-8">
+        <div className="grid gap-1">
+          <Label htmlFor="deviceName" className="text-sm font-semibold">
+            Tên thiết bị
+          </Label>
+          <div
             className={cn(
-              "text-base md:text-sm w-full h-full focus-visible:outline-0 focus-visible:ring-0"
+              "flex items-center gap-2 border rounded-md h-9 px-3 py-1 focus-within:ring-4 focus-within:outline-1 ring-ring/10",
+              isDeviceNameError
+                ? "border-red-500 bg-red-50 outline-red-50 ring-red-50"
+                : ""
             )}
-            value={deviceName}
-            onChange={(e) => {
-              handleDeviceName(e.target.value);
-            }}
-          />
-          <span className="text-muted-foreground text-xs">
-            {deviceName.length}/128
-          </span>
-        </div>
-
-        <p className="text-xs text-muted-foreground">
-          Nhập tên có ý nghĩa để nhận dạng thiết bị này.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Tối đa 128 ký tự không dấu. Hỗ trợ các ký tự +=,.@-_
-        </p>
-      </div>
-
-      <div className="flex items-center gap-2 border p-2 rounded">
-        <MonitorSmartphoneIcon className="size-16" />
-        <div>
-          <p className="text-sm font-medium">Ứng dụng xác thực</p>
+          >
+            <input
+              required
+              type="text"
+              name="deviceName"
+              id="deviceName"
+              autoComplete="off"
+              autoCapitalize="off"
+              autoCorrect="off"
+              maxLength={128}
+              className={cn(
+                "text-base md:text-sm w-full h-full focus-visible:outline-0 focus-visible:ring-0"
+              )}
+              value={deviceName}
+              onChange={(e) => {
+                setDeviceName(e.target.value);
+              }}
+            />
+            <span className="text-muted-foreground text-xs">
+              {deviceName.length}/128
+            </span>
+          </div>
           <p className="text-xs text-muted-foreground">
-            Xác thực bằng mã được tạo bởi ứng dụng được cài đặt trên thiết bị di
-            động hoặc máy tính của bạn
+            Nhập tên có ý nghĩa để nhận dạng thiết bị này.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Tối đa 128 ký tự không dấu. Hỗ trợ các ký tự +=,.@-_
           </p>
         </div>
+        <div className="flex items-center gap-2 border p-2 rounded">
+          <MonitorSmartphoneIcon className="size-16" />
+          <div>
+            <p className="text-sm font-medium">Ứng dụng xác thực</p>
+            <p className="text-xs text-muted-foreground">
+              Xác thực bằng mã được tạo bởi ứng dụng được cài đặt trên thiết bị
+              di động hoặc máy tính của bạn
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <div className="flex gap-2 items-center justify-end mt-4">
+        <Button
+          className="cursor-pointer"
+          type="button"
+          variant="outline"
+          onClick={handleCancel}
+        >
+          Huỷ
+        </Button>
+        <Button
+          className="cursor-pointer"
+          disabled={
+            isDeviceNameError ||
+            isPending ||
+            (!!totp && totp.deviceName != deviceName)
+          }
+        >
+          {isPending ? (
+            <LoaderCircleIcon className="size-4 animate-spin" />
+          ) : null}
+          <p>Tiếp tục</p>
+        </Button>
+      </div>
+    </form>
   );
 };
 
@@ -379,32 +401,11 @@ const QRView1 = () => {
 };
 
 const StepTwo = () => {
-  const { viewMode, handleToggleViewMode, deviceName, totp, handleTOTP } =
+  const { totp, handleOpenModal, handleCheckSwitch, back, handleTOTP } =
     useMFA();
 
   const [codes, setCodes] = React.useState<string[]>(["", ""]);
-
-  const {
-    data: setupMFAData,
-    mutate: setupMFAMutate,
-    isPending: isPendingSetupMFA,
-  } = useMutation({
-    mutationFn: async (deviceName: string) => {
-      return await setupMFAAction(deviceName);
-    },
-    onSuccess({ data }) {
-      if (data) {
-        console.log(data);
-        handleTOTP(data);
-      }
-    },
-  });
-
-  const {
-    data: createMFAData,
-    mutate: createMFAMutate,
-    isPending: isPendingCreateMFA,
-  } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       return await createMFAAction(codes);
     },
@@ -413,140 +414,149 @@ const StepTwo = () => {
     },
   });
 
-  console.log(totp);
+  const handleCancel = () => {
+    handleOpenModal(false);
+    handleCheckSwitch(false);
+    back();
+    handleTOTP(null);
+  };
+
+  const handleBack = () => {
+    back();
+  };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
-        <div className="hidden sm:block size-16 mx-auto rounded-full bg-muted">
-          <p className="text-center">
-            <span className="inline-block align-middle p-5">1</span>
-          </p>
-        </div>
-
-        <div className="col-span-6 sm:col-span-5">
-          <p className="text-muted-foreground text-sm">
-            <span className="sm:hidden">1. </span>
-            Cài đặt ứng dụng tương thích như Google Authenticator, Microsoft
-            Authenticator, Duo Mobile hoặc ứng dụng Authy trên thiết bị di động
-            hoặc máy tính của bạn.
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
-        <div className="hidden sm:block size-16 mx-auto rounded-full bg-muted">
-          <p className="text-center">
-            <span className="inline-block align-middle p-5">2</span>
-          </p>
-        </div>
-        <div className="col-span-6 sm:col-span-5 grid gap-3">
-          <p className="text-muted-foreground text-sm">
-            <span className="sm:hidden">2. </span>
-            Mở ứng dụng xác thực của bạn, chọn{" "}
-            <span className="font-bold text-foreground">
-              Hiển thị mã QR
-            </span>{" "}
-            trên trang này, sau đó sử dụng ứng dụng để quét mã. Ngoài ra, bạn có
-            thể nhập khóa bí mật.
-            <span
-              onClick={handleToggleViewMode}
-              className="ml-1 text-primary cursor-pointer"
-            >
-              {viewMode == "qr-code"
-                ? "Hiển thị khóa bí mật"
-                : "Hiển thị mã QR"}
-            </span>
-          </p>
-
-          <QRView1 />
-          {/* {viewMode == "qr-code" ? (
-            <button
-              onClick={() => setupMFAMutate(deviceName)}
-              className="cursor-pointer size-[200px] border border-primary text-sm text-center text-primary"
-            >
-              {totp ? (
-                <Image
-                  src={totp.qrCodeUrl}
-                  alt="MFA QR code"
-                  width={200}
-                  height={200}
-                />
-              ) : isPendingSetupMFA ? (
-                <span>
-                  <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline mr-2" />
-                  Loading ...
-                </span>
-              ) : (
-                <span className="align-middle h-full">Hiển thị mã QR</span>
-              )}
-            </button>
-          ) : (
-            <p className="font-medium text-sm text-muted-foreground break-words">
-              Khóa bí mật :{" "}
-              {totp ? (
-                <span className="text-foreground text-base">{totp.base32}</span>
-              ) : isPendingSetupMFA ? (
-                <LoaderCircleIcon className="size-5 animate-spin flex-shrink-0 inline" />
-              ) : (
-                <span className="text-primary underline cursor-pointer">
-                  lấy mã
-                </span>
-              )}
+    <form>
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
+          <div className="hidden sm:block size-16 mx-auto rounded-full bg-muted">
+            <p className="text-center">
+              <span className="inline-block align-middle p-5">1</span>
             </p>
-          )} */}
+          </div>
+
+          <div className="col-span-6 sm:col-span-5">
+            <p className="text-muted-foreground text-sm">
+              <span className="sm:hidden">1. </span>
+              Cài đặt ứng dụng tương thích như Google Authenticator, Microsoft
+              Authenticator, Duo Mobile hoặc ứng dụng Authy trên thiết bị di
+              động hoặc máy tính của bạn.
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
-        <div className="hidden sm:block size-16 mx-auto rounded-full bg-muted">
-          <p className="text-center">
-            <span className="inline-block align-middle p-5">3</span>
-          </p>
+
+        <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
+          <div className="hidden sm:block size-16 mx-auto rounded-full bg-muted">
+            <p className="text-center">
+              <span className="inline-block align-middle p-5">2</span>
+            </p>
+          </div>
+          <div className="col-span-6 sm:col-span-5 grid gap-3">
+            <p className="text-muted-foreground text-sm">
+              <span className="sm:hidden">2. </span>
+              Mở ứng dụng xác thực của bạn để quét mã QR.
+            </p>
+            <Image
+              src={totp?.qrCodeUrl || ""}
+              alt="MFA QR code"
+              width={150}
+              height={150}
+              className="border border-primary rounded-md"
+            />
+            <p className="text-muted-foreground text-sm">
+              Hoặc nhập mã theo cách thủ công
+            </p>
+            <div className="inline-flex items-center gap-2 border h-9 px-3 py-1 overflow-hidden rounded-md max-w-[430px]">
+              <KeyRoundIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <p className="select-none truncate w-full h-full text-muted-foreground font-semibold focus-visible:outline-0 focus-visible:ring-0">
+                {totp!.base32}
+              </p>
+              <button
+                type="button"
+                className="text-muted-foreground cursor-pointer"
+                onClick={() => {
+                  window.navigator.clipboard.writeText(totp?.base32 || "");
+                  toast.info(`Sao chép thành công khoá bí mật.`);
+                }}
+              >
+                <CopyIcon className="h-4 w-4 shrink-0" />
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="col-span-6 sm:col-span-5">
-          <p className="text-muted-foreground text-sm">
-            <span className="sm:hidden">3. </span>
-            Nhập mã từ ứng dụng xác thực của bạn.
-          </p>
-          <div className="grid gap-2 py-2 sm:max-w-1/2">
-            <div className="flex items-center gap-4">
-              <Label htmlFor="code1" className="text-right text-sm shrink-0">
-                Mã 1
-              </Label>
-              <div className="w-full">
+        <div className="grid grid-cols-6 items-center border-b last:border-none py-3">
+          <div className="hidden sm:block size-16 mx-auto rounded-full bg-muted">
+            <p className="text-center">
+              <span className="inline-block align-middle p-5">3</span>
+            </p>
+          </div>
+          <div className="col-span-6 sm:col-span-5">
+            <p className="text-muted-foreground text-sm">
+              <span className="sm:hidden">3. </span>
+              Nhập mã từ ứng dụng xác thực của bạn.
+            </p>
+            <div className="grid gap-2 py-2 sm:max-w-1/2">
+              <div className="flex items-center gap-4">
+                <Label htmlFor="code1" className="text-right text-sm shrink-0">
+                  Mã 1
+                </Label>
+                <div className="w-full">
+                  <Input
+                    id="code1"
+                    value={codes[0]}
+                    onChange={(e) => {
+                      setCodes((prev) => [e.target.value, prev[1]]);
+                    }}
+                    placeholder="123456"
+                    maxLength={6}
+                  />
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Chờ 30s để nhập mã thứ 2
+              </p>
+
+              <div className="flex items-center gap-4">
+                <Label htmlFor="code2" className="text-right text-sm shrink-0">
+                  Mã 2
+                </Label>
                 <Input
-                  id="code1"
-                  value={codes[0]}
+                  id="code2"
+                  value={codes[1]}
                   onChange={(e) => {
-                    setCodes((prev) => [e.target.value, prev[1]]);
+                    setCodes((prev) => [prev[0], e.target.value]);
                   }}
                   placeholder="123456"
                   maxLength={6}
                 />
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Chờ 30s để nhập mã thứ 2
-            </p>
-
-            <div className="flex items-center gap-4">
-              <Label htmlFor="code2" className="text-right text-sm shrink-0">
-                Mã 2
-              </Label>
-              <Input
-                id="code2"
-                value={codes[1]}
-                onChange={(e) => {
-                  setCodes((prev) => [prev[0], e.target.value]);
-                }}
-                placeholder="123456"
-                maxLength={6}
-              />
-            </div>
           </div>
         </div>
       </div>
-    </div>
+      <div className="flex gap-2 items-center justify-end mt-4">
+        <Button
+          variant="outline"
+          className="cursor-pointer"
+          onClick={handleCancel}
+        >
+          Huỷ
+        </Button>
+        <Button
+          variant="outline"
+          className="cursor-pointer"
+          onClick={handleBack}
+        >
+          Trở về
+        </Button>
+        <Button>
+          {/* {isPending ? (
+            <LoaderCircleIcon className="size-4 animate-spin" />
+          ) : null} */}
+          <p>Liên kết</p>
+        </Button>
+      </div>
+    </form>
   );
 };
 
@@ -595,7 +605,6 @@ const MFAFooter = () => {
     step,
     next,
     deviceName,
-    isDeviceNameError,
     back,
     handleOpenModal,
     handleCheckSwitch,
@@ -619,7 +628,7 @@ const MFAFooter = () => {
         <AlertDialogCancel onClick={back}>Trở về</AlertDialogCancel>
       ) : null}
       <AlertDialogAction
-        disabled={step == 1 && (deviceName.length == 0 || isDeviceNameError)}
+        disabled={step == 1 && deviceName.length == 0}
         onClick={next}
       >
         {step == MAX_STEP ? "Đóng" : "Tiếp tục"}
@@ -639,10 +648,10 @@ const MFAContainer = () => {
         checked={isCheckedSwitch}
         onCheckedChange={handleCheckSwitch}
       />
-      <AlertDialogContent className="sm:max-w-[calc(100%-2rem)] md:max-w-2xl">
+      <AlertDialogContent className="sm:max-w-[calc(100%-2rem)] lg:max-w-3xl">
         <MFAHeader />
         <MFABody />
-        <MFAFooter />
+        {/* <MFAFooter /> */}
       </AlertDialogContent>
     </AlertDialog>
   );

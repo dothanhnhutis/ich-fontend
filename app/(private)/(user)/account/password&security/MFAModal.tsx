@@ -190,6 +190,7 @@ const StepOne = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!!totp && totp.deviceName == deviceName) {
       next();
     } else {

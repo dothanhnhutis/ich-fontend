@@ -30,6 +30,7 @@ export type TOTPAuth = {
   oauthUrl: string;
   deviceName: string;
   qrCodeUrl: string;
+  createdAt: Date;
 };
 
 type Avatar = {
@@ -223,6 +224,30 @@ export const getMFA = async () => {
       message: string;
       data: MFA;
     }>("/mfa", {
+      headers: await getHeaders(),
+    });
+    return data;
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof FetchError) {
+      errMes = error.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    console.log(errMes);
+    return null;
+  }
+};
+
+export const getSetupMFA = async () => {
+  try {
+    const {
+      data: { data },
+    } = await middlewareAPI.get<{
+      success: boolean;
+      message: string;
+      data: TOTPAuth;
+    }>("/setup-mfa", {
       headers: await getHeaders(),
     });
     return data;

@@ -29,16 +29,17 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { cn } from "@/lib/utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
-import { MFA, TOTPAuth } from "@/data/user";
-import { createMFAAction, setupMFAAction } from "../actions";
+import { getSetupMFA, MFA, TOTPAuth } from "@/data/user";
+import { createMFAAction, getSetupMFAAction, setupMFAAction } from "../actions";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/hooks/use-store";
 
 type MFAContext = {
+  mFAData?: MFA;
   step: number;
   isOpenModal: boolean;
   isCheckedSwitch: boolean;
@@ -65,11 +66,12 @@ export const MFAProvider = ({
   children,
   mfa,
 }: Readonly<{ children: React.ReactNode; mfa?: MFA }>) => {
-  const [step, setStep] = React.useState<number>(mfa ? 3 : 1);
-  const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false);
+  const [step, setStep] = React.useState<number>(mfa ? 4 : 1);
+  const [isOpenModal, setIsOpenModal] = React.useState<boolean>(true);
   const [isCheckedSwitch, setIsCheckedSwitch] = React.useState<boolean>(!!mfa);
-
   const [totp, setTotp] = React.useState<null | TOTPAuth>(null);
+
+  const [mFAData, setMFAData] = React.useState<MFA | undefined>(mfa);
 
   const handleTOTP = (totp: null | TOTPAuth) => {
     setTotp(totp);
@@ -94,15 +96,9 @@ export const MFAProvider = ({
     setIsOpenModal(open);
   };
 
-  const handleDeviceName = React.useCallback(
-    (deviceName: string) => {
-      if (totp) setTotp(null);
-    },
-    [totp]
-  );
-
   const contextValue = React.useMemo<MFAContext>(
     () => ({
+      mFAData,
       step,
       isOpenModal,
       isCheckedSwitch,
@@ -123,11 +119,41 @@ const StepOne = () => {
   const { handleCheckSwitch, handleOpenModal, handleTOTP, totp, next } =
     useMFA();
 
-  const [mfaStore, setMFAStore] = useStore("mfa");
-
   const [deviceName, setDeviceName] = React.useState<string>(
     totp?.deviceName ?? ""
   );
+
+  const { data } = useQuery({
+    queryKey: ["mfa"],
+    queryFn: async () => {
+      return await getSetupMFAAction();
+    },
+  });
+  console.log(data);
+
+  const [countDown, setCountDown] = React.useState<number>(0);
+  React.useEffect(() => {
+    let timerId: NodeJS.Timeout;
+
+    if (totp && totp.deviceName != deviceName) {
+      timerId = setInterval(() => {
+        const createdAt = new Date(totp.createdAt);
+        const timeLeft = Math.ceil(
+          (createdAt.getTime() - Date.now() + 60000) / 1000
+        );
+        if (timeLeft > 0) {
+          setCountDown(timeLeft);
+        } else {
+          setCountDown(0);
+          clearInterval(timerId);
+        }
+      });
+    } else {
+      setCountDown(0);
+    }
+
+    return () => clearInterval(timerId);
+  }, [countDown, deviceName, totp]);
 
   const isDeviceNameError = useMemo(() => {
     return deviceName.length > 0
@@ -154,11 +180,6 @@ const StepOne = () => {
     },
     onSuccess({ data, message }) {
       if (data) {
-        setMFAStore(
-          JSON.stringify({
-            deviceName: new Date(),
-          })
-        );
         handleTOTP(data);
         next();
       } else {
@@ -243,12 +264,15 @@ const StepOne = () => {
         </Button>
         <Button
           className="cursor-pointer"
-          disabled={isDeviceNameError || isPending}
+          disabled={isDeviceNameError || isPending || countDown > 0}
         >
           {isPending ? (
             <LoaderCircleIcon className="size-4 animate-spin" />
           ) : null}
-          <p>Tiếp tục</p>
+
+          <p>
+            {countDown > 0 ? <span>{`(${countDown}) `}</span> : null}Tiếp tục
+          </p>
         </Button>
       </div>
     </form>
@@ -428,7 +452,70 @@ const StepTwo = () => {
 };
 
 const StepThree = () => {
-  return <div>ádsa</div>;
+  const { mFAData } = useMFA();
+
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="text-muted-foreground text-center">
+        Mã dự phòng giúp đăng nhập khi không có thiết bị xác thực.
+      </p>
+      {mFAData ? (
+        <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
+          {mFAData.backupCode.map((code, idx) => (
+            <div
+              key={idx}
+              className={cn(
+                "flex items-center justify-center py-2",
+                mFAData.codeExpires.includes(code)
+                  ? "line-through text-muted-foreground"
+                  : ""
+              )}
+            >
+              {code}
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-end gap-1 mt-4">
+        <Button variant="outline">Đóng</Button>
+      </div>
+    </div>
+  );
+};
+
+const DisableMFA = () => {
+  const { mFAData } = useMFA();
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="text-muted-foreground text-center sm:text-left">
+        Mã dự phòng giúp đăng nhập khi không có thiết bị xác thực.
+      </p>
+      {mFAData ? (
+        <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
+          {mFAData.backupCode.map((code, idx) => (
+            <div
+              key={idx}
+              className={cn(
+                "flex items-center justify-center py-2",
+                mFAData.codeExpires.includes(code)
+                  ? "line-through text-muted-foreground"
+                  : ""
+              )}
+            >
+              {code}
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-end gap-1 mt-4">
+        <Button variant="destructive">Tắt MFA</Button>
+        <Button>Tạo mã mới</Button>
+        <Button variant="outline">Đóng</Button>
+      </div>
+    </div>
+  );
 };
 
 const MFAHeader = () => {
@@ -438,37 +525,50 @@ const MFAHeader = () => {
     <AlertDialogHeader>
       <AlertDialogTitle>Xác thực đa yếu tố (MFA)</AlertDialogTitle>
       <AlertDialogDescription className="hidden"></AlertDialogDescription>
-      <Breadcrumb>
-        <BreadcrumbList className="flex-nowrap justify-center sm:justify-start">
-          <BreadcrumbItem
-            className={cn(step == 1 ? "font-normal text-foreground" : "")}
-          >
-            Bước 1: Nhập tên thiết bị
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem
-            className={cn(step == 2 ? "font-normal text-foreground" : "")}
-          >
-            Bước 2: Thiết lập liên kết
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem
-            className={cn(step == 3 ? "font-normal text-foreground" : "")}
-          >
-            Bước 3: Hoàn thành
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      {step != 4 ? (
+        <Breadcrumb>
+          <BreadcrumbList className="flex-nowrap justify-center sm:justify-start">
+            <BreadcrumbItem
+              className={cn(step == 1 ? "font-normal text-foreground" : "")}
+            >
+              Bước 1: Nhập tên thiết bị
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem
+              className={cn(step == 2 ? "font-normal text-foreground" : "")}
+            >
+              Bước 2: Thiết lập liên kết
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem
+              className={cn(step == 3 ? "font-normal text-foreground" : "")}
+            >
+              Bước 3: Hoàn thành
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      ) : null}
     </AlertDialogHeader>
   );
 };
 
 const MFABody = () => {
   const { step } = useMFA();
-  if (step == 1) return <StepOne />;
-  if (step == 2) return <StepTwo />;
-  if (step == 3) return <StepThree />;
-  return null;
+
+  return (
+    <AlertDialogContent className="sm:max-w-[calc(100%-2rem)] lg:max-w-3xl">
+      <MFAHeader />
+      {step == 1 ? (
+        <StepOne />
+      ) : step == 2 ? (
+        <StepTwo />
+      ) : step == 3 ? (
+        <StepThree />
+      ) : step == 4 ? (
+        <DisableMFA />
+      ) : null}
+    </AlertDialogContent>
+  );
 };
 
 export const MFAContainer = () => {
@@ -481,10 +581,7 @@ export const MFAContainer = () => {
         checked={isCheckedSwitch}
         onCheckedChange={handleCheckSwitch}
       />
-      <AlertDialogContent className="sm:max-w-[calc(100%-2rem)] lg:max-w-3xl">
-        <MFAHeader />
-        <MFABody />
-      </AlertDialogContent>
+      <MFABody />
     </AlertDialog>
   );
 };

@@ -1,6 +1,12 @@
 "use server";
 
-import { createMFA, deleteSessionById, getMFA, setupMFA } from "@/data/user";
+import {
+  createMFA,
+  deleteSessionById,
+  getMFA,
+  getSetupMFA,
+  setupMFA,
+} from "@/data/user";
 
 export async function deleteSessionByIdAction(sessionId: string) {
   return await deleteSessionById(sessionId);
@@ -16,4 +22,8 @@ export async function createMFAAction(codes: string[]) {
 
 export async function getMFAAction() {
   return await getMFA();
+}
+
+export async function getSetupMFAAction() {
+  return await getSetupMFA();
 }

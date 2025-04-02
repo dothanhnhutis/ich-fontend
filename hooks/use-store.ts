@@ -1,3 +1,4 @@
+"use client";
 export function useStore(key: string): [string | null, (data: string) => void] {
   const data: string | null =
     typeof window != "undefined" ? window.localStorage.getItem(key) : null;

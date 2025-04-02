@@ -61,6 +61,15 @@ const useMFA = () => {
 const MAX_STEP = 3;
 const MIN_STEP = 1;
 
+function isValidJSON(jsonString: string) {
+  try {
+    const parsed = JSON.parse(jsonString);
+    return typeof parsed === "object" && parsed !== null;
+  } catch {
+    return false;
+  }
+}
+
 export const MFAProvider = ({
   children,
   mfa,
@@ -156,7 +165,7 @@ const StepOne = () => {
       if (data) {
         setMFAStore(
           JSON.stringify({
-            deviceName: new Date(),
+            [deviceName]: new Date(),
           })
         );
         handleTOTP(data);
@@ -167,11 +176,21 @@ const StepOne = () => {
     },
   });
 
+  const isExistsKey = React.useMemo(() => {
+    console.log(mfaStore && isValidJSON(mfaStore));
+    const data = mfaStore && isValidJSON(mfaStore) ? JSON.parse(mfaStore) : {};
+    return data[deviceName]
+      ? Date.now() - new Date(data[deviceName]).getTime() > 60000
+      : false;
+  }, []);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!!totp && totp.deviceName == deviceName) {
       next();
     } else {
+      console.log(isExistsKey);
       mutate();
     }
   };

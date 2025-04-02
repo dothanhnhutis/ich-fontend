@@ -9,8 +9,9 @@ import { useRouter } from "next/navigation";
 import { LogInDataType } from "@/data/auth";
 import PasswordInput from "@/components/password-input";
 import { logInAction } from "../actions";
+import Link from "next/link";
 
-export const LoginForm = () => {
+const SignInForm = () => {
   const router = useRouter();
   const [formData, setFormData] = React.useState<LogInDataType>({
     email: "",
@@ -80,12 +81,12 @@ export const LoginForm = () => {
           <div className="grid gap-2">
             <div className="flex items-center">
               <Label htmlFor="password">Mật khẩu</Label>
-              <a
+              <Link
                 href="#"
                 className="ml-auto text-sm underline-offset-4 hover:underline"
               >
                 Quên mật khẩu?
-              </a>
+              </Link>
             </div>
             <PasswordInput
               id="password"
@@ -112,7 +113,7 @@ export const LoginForm = () => {
         </div>
         <div className="text-center text-sm">
           Không có tài khoản?{" "}
-          <a href="#" className="underline underline-offset-4">
+          <a href="/signup" className="underline underline-offset-4">
             Đăng ký
           </a>
         </div>
@@ -120,3 +121,5 @@ export const LoginForm = () => {
     </form>
   );
 };
+
+export default SignInForm;

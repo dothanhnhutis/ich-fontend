@@ -1,8 +1,8 @@
 import React from "react";
 import ResetPasswordForm from "./form";
 import { verifyJWT } from "@/lib/utils";
-import envs from "@/configs/envs";
 import { UserToken } from "@/schema/user.schema";
+import env from "@/configs/env";
 
 const ResetPasswordPage = ({
   searchParams,
@@ -21,7 +21,7 @@ const ResetPasswordPage = ({
   if (!token) {
     return expiredElement;
   }
-  const data = verifyJWT<UserToken>(token, envs.NEXT_PUBLIC_JWT_SECRET, {
+  const data = verifyJWT<UserToken>(token, env.NEXT_PUBLIC_JWT_SECRET, {
     ignoreExpiration: false,
   });
   if (!data || data.type != "recover") return expiredElement;

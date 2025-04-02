@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { mainFetch } from "@/lib/custom-fetch";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { useMutation } from "@tanstack/react-query";
 import { LoaderCircleIcon, OctagonAlertIcon } from "lucide-react";

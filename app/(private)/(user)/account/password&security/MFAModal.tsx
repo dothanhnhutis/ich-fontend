@@ -39,7 +39,7 @@ import { Button } from "@/components/ui/button";
 import { useStore } from "@/hooks/use-store";
 
 type MFAContext = {
-  mFAData?: MFA;
+  mFAData: MFA | null;
   step: number;
   isOpenModal: boolean;
   isCheckedSwitch: boolean;
@@ -47,6 +47,8 @@ type MFAContext = {
   handleTOTP: (totp: TOTPAuth | null) => void;
   handleOpenModal: (open: boolean) => void;
   handleCheckSwitch: (checked: boolean) => void;
+  handleMFA: (mfa: MFA | null) => void;
+  handleDisableMFA: () => void;
   next: () => void;
   back: () => void;
 };
@@ -67,11 +69,23 @@ export const MFAProvider = ({
   mfa,
 }: Readonly<{ children: React.ReactNode; mfa?: MFA }>) => {
   const [step, setStep] = React.useState<number>(mfa ? 4 : 1);
-  const [isOpenModal, setIsOpenModal] = React.useState<boolean>(true);
+  const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false);
   const [isCheckedSwitch, setIsCheckedSwitch] = React.useState<boolean>(!!mfa);
   const [totp, setTotp] = React.useState<null | TOTPAuth>(null);
 
-  const [mFAData, setMFAData] = React.useState<MFA | undefined>(mfa);
+  const [mFAData, setMFAData] = React.useState<MFA | null>(mfa || null);
+
+  React.useEffect(() => {
+    const loadSetupMFA = async () => {
+      const totp = await getSetupMFAAction();
+      if (totp) setTotp(totp);
+    };
+    loadSetupMFA();
+  }, [isOpenModal]);
+
+  const handleMFA = (mfa: MFA | null) => {
+    setMFAData(mfa);
+  };
 
   const handleTOTP = (totp: null | TOTPAuth) => {
     setTotp(totp);
@@ -85,11 +99,17 @@ export const MFAProvider = ({
     setStep(step > MIN_STEP ? step - 1 : step);
   }, [step]);
 
+  const handleDisableMFA = () => {
+    setStep(5);
+  };
+
   const handleCheckSwitch = (checked: boolean) => {
     if (checked) {
       setIsOpenModal(true);
+      setIsCheckedSwitch(checked);
+    } else {
+      setIsOpenModal(true);
     }
-    setIsCheckedSwitch(checked);
   };
 
   const handleOpenModal = (open: boolean) => {
@@ -106,10 +126,12 @@ export const MFAProvider = ({
       handleTOTP,
       handleCheckSwitch,
       handleOpenModal,
+      handleMFA,
       next: handleNext,
       back: handleBack,
+      handleDisableMFA,
     }),
-    [step, isOpenModal, isCheckedSwitch, totp, handleNext, handleBack]
+    [mFAData, step, isOpenModal, isCheckedSwitch, totp, handleNext, handleBack]
   );
 
   return <MFAContext value={contextValue}>{children}</MFAContext>;
@@ -122,14 +144,6 @@ const StepOne = () => {
   const [deviceName, setDeviceName] = React.useState<string>(
     totp?.deviceName ?? ""
   );
-
-  const { data } = useQuery({
-    queryKey: ["mfa"],
-    queryFn: async () => {
-      return await getSetupMFAAction();
-    },
-  });
-  console.log(data);
 
   const [countDown, setCountDown] = React.useState<number>(0);
   React.useEffect(() => {
@@ -281,8 +295,15 @@ const StepOne = () => {
 };
 
 const StepTwo = () => {
-  const { totp, handleOpenModal, handleCheckSwitch, back, next, handleTOTP } =
-    useMFA();
+  const {
+    totp,
+    handleOpenModal,
+    handleCheckSwitch,
+    back,
+    next,
+    handleTOTP,
+    handleMFA,
+  } = useMFA();
 
   const [codes, setCodes] = React.useState<string[]>(["", ""]);
   const { mutate, isPending } = useMutation({
@@ -291,7 +312,7 @@ const StepTwo = () => {
     },
     onSuccess({ data, message }) {
       if (data) {
-        console.log(data);
+        handleMFA(data);
         next();
       } else {
         toast.error(message);
@@ -457,11 +478,11 @@ const StepThree = () => {
 
   return (
     <div className="flex flex-col gap-1">
-      <p className="text-muted-foreground text-center">
+      <p className="text-muted-foreground text-center sm:text-left">
         Mã dự phòng giúp đăng nhập khi không có thiết bị xác thực.
       </p>
       {mFAData ? (
-        <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
+        <div className="grid grid-cols-4 sm:grid-cols-5 gap-1 mt-3">
           {mFAData.backupCode.map((code, idx) => (
             <div
               key={idx}
@@ -478,7 +499,7 @@ const StepThree = () => {
         </div>
       ) : null}
 
-      <div className="flex items-center justify-end gap-1 mt-4">
+      <div className="flex items-center justify-end gap-2 mt-4">
         <Button variant="outline">Đóng</Button>
       </div>
     </div>
@@ -486,7 +507,33 @@ const StepThree = () => {
 };
 
 const DisableMFA = () => {
-  const { mFAData } = useMFA();
+  const { back } = useMFA();
+
+  return (
+    <div>
+      <p className="text-sm text-muted-foreground">
+        Bạn sắp tắt xác thực hai yếu tố (MFA). Điều này có thể làm giảm tính bảo
+        mật của tài khoản. Bạn có chắc chắn muốn tiếp tục?
+      </p>
+      <div className="flex flex-col min-[412px]:flex-row gap-2 items-center  justify-end mt-4 [&>button]:cursor-pointer">
+        <Button className="w-full min-[412px]:w-auto" variant={"destructive"}>
+          Tắt
+        </Button>
+        <Button
+          className="w-full min-[412px]:w-auto"
+          onClick={back}
+          variant={"outline"}
+        >
+          Huỷ
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const DetailMFA = () => {
+  const { mFAData, handleOpenModal, handleDisableMFA } = useMFA();
+
   return (
     <div className="flex flex-col gap-1">
       <p className="text-muted-foreground text-center sm:text-left">
@@ -510,10 +557,24 @@ const DisableMFA = () => {
         </div>
       ) : null}
 
-      <div className="flex items-center justify-end gap-1 mt-4">
-        <Button variant="destructive">Tắt MFA</Button>
-        <Button>Tạo mã mới</Button>
-        <Button variant="outline">Đóng</Button>
+      <div className="flex flex-col min-[412px]:flex-row items-center justify-end gap-2 mt-4 [&>button]:cursor-pointer">
+        <Button
+          variant="destructive"
+          className="w-full min-[412px]:w-auto"
+          onClick={handleDisableMFA}
+        >
+          Tắt MFA
+        </Button>
+        <Button className="w-full min-[412px]:w-auto">Tạo mã mới</Button>
+        <Button
+          variant="outline"
+          className="w-full min-[412px]:w-auto"
+          onClick={() => {
+            handleOpenModal(false);
+          }}
+        >
+          Đóng
+        </Button>
       </div>
     </div>
   );
@@ -526,23 +587,23 @@ const MFAHeader = () => {
     <AlertDialogHeader>
       <AlertDialogTitle>Xác thực đa yếu tố (MFA)</AlertDialogTitle>
       <AlertDialogDescription className="hidden"></AlertDialogDescription>
-      {step != 4 ? (
+      {step < 4 ? (
         <Breadcrumb>
           <BreadcrumbList className="flex-nowrap justify-center sm:justify-start">
             <BreadcrumbItem
-              className={cn(step == 1 ? "font-normal text-foreground" : "")}
+              className={cn(step == 1 ? "text-foreground font-semibold" : "")}
             >
               Bước 1: Nhập tên thiết bị
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem
-              className={cn(step == 2 ? "font-normal text-foreground" : "")}
+              className={cn(step == 2 ? "text-foreground font-semibold" : "")}
             >
               Bước 2: Thiết lập liên kết
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem
-              className={cn(step == 3 ? "font-normal text-foreground" : "")}
+              className={cn(step == 3 ? "text-foreground font-semibold" : "")}
             >
               Bước 3: Hoàn thành
             </BreadcrumbItem>
@@ -557,7 +618,14 @@ const MFABody = () => {
   const { step } = useMFA();
 
   return (
-    <AlertDialogContent className="sm:max-w-[calc(100%-2rem)] lg:max-w-3xl">
+    <AlertDialogContent
+      className={cn(
+        "p-3 min-[412px]:p-6",
+        step == 5
+          ? "max-w-[calc(100%-2rem)] sm:max-w-sm"
+          : "sm:max-w-[calc(100%-2rem)] lg:max-w-3xl"
+      )}
+    >
       <MFAHeader />
       {step == 1 ? (
         <StepOne />
@@ -566,6 +634,8 @@ const MFABody = () => {
       ) : step == 3 ? (
         <StepThree />
       ) : step == 4 ? (
+        <DetailMFA />
+      ) : step == 5 ? (
         <DisableMFA />
       ) : null}
     </AlertDialogContent>

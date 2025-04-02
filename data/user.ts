@@ -190,7 +190,7 @@ export const createMFA = async (codes: string[]) => {
     const { data } = await middlewareAPI.post<{
       success: boolean;
       message: string;
-      data: any;
+      data: MFA;
     }>(
       `/mfa`,
       { codes },
@@ -260,5 +260,35 @@ export const getSetupMFA = async () => {
     }
     console.log(errMes);
     return null;
+  }
+};
+
+export const deleteMFA = async (codes: string[]) => {
+  try {
+    const { data } = await middlewareAPI.delete<{
+      success: boolean;
+      message: string;
+      data: MFA;
+    }>(
+      `/mfa`,
+      { codes },
+      {
+        headers: await getHeaders(),
+      }
+    );
+    return data;
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof FetchError) {
+      errMes = error.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    console.log(errMes);
+    return {
+      success: false,
+      message: errMes,
+      data: null,
+    };
   }
 };

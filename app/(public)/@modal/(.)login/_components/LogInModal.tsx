@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { LoginForm } from "@/app/(public)/_components/forms/login";
+import SignInForm from "@/app/(public)/_components/forms/signin-form";
 
 const LogInModal = () => {
   const router = useRouter();
@@ -44,7 +44,7 @@ const LogInModal = () => {
             Đăng nhập bằng tài khoản Google của bạn
           </DialogDescription>
         </DialogHeader>
-        <LoginForm />
+        <SignInForm />
         <DialogFooter>
           <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary  ">
             Bằng cách nhấp vào tiếp tục, bạn đồng ý với{" "}

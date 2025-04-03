@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button";
 import { EllipsisIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { useUser } from "@/app/(private)/user-provider";
 import { Session } from "@/data/user";
 import { useMutation } from "@tanstack/react-query";
 import { deleteSessionByIdAction } from "../actions";
 
-const ipSchema = z.string().ip({ version: "v4" });
+const ipSchema = z.union([
+  z.string().ip({ version: "v4" }),
+  z.string().ip({ version: "v6" }),
+]);
 
 const SessionItem = ({
   session,
@@ -21,8 +23,6 @@ const SessionItem = ({
   session: Session;
   isCurrentSession: boolean;
 }) => {
-  const router = useRouter();
-
   const { isPending, mutate } = useMutation({
     mutationFn: async (sessionId: string) => {
       return await deleteSessionByIdAction(sessionId);
@@ -33,10 +33,10 @@ const SessionItem = ({
       } else {
         toast.error(message);
       }
-      router.refresh();
     },
   });
 
+  console.log(session);
   return (
     <div
       key={session.id}

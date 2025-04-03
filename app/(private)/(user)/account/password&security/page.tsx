@@ -82,7 +82,7 @@ const SecurityPage = async () => {
           </p>
         </div>
 
-        <MFAProvider mfa={mfa ? mfa : undefined}>
+        <MFAProvider mfa={mfa}>
           <MFAContainer />
         </MFAProvider>
       </div>

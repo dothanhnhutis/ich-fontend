@@ -52,9 +52,9 @@ export default class FetchAPI {
         ...options?.headers,
       },
       method,
-      body: ["POST", "PUT", "PATCH"].includes(method)
-        ? options?.body
-        : undefined,
+      // body: ["POST", "PUT", "PATCH"].includes(method)
+      //   ? options?.body
+      //   : undefined,
     });
 
     if (!res.ok) {
@@ -111,5 +111,17 @@ export default class FetchAPI {
 
   async delete<T = unknown>(url: string, opt?: Omit<FetchApiOpts, "body">) {
     return await this.core<T>("DELETE", url, opt);
+  }
+
+  async deleteBody<T = unknown>(
+    url: string,
+    body: JSONObject | FormData,
+    opt?: FetchApiOpts
+  ) {
+    const isFormData = body instanceof FormData;
+    return await this.core<T>("DELETE", url, {
+      ...opt,
+      body: isFormData ? body : JSON.stringify(body),
+    });
   }
 }

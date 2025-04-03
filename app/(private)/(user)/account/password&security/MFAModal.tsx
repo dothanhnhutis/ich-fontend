@@ -33,10 +33,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
 import { getSetupMFA, MFA, TOTPAuth } from "@/data/user";
-import { createMFAAction, getSetupMFAAction, setupMFAAction } from "../actions";
+import {
+  createMFAAction,
+  deleteMFAAction,
+  getSetupMFAAction,
+  setupMFAAction,
+} from "../actions";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/hooks/use-store";
+import Link from "next/link";
 
 type MFAContext = {
   mFAData: MFA | null;
@@ -48,7 +54,7 @@ type MFAContext = {
   handleOpenModal: (open: boolean) => void;
   handleCheckSwitch: (checked: boolean) => void;
   handleMFA: (mfa: MFA | null) => void;
-  handleDisableMFA: () => void;
+  handleStep: (number: 4 | 5) => void;
   next: () => void;
   back: () => void;
 };
@@ -67,13 +73,12 @@ const MIN_STEP = 1;
 export const MFAProvider = ({
   children,
   mfa,
-}: Readonly<{ children: React.ReactNode; mfa?: MFA }>) => {
+}: Readonly<{ children: React.ReactNode; mfa: MFA | null }>) => {
   const [step, setStep] = React.useState<number>(mfa ? 4 : 1);
   const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false);
   const [isCheckedSwitch, setIsCheckedSwitch] = React.useState<boolean>(!!mfa);
   const [totp, setTotp] = React.useState<null | TOTPAuth>(null);
-
-  const [mFAData, setMFAData] = React.useState<MFA | null>(mfa ?? null);
+  const [mFAData, setMFAData] = React.useState<MFA | null>(mfa);
 
   React.useEffect(() => {
     const loadSetupMFA = async () => {
@@ -101,18 +106,12 @@ export const MFAProvider = ({
     setStep(step > MIN_STEP ? step - 1 : step);
   }, [step]);
 
-  const handleDisableMFA = () => {
-    setStep(5);
+  const handleStep = (step: 4 | 5) => {
+    setStep(step);
   };
 
   const handleCheckSwitch = (checked: boolean) => {
     setIsCheckedSwitch(checked);
-    // if (checked) {
-    //   setIsOpenModal(true);
-    //   setIsCheckedSwitch(checked);
-    // } else {
-    //   setIsOpenModal(true);
-    // }
   };
 
   const handleOpenModal = (open: boolean) => {
@@ -132,7 +131,7 @@ export const MFAProvider = ({
       handleMFA,
       next: handleNext,
       back: handleBack,
-      handleDisableMFA,
+      handleStep,
     }),
     [step, isOpenModal, isCheckedSwitch, totp, handleNext, handleBack]
   );
@@ -298,15 +297,8 @@ const StepOne = () => {
 };
 
 const StepTwo = () => {
-  const {
-    totp,
-    handleOpenModal,
-    handleCheckSwitch,
-    back,
-    next,
-    handleTOTP,
-    handleMFA,
-  } = useMFA();
+  const { totp, handleOpenModal, handleCheckSwitch, back, next, handleMFA } =
+    useMFA();
 
   const [codes, setCodes] = React.useState<string[]>(["", ""]);
   const { mutate, isPending } = useMutation({
@@ -317,6 +309,7 @@ const StepTwo = () => {
       if (data) {
         handleMFA(data);
         next();
+        toast.success(message);
       } else {
         toast.error(message);
       }
@@ -326,7 +319,6 @@ const StepTwo = () => {
   const handleCancel = () => {
     handleOpenModal(false);
     handleCheckSwitch(false);
-    // handleTOTP(null);
   };
 
   const handleBack = () => {
@@ -451,6 +443,7 @@ const StepTwo = () => {
       </div>
       <div className="flex gap-2 items-center justify-end mt-4">
         <Button
+          disabled={isPending}
           type="button"
           variant="outline"
           className="cursor-pointer"
@@ -459,6 +452,7 @@ const StepTwo = () => {
           Huỷ
         </Button>
         <Button
+          disabled={isPending}
           type="button"
           variant="outline"
           className="cursor-pointer"
@@ -466,7 +460,7 @@ const StepTwo = () => {
         >
           Trở về
         </Button>
-        <Button className="cursor-pointer">
+        <Button disabled={isPending} className="cursor-pointer">
           {isPending ? (
             <LoaderCircleIcon className="size-4 animate-spin" />
           ) : null}
@@ -478,7 +472,7 @@ const StepTwo = () => {
 };
 
 const StepThree = () => {
-  const { mFAData } = useMFA();
+  const { mFAData, handleOpenModal, handleStep } = useMFA();
 
   return (
     <div className="flex flex-col gap-1">
@@ -503,40 +497,126 @@ const StepThree = () => {
         </div>
       ) : null}
 
-      <div className="flex items-center justify-end gap-2 mt-4">
-        <Button variant="outline">Đóng</Button>
+      <div className="flex items-center justify-end gap-2 mt-4 [&>button]:cursor-pointer">
+        <Button
+          variant="outline"
+          type="button"
+          onClick={() => {
+            handleOpenModal(false);
+            handleStep(4);
+          }}
+        >
+          Đóng
+        </Button>
       </div>
     </div>
   );
 };
 
 const DisableMFA = () => {
-  const { back } = useMFA();
+  const { back, handleOpenModal, handleCheckSwitch } = useMFA();
+  const [codes, setCodes] = React.useState<string[]>(["", ""]);
+  const { isPending, mutate } = useMutation({
+    mutationFn: async () => {
+      return await deleteMFAAction(codes);
+    },
+    onSuccess({ success, message }) {
+      if (success) {
+        handleOpenModal(false);
+        // handleCheckSwitch(false);
+        toast.success(message);
+      } else {
+        toast.error(message);
+      }
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    mutate();
+  };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <p className="text-sm text-muted-foreground">
         Bạn sắp tắt xác thực hai yếu tố (MFA). Điều này có thể làm giảm tính bảo
         mật của tài khoản. Bạn có chắc chắn muốn tiếp tục?
       </p>
-      <div className="flex flex-col min-[412px]:flex-row gap-2 items-center  justify-end mt-4 [&>button]:cursor-pointer">
-        <Button className="w-full min-[412px]:w-auto" variant={"destructive"}>
+      <div className="col-span-6 sm:col-span-5 mt-4">
+        <p className="text-muted-foreground text-sm">
+          Nhập mã từ ứng dụng xác thực của bạn.
+        </p>
+        <div className="grid gap-2 py-2">
+          <div className="flex items-center gap-4">
+            <Label htmlFor="code1" className="text-right text-sm shrink-0">
+              Mã 1
+            </Label>
+            <div className="w-full">
+              <Input
+                id="code1"
+                required
+                placeholder="123456"
+                maxLength={6}
+                value={codes[0]}
+                onChange={(e) => {
+                  setCodes((prev) => [e.target.value, prev[1]]);
+                }}
+              />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Chờ 30s để nhập mã thứ 2
+          </p>
+
+          <div className="flex items-center gap-4">
+            <Label htmlFor="code2" className="text-right text-sm shrink-0">
+              Mã 2
+            </Label>
+            <Input
+              id="code2"
+              required
+              placeholder="123456"
+              maxLength={6}
+              value={codes[1]}
+              onChange={(e) => {
+                setCodes((prev) => [prev[0], e.target.value]);
+              }}
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-end">
+          <Link href="#" className="text-primary  text-sm">
+            Khắc phục sự cố MFA
+          </Link>
+        </div>
+      </div>
+      <div className="flex flex-col min-[413px]:flex-row gap-2 items-center  justify-end mt-4 [&>button]:cursor-pointer">
+        <Button
+          className="w-full min-[413px]:w-auto"
+          variant={"destructive"}
+          disabled={isPending}
+        >
+          {isPending ? (
+            <LoaderCircleIcon className="size-4 animate-spin" />
+          ) : null}
           Tắt
         </Button>
         <Button
-          className="w-full min-[412px]:w-auto"
+          disabled={isPending}
+          type="button"
+          className="w-full min-[413px]:w-auto"
           onClick={back}
           variant={"outline"}
         >
           Huỷ
         </Button>
       </div>
-    </div>
+    </form>
   );
 };
 
 const DetailMFA = () => {
-  const { mFAData, handleOpenModal, handleDisableMFA } = useMFA();
+  const { mFAData, handleOpenModal, handleStep } = useMFA();
 
   return (
     <div className="flex flex-col gap-1">
@@ -565,7 +645,7 @@ const DetailMFA = () => {
         <Button
           variant="destructive"
           className="w-full min-[412px]:w-auto"
-          onClick={handleDisableMFA}
+          onClick={() => handleStep(5)}
         >
           Tắt MFA
         </Button>
@@ -654,7 +734,6 @@ export const MFAContainer = () => {
     handleOpenModal,
     step,
     back,
-    handleTOTP,
   } = useMFA();
 
   return (
@@ -669,8 +748,8 @@ export const MFAContainer = () => {
               back();
             }
             handleCheckSwitch(v);
-            handleOpenModal(v);
           }
+          handleOpenModal(true);
         }}
       />
       <MFABody />

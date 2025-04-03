@@ -2,6 +2,7 @@ import "server-only";
 import FetchAPI, { FetchError } from "@/lib/fetchApi";
 import { getHeaders } from "./common";
 import { CookieOpt } from "@/lib/utils";
+import { revalidatePath } from "next/cache";
 
 const middlewareAPI = FetchAPI.createInstance({
   baseUrl: "http://localhost:4000" + "/api/v1/users",
@@ -138,6 +139,8 @@ export const deleteSessionById = async (sessionId: string) => {
     }>(`/sessions/${sessionId}`, {
       headers: await getHeaders(),
     });
+
+    revalidatePath("/account/sessions");
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
@@ -198,6 +201,7 @@ export const createMFA = async (codes: string[]) => {
         headers: await getHeaders(),
       }
     );
+    revalidatePath("/account/password&security");
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
@@ -265,10 +269,9 @@ export const getSetupMFA = async () => {
 
 export const deleteMFA = async (codes: string[]) => {
   try {
-    const { data } = await middlewareAPI.delete<{
+    const { data } = await middlewareAPI.deleteBody<{
       success: boolean;
       message: string;
-      data: MFA;
     }>(
       `/mfa`,
       { codes },
@@ -276,6 +279,7 @@ export const deleteMFA = async (codes: string[]) => {
         headers: await getHeaders(),
       }
     );
+    revalidatePath("/account/password&security", "page");
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
@@ -288,7 +292,6 @@ export const deleteMFA = async (codes: string[]) => {
     return {
       success: false,
       message: errMes,
-      data: null,
     };
   }
 };

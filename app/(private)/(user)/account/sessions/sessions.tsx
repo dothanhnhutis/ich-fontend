@@ -36,7 +36,6 @@ const SessionItem = ({
     },
   });
 
-  console.log(session);
   return (
     <div
       key={session.id}

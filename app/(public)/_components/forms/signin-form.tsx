@@ -22,9 +22,14 @@ const SignInForm = () => {
     mutationFn: async () => {
       return await logInAction(formData);
     },
-    onSuccess({ success }) {
-      if (success) router.refresh();
+    onSuccess(data) {
+      if (data.success == false) {
+        data.
+      } else {
+        router.refresh();
+      }
     },
+
     onSettled() {
       setFormData({
         email: "",

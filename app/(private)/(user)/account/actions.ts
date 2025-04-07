@@ -4,11 +4,11 @@ import {
   createMFA,
   deleteMFA,
   deleteSessionById,
+  disableAccount,
   getMFA,
   getSetupMFA,
   setupMFA,
 } from "@/data/user";
-import { revalidatePath } from "next/cache";
 
 export async function deleteSessionByIdAction(sessionId: string) {
   return await deleteSessionById(sessionId);
@@ -32,4 +32,8 @@ export async function getSetupMFAAction() {
 
 export async function deleteMFAAction(codes: string[]) {
   return await deleteMFA(codes);
+}
+
+export async function disableAccountAction() {
+  return await disableAccount();
 }

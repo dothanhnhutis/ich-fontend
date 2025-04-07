@@ -12,8 +12,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { disableAccountAction } from "../actions";
+import { toast } from "sonner";
+import { LoaderCircleIcon } from "lucide-react";
 
 const DisableAccountModal = () => {
+  const { isPending, mutate } = useMutation({
+    mutationFn: async () => {
+      return await disableAccountAction();
+    },
+    onSuccess({ success, message }) {
+      if (success) {
+        toast.success(message);
+      } else {
+        toast.error(message);
+      }
+    },
+  });
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -33,11 +49,18 @@ const DisableAccountModal = () => {
             phải được kích hoạt khi bạn đăng nhập lại
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogAction className="bg-destructive hover:bg-destructive/80 text-background">
+        <AlertDialogFooter className="[&>button]:cursor-pointer ">
+          <AlertDialogAction
+            onClick={() => mutate()}
+            disabled={isPending}
+            className="bg-destructive hover:bg-destructive/80 text-background"
+          >
+            {isPending ? (
+              <LoaderCircleIcon className="size-4 animate-spin" />
+            ) : null}
             Vô hiệu hoá
           </AlertDialogAction>
-          <AlertDialogCancel>Huỷ</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Huỷ</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

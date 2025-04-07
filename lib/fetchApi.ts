@@ -3,10 +3,12 @@ type JSONObject = Record<string, unknown>;
 
 export class FetchError extends Error {
   status: number;
+  data: unknown;
 
-  constructor(message: string = "", status: number = 400) {
-    super(message);
-    this.status = status;
+  constructor(err: { message: string; status: number; data: unknown }) {
+    super(err.message ?? "");
+    this.status = err.status || 400;
+    this.data = err.data;
   }
 
   serialize() {
@@ -14,7 +16,7 @@ export class FetchError extends Error {
       status: this.status,
       success: false,
       message: this.message,
-      data: null,
+      data: this.data,
     };
   }
 }
@@ -25,14 +27,11 @@ export default class FetchAPI {
     private options?: Omit<FetchApiOpts, "body">
   ) {}
 
-  static createInstance({
-    baseUrl,
-    ...opt
-  }: { baseUrl?: string } & FetchApiOpts) {
+  static create({ baseUrl, ...opt }: { baseUrl?: string } & FetchApiOpts) {
     return new FetchAPI(baseUrl, opt);
   }
 
-  private async core<T>(
+  private async core<T = unknown>(
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
     url: string,
     options?: FetchApiOpts
@@ -43,7 +42,7 @@ export default class FetchAPI {
       : `${baseUrl}/${url}`;
     const isFormData = options?.body instanceof FormData;
 
-    const res = await fetch(fullUrl, {
+    const { ok, json, headers } = await fetch(fullUrl, {
       ...this.options,
       ...options,
       headers: {
@@ -52,28 +51,32 @@ export default class FetchAPI {
         ...options?.headers,
       },
       method,
-      // body: ["POST", "PUT", "PATCH"].includes(method)
-      //   ? options?.body
-      //   : undefined,
     });
 
-    if (!res.ok) {
-      const data: { message: string; status: number } = await res.json();
-      throw new FetchError(data.message, data.status);
+    if (!ok) {
+      const resJson: { message: string; status: number; data: unknown } =
+        await json();
+
+      throw new FetchError({
+        data: resJson.data,
+        status: resJson.status,
+        message: resJson.message,
+      });
     }
-    const data: T = await res.json();
+    const data: { message: string; status: number; success: boolean; data: T } =
+      await json();
     const result = {
-      headers: res.headers,
+      headers: headers,
       data,
     };
     return result;
   }
 
-  async get<T = unknown>(url: string, opt?: Omit<FetchApiOpts, "body">) {
+  async get<T>(url: string, opt?: Omit<FetchApiOpts, "body">) {
     return await this.core<T>("GET", url, opt);
   }
 
-  async post<T = unknown>(
+  async post<T = unknown, E = unknown>(
     url: string,
     body: JSONObject | FormData,
     opt?: FetchApiOpts
@@ -85,7 +88,7 @@ export default class FetchAPI {
     });
   }
 
-  async put<T = unknown>(
+  async put<T = unknown, E = unknown>(
     url: string,
     body: JSONObject | FormData,
     opt?: FetchApiOpts
@@ -97,7 +100,7 @@ export default class FetchAPI {
     });
   }
 
-  async patch<T = unknown>(
+  async patch<T = unknown, E = unknown>(
     url: string,
     body: JSONObject | FormData,
     opt?: FetchApiOpts
@@ -109,11 +112,14 @@ export default class FetchAPI {
     });
   }
 
-  async delete<T = unknown>(url: string, opt?: Omit<FetchApiOpts, "body">) {
+  async delete<T = unknown, E = unknown>(
+    url: string,
+    opt?: Omit<FetchApiOpts, "body">
+  ) {
     return await this.core<T>("DELETE", url, opt);
   }
 
-  async deleteBody<T = unknown>(
+  async deleteBody<T = unknown, E = unknown>(
     url: string,
     body: JSONObject | FormData,
     opt?: FetchApiOpts

@@ -3,8 +3,9 @@ import FetchAPI, { FetchError } from "@/lib/fetchApi";
 import { getHeaders } from "./common";
 import { CookieOpt } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
-const middlewareAPI = FetchAPI.createInstance({
+const middlewareAPI = FetchAPI.create({
   baseUrl: "http://localhost:4000" + "/api/v1/users",
   credentials: "include",
   headers: {
@@ -280,6 +281,33 @@ export const deleteMFA = async (codes: string[]) => {
       }
     );
     revalidatePath("/account/password&security");
+    return data;
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof FetchError) {
+      errMes = error.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    console.log(errMes);
+    return {
+      success: false,
+      message: errMes,
+    };
+  }
+};
+
+export const disableAccount = async () => {
+  try {
+    const { data } = await middlewareAPI.delete<{
+      success: boolean;
+      message: string;
+    }>(`/deactivate`, {
+      headers: await getHeaders(),
+    });
+    revalidatePath("/account/password&security");
+    const cookieStore = await cookies();
+    cookieStore.delete("sid");
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";

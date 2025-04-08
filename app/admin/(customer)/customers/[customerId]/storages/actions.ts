@@ -2,7 +2,7 @@
 
 import env from "@/configs/env";
 import { getHeaders } from "@/lib/action";
-import FetchAPI, { FetchError } from "@/lib/fetchApi";
+import FetchAPI, { FetchError } from "@/lib/_fetchApi";
 import { revalidatePath } from "next/cache";
 
 const customerStorageApi = FetchAPI.createInstance({

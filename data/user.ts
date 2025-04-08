@@ -5,7 +5,7 @@ import { CookieOpt } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
-const middlewareAPI = FetchAPI.create({
+const userAPI = FetchAPI.create({
   baseUrl: "http://localhost:4000" + "/api/v1/users",
   credentials: "include",
   headers: {
@@ -81,17 +81,18 @@ export type CurrentUser = {
   updatedAt: Date;
   session: Session;
   roles: Role[];
+  hasPassword: boolean;
 };
 
 type CurrentUserResponse = DefaultResponseData & {
   data: CurrentUser | null;
 };
 
-export async function currrentUser(): Promise<CurrentUserResponse["data"]> {
+export async function getCurrrentUser(): Promise<CurrentUserResponse["data"]> {
   try {
     const {
       data: { data },
-    } = await middlewareAPI.get<CurrentUserResponse>("/me", {
+    } = await userAPI.get<CurrentUserResponse>("/me", {
       headers: await getHeaders(),
     });
     return data;
@@ -111,7 +112,7 @@ export const getSessions = async () => {
   try {
     const {
       data: { data },
-    } = await middlewareAPI.get<{
+    } = await userAPI.get<{
       success: boolean;
       message: string;
       data: Session[];
@@ -133,7 +134,7 @@ export const getSessions = async () => {
 
 export const deleteSessionById = async (sessionId: string) => {
   try {
-    const { data } = await middlewareAPI.delete<{
+    const { data } = await userAPI.delete<{
       success: boolean;
       message: string;
       data: null;
@@ -161,7 +162,7 @@ export const deleteSessionById = async (sessionId: string) => {
 
 export const setupMFA = async (deviceName: string) => {
   try {
-    const { data } = await middlewareAPI.post<{
+    const { data } = await userAPI.post<{
       success: boolean;
       message: string;
       data: TOTPAuth;
@@ -191,7 +192,7 @@ export const setupMFA = async (deviceName: string) => {
 
 export const createMFA = async (codes: string[]) => {
   try {
-    const { data } = await middlewareAPI.post<{
+    const { data } = await userAPI.post<{
       success: boolean;
       message: string;
       data: MFA;
@@ -224,7 +225,7 @@ export const getMFA = async () => {
   try {
     const {
       data: { data },
-    } = await middlewareAPI.get<{
+    } = await userAPI.get<{
       success: boolean;
       message: string;
       data: MFA;
@@ -248,7 +249,7 @@ export const getSetupMFA = async () => {
   try {
     const {
       data: { data },
-    } = await middlewareAPI.get<{
+    } = await userAPI.get<{
       success: boolean;
       message: string;
       data: TOTPAuth;
@@ -270,16 +271,13 @@ export const getSetupMFA = async () => {
 
 export const deleteMFA = async (codes: string[]) => {
   try {
-    const { data } = await middlewareAPI.deleteBody<{
+    const { data } = await userAPI.delete<{
       success: boolean;
       message: string;
-    }>(
-      `/mfa`,
-      { codes },
-      {
-        headers: await getHeaders(),
-      }
-    );
+    }>(`/mfa`, {
+      body: JSON.stringify({ codes }),
+      headers: await getHeaders(),
+    });
     revalidatePath("/account/password&security");
     return data;
   } catch (error: unknown) {
@@ -299,7 +297,7 @@ export const deleteMFA = async (codes: string[]) => {
 
 export const disableAccount = async () => {
   try {
-    const { data } = await middlewareAPI.delete<{
+    const { data } = await userAPI.delete<{
       success: boolean;
       message: string;
     }>(`/deactivate`, {
@@ -323,3 +321,47 @@ export const disableAccount = async () => {
     };
   }
 };
+
+export async function sendOTPUpdateEmail(email: string): Promise<void> {
+  try {
+    await userAPI.post<DefaultResponseData>(
+      `/email`,
+      { email },
+      {
+        headers: await getHeaders(),
+      }
+    );
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof FetchApiError) {
+      errMes = error.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    console.log(errMes);
+  }
+}
+
+export async function updateEmailByOTP(input: {
+  email: string;
+  otp: string;
+}): Promise<DefaultResponseData> {
+  try {
+    const { data } = await userAPI.patch<DefaultResponseData>("/email", input, {
+      headers: await getHeaders(),
+    });
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof FetchApiError) {
+      const data = error.response.data as DefaultResponseData;
+
+      return data;
+    }
+    console.error("Unknown error", error);
+    return {
+      status: 400,
+      success: false,
+      message: "",
+    };
+  }
+}

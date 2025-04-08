@@ -112,6 +112,7 @@ export class FetchAPI {
 
     // Nếu phản hồi không thành công, ném lỗi
     if (!res.ok) {
+      console.log(response.data);
       throw new FetchApiError(processedResponse.statusText, processedResponse);
     }
     return processedResponse;
@@ -130,6 +131,14 @@ export class FetchAPI {
     config?: FetchApiRequestConfig
   ): Promise<FetchApiResponse<T>> {
     return this.request({ ...config, url, data, method: "POST" });
+  }
+
+  patch<T = any>(
+    url: string,
+    data?: any,
+    config?: FetchApiRequestConfig
+  ): Promise<FetchApiResponse<T>> {
+    return this.request({ ...config, url, data, method: "PATCH" });
   }
 
   put<T = any>(

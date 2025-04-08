@@ -1,6 +1,6 @@
 "use server";
 
-import FetchAPI, { FetchError } from "@/lib/fetchApi";
+import FetchAPI, { FetchError } from "@/lib/_fetchApi";
 import env from "@/configs/env";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";

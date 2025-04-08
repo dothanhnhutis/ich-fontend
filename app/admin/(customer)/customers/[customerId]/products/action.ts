@@ -2,7 +2,7 @@
 
 import env from "@/configs/env";
 import { getHeaders } from "@/lib/action";
-import FetchAPI, { FetchError } from "@/lib/fetchApi";
+import FetchAPI, { FetchError } from "@/lib/_fetchApi";
 
 const customerProductApi = FetchAPI.createInstance({
   baseUrl: env.NEXT_PUBLIC_SERVER_URL + "/api/v1/customers",

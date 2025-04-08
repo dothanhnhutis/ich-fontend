@@ -38,7 +38,7 @@ import {
   deleteMFAAction,
   getSetupMFAAction,
   setupMFAAction,
-} from "../actions";
+} from "../../actions";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/hooks/use-store";

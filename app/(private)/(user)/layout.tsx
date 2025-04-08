@@ -56,7 +56,7 @@ const navs = [
 const PrivateUserLayout = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
-  const { state } = useUser();
+  const { user } = useUser();
   const currentUser = {
     username: "Do Thanh Nhut",
     image:
@@ -175,7 +175,7 @@ const PrivateUserLayout = ({
             <div className="text-muted-foreground">
               <div className="flex items-center gap-2">
                 <p className="text-xl font-semibold text-black">
-                  {state?.username}
+                  {user?.username}
                   {nav ? (
                     <>
                       <span className="mx-2 text-lg text-muted-foreground">

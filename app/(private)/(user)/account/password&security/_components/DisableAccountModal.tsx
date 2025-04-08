@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import { disableAccountAction } from "../actions";
+import { disableAccountAction } from "../../actions";
 import { toast } from "sonner";
 import { LoaderCircleIcon } from "lucide-react";
 

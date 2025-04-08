@@ -365,3 +365,60 @@ export async function updateEmailByOTP(input: {
     };
   }
 }
+
+export type UpdatePassword = {
+  oldPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+  isSignOut: boolean;
+};
+export async function updatePassword(input: UpdatePassword) {
+  try {
+    const { data } = await userAPI.patch<DefaultResponseData>(
+      "/password",
+      input,
+      {
+        headers: await getHeaders(),
+      }
+    );
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof FetchApiError) {
+      const data = error.response.data as DefaultResponseData;
+      return data;
+    }
+    console.error("Unknown error", error);
+    return {
+      status: 400,
+      success: false,
+      message: "",
+    };
+  }
+}
+
+export async function createPassword(input: UpdatePassword) {
+  try {
+    const { data } = await userAPI.post<DefaultResponseData>(
+      "/password",
+      {
+        password: input.newPassword,
+        confirmPassword: input.confirmNewPassword,
+      },
+      {
+        headers: await getHeaders(),
+      }
+    );
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof FetchApiError) {
+      const data = error.response.data as DefaultResponseData;
+      return data;
+    }
+    console.error("Unknown error", error);
+    return {
+      status: 400,
+      success: false,
+      message: "",
+    };
+  }
+}

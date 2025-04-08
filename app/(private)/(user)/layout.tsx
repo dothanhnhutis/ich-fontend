@@ -70,9 +70,9 @@ const PrivateUserLayout = ({
   }, [pathName]);
 
   return (
-    <div>
+    <>
       <div className="sticky top-0 left-0 right-0 z-50 bg-accent-foreground">
-        <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between gap-2 px-2 sm:px-3 py-1 h-[64px] mx-auto max-w-7xl">
+        <div className="flex items-center justify-between gap-2 px-2 sm:px-3 py-1 h-[64px] mx-auto max-w-7xl">
           <Link href={"/"}>
             <Image
               priority
@@ -211,7 +211,7 @@ const PrivateUserLayout = ({
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

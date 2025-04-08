@@ -106,3 +106,29 @@ export const sendReactivateAccount = async (
     };
   }
 };
+
+export async function forgotPassword(
+  email: string
+): Promise<DefaultResponseData> {
+  try {
+    const { data } = await authInstance.post<DefaultResponseData>(
+      "/recover",
+      { email },
+      {
+        headers: await getHeaders(),
+      }
+    );
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof FetchApiError) {
+      const data = error.response.data as DefaultResponseData;
+      return data;
+    }
+    console.error("Unknown error", error);
+    return {
+      status: 400,
+      success: false,
+      message: "",
+    };
+  }
+}

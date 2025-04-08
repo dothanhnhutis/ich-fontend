@@ -16,3 +16,9 @@ export const getHeaders = async () => {
     "user-agent": userAgent,
   };
 };
+
+export type DefaultResponseData = {
+  status: number;
+  success: boolean;
+  message: string;
+};

@@ -6,30 +6,32 @@ import { Label } from "@/components/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { LoaderCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { LogInDataType } from "@/data/auth";
+import { LognIn } from "@/data/auth";
 import PasswordInput from "@/components/password-input";
-import { logInAction } from "../actions";
+import { lognInAction } from "../actions";
 import Link from "next/link";
 
 const SignInForm = () => {
   const router = useRouter();
-  const [formData, setFormData] = React.useState<LogInDataType>({
+  const [formData, setFormData] = React.useState<LognIn>({
     email: "",
     password: "",
   });
 
-  const { data, mutate, isPending, reset } = useMutation({
+  const {
+    data: resData,
+    mutate,
+    isPending,
+    reset,
+  } = useMutation({
     mutationFn: async () => {
-      return await logInAction(formData);
+      return await lognInAction(formData);
     },
-    onSuccess(data) {
-      if (data.success == false) {
-        data.
-      } else {
+    onSuccess({ success }) {
+      if (success) {
         router.refresh();
       }
     },
-
     onSettled() {
       setFormData({
         email: "",
@@ -103,9 +105,19 @@ const SignInForm = () => {
               value={formData.password}
               disabled={isPending}
             />
-            {data && !data.success && (
-              <p className="text-destructive text-xs">{data.message}</p>
-            )}
+            {resData && !resData.success ? (
+              resData.data.isDisabled ? (
+                <p className="text-destructive text-xs">
+                  Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
+                  <Link href="/reactivate" className="text-primary">
+                    kích hoạt lại
+                  </Link>{" "}
+                  trước khi đăng nhập.
+                </p>
+              ) : (
+                <p className="text-destructive text-xs">{resData.message}</p>
+              )
+            ) : null}
           </div>
           <Button
             type="submit"

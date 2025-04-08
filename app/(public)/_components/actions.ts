@@ -1,6 +1,6 @@
 "use server";
-import { LognIn, LogInDataType } from "@/data/auth";
+import { lognIn, LognIn } from "@/data/auth";
 
-export const logInAction = async (input: LogInDataType) => {
-  return await LognIn(input);
+export const lognInAction = async (input: LognIn) => {
+  return await lognIn(input);
 };

@@ -1,6 +1,6 @@
 import "server-only";
-import FetchAPI, { FetchError } from "@/lib/fetchApi";
-import { getHeaders } from "./common";
+import { FetchAPI, FetchApiError } from "@/lib/axios";
+import { DefaultResponseData, getHeaders } from "./common";
 import { CookieOpt } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -83,21 +83,21 @@ export type CurrentUser = {
   roles: Role[];
 };
 
-export const currrentUser = async () => {
+type CurrentUserResponse = DefaultResponseData & {
+  data: CurrentUser | null;
+};
+
+export async function currrentUser(): Promise<CurrentUserResponse["data"]> {
   try {
     const {
       data: { data },
-    } = await middlewareAPI.get<{
-      success: boolean;
-      message: string;
-      data: CurrentUser;
-    }>("/me", {
+    } = await middlewareAPI.get<CurrentUserResponse>("/me", {
       headers: await getHeaders(),
     });
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
-    if (error instanceof FetchError) {
+    if (error instanceof FetchApiError) {
       errMes = error.message;
     } else if (error instanceof Error) {
       errMes = error.message;
@@ -105,7 +105,7 @@ export const currrentUser = async () => {
     console.log(errMes);
     return null;
   }
-};
+}
 
 export const getSessions = async () => {
   try {
@@ -121,7 +121,7 @@ export const getSessions = async () => {
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
-    if (error instanceof FetchError) {
+    if (error instanceof FetchApiError) {
       errMes = error.message;
     } else if (error instanceof Error) {
       errMes = error.message;
@@ -145,7 +145,7 @@ export const deleteSessionById = async (sessionId: string) => {
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
-    if (error instanceof FetchError) {
+    if (error instanceof FetchApiError) {
       errMes = error.message;
     } else if (error instanceof Error) {
       errMes = error.message;
@@ -175,7 +175,7 @@ export const setupMFA = async (deviceName: string) => {
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
-    if (error instanceof FetchError) {
+    if (error instanceof FetchApiError) {
       errMes = error.message;
     } else if (error instanceof Error) {
       errMes = error.message;
@@ -206,7 +206,7 @@ export const createMFA = async (codes: string[]) => {
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
-    if (error instanceof FetchError) {
+    if (error instanceof FetchApiError) {
       errMes = error.message;
     } else if (error instanceof Error) {
       errMes = error.message;
@@ -234,7 +234,7 @@ export const getMFA = async () => {
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
-    if (error instanceof FetchError) {
+    if (error instanceof FetchApiError) {
       errMes = error.message;
     } else if (error instanceof Error) {
       errMes = error.message;
@@ -258,7 +258,7 @@ export const getSetupMFA = async () => {
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
-    if (error instanceof FetchError) {
+    if (error instanceof FetchApiError) {
       errMes = error.message;
     } else if (error instanceof Error) {
       errMes = error.message;
@@ -284,7 +284,7 @@ export const deleteMFA = async (codes: string[]) => {
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
-    if (error instanceof FetchError) {
+    if (error instanceof FetchApiError) {
       errMes = error.message;
     } else if (error instanceof Error) {
       errMes = error.message;
@@ -311,7 +311,7 @@ export const disableAccount = async () => {
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
-    if (error instanceof FetchError) {
+    if (error instanceof FetchApiError) {
       errMes = error.message;
     } else if (error instanceof Error) {
       errMes = error.message;

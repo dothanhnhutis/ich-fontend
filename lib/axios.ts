@@ -148,38 +148,38 @@ export class FetchAPI {
   }
 }
 
-// Ví dụ sử dụng:
+// // Ví dụ sử dụng:
 
-// Tạo instance với cấu hình mặc định
-const api = new FetchAPI({
-  baseUrl: "https://api.example.com",
-  headers: {
-    Authorization: "Bearer token",
-  },
-});
+// // Tạo instance với cấu hình mặc định
+// const api = new FetchAPI({
+//   baseUrl: "https://api.example.com",
+//   headers: {
+//     Authorization: "Bearer token",
+//   },
+// });
 
-// Thêm request interceptor
-api.interceptors.request.push(async (config) => {
-  console.log("Request config:", config);
-  // Bạn có thể thêm các xử lý như thêm token, logging,...
-  return config;
-});
+// // Thêm request interceptor
+// api.interceptors.request.push(async (config) => {
+//   console.log("Request config:", config);
+//   // Bạn có thể thêm các xử lý như thêm token, logging,...
+//   return config;
+// });
 
-// Thêm response interceptor
-api.interceptors.response.push(async (response) => {
-  console.log("Response:", response);
-  // Bạn có thể kiểm tra, chuyển đổi dữ liệu response,...
-  return response;
-});
+// // Thêm response interceptor
+// api.interceptors.response.push(async (response) => {
+//   console.log("Response:", response);
+//   // Bạn có thể kiểm tra, chuyển đổi dữ liệu response,...
+//   return response;
+// });
 
-// Gọi API giống axios
-(async () => {
-  try {
-    const { data, status } = await api.post<{ result: string }>("/endpoint", {
-      key: "value",
-    });
-    console.log("Data:", data, "Status:", status);
-  } catch (error) {
-    console.error("Error:", error);
-  }
-})();
+// // Gọi API giống axios
+// (async () => {
+//   try {
+//     const { data, status } = await api.post<{ result: string }>("/endpoint", {
+//       key: "value",
+//     });
+//     console.log("Data:", data, "Status:", status);
+//   } catch (error) {
+//     console.error("Error:", error);
+//   }
+// })();

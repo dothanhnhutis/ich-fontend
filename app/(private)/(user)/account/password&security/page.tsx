@@ -4,7 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 
 import { Button } from "@/components/ui/button";
 import PasswordModal from "./PasswordModal";
-import EmailModal from "./EmailModal";
+import EmailModal from "./_components/EmailModal";
 import DisableAccountModal from "./DisableAccountModal";
 import { MFAContainer, MFAProvider } from "./MFAModal";
 import { getMFA } from "@/data/user";

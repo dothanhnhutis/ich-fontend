@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/app/(private)/user-provider";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/hooks/use-store";
 import { sendOTPUpdateEmailAction, updateEmailByOTPAction } from "./actions";

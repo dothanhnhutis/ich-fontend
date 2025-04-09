@@ -25,7 +25,7 @@ export type MFA = {
   updatedAt: Date;
 };
 
-export type TOTPAuth = {
+export type TOTP = {
   ascii: string;
   hex: string;
   base32: string;
@@ -159,13 +159,14 @@ export const deleteSessionById = async (sessionId: string) => {
     };
   }
 };
-
-export const setupMFA = async (deviceName: string) => {
+type SetupMFA = DefaultResponseData & { data: TOTP | null };
+export const setupMFA = async (deviceName: string): Promise<SetupMFA> => {
   try {
     const { data } = await userAPI.post<{
+      status: number;
       success: boolean;
       message: string;
-      data: TOTPAuth;
+      data: TOTP;
     }>(
       `/setup-mfa`,
       { deviceName },
@@ -183,6 +184,7 @@ export const setupMFA = async (deviceName: string) => {
     }
     console.log(errMes);
     return {
+      status: 400,
       success: false,
       message: errMes,
       data: null,
@@ -190,13 +192,30 @@ export const setupMFA = async (deviceName: string) => {
   }
 };
 
-export const createMFA = async (codes: string[]) => {
+export async function getSetupMFA(): Promise<SetupMFA["data"]> {
   try {
-    const { data } = await userAPI.post<{
-      success: boolean;
-      message: string;
-      data: MFA;
-    }>(
+    const {
+      data: { data },
+    } = await userAPI.get<SetupMFA>("/setup-mfa", {
+      headers: await getHeaders(),
+    });
+    return data;
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof FetchApiError) {
+      errMes = error.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    console.log(errMes);
+    return null;
+  }
+}
+type MFAResponseData = DefaultResponseData & { data: MFA | null };
+
+export async function createMFA(codes: string[]): Promise<MFAResponseData> {
+  try {
+    const { data } = await userAPI.post<MFAResponseData>(
       `/mfa`,
       { codes },
       {
@@ -214,22 +233,19 @@ export const createMFA = async (codes: string[]) => {
     }
     console.log(errMes);
     return {
+      status: 400,
       success: false,
       message: errMes,
       data: null,
     };
   }
-};
+}
 
-export const getMFA = async () => {
+export async function getMFA(): Promise<MFAResponseData["data"]> {
   try {
     const {
       data: { data },
-    } = await userAPI.get<{
-      success: boolean;
-      message: string;
-      data: MFA;
-    }>("/mfa", {
+    } = await userAPI.get<MFAResponseData>("/mfa", {
       headers: await getHeaders(),
     });
     return data;
@@ -243,38 +259,11 @@ export const getMFA = async () => {
     console.log(errMes);
     return null;
   }
-};
+}
 
-export const getSetupMFA = async () => {
+export async function deleteMFA(codes: string[]): Promise<DefaultResponseData> {
   try {
-    const {
-      data: { data },
-    } = await userAPI.get<{
-      success: boolean;
-      message: string;
-      data: TOTPAuth;
-    }>("/setup-mfa", {
-      headers: await getHeaders(),
-    });
-    return data;
-  } catch (error: unknown) {
-    let errMes = "unknown error";
-    if (error instanceof FetchApiError) {
-      errMes = error.message;
-    } else if (error instanceof Error) {
-      errMes = error.message;
-    }
-    console.log(errMes);
-    return null;
-  }
-};
-
-export const deleteMFA = async (codes: string[]) => {
-  try {
-    const { data } = await userAPI.delete<{
-      success: boolean;
-      message: string;
-    }>(`/mfa`, {
+    const { data } = await userAPI.delete<DefaultResponseData>(`/mfa`, {
       body: JSON.stringify({ codes }),
       headers: await getHeaders(),
     });
@@ -289,11 +278,12 @@ export const deleteMFA = async (codes: string[]) => {
     }
     console.log(errMes);
     return {
+      status: 400,
       success: false,
       message: errMes,
     };
   }
-};
+}
 
 export const disableAccount = async () => {
   try {

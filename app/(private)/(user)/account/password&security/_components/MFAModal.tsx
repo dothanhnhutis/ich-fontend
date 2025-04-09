@@ -2,11 +2,8 @@
 import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -15,12 +12,9 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import {
   CopyIcon,
-  KeyIcon,
   KeyRoundIcon,
   LoaderCircleIcon,
-  LoaderPinwheelIcon,
   MonitorSmartphoneIcon,
-  RefreshCwIcon,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -29,115 +23,19 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { cn } from "@/lib/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
-import { getSetupMFA, MFA, TOTPAuth } from "@/data/user";
+import { MFA } from "@/data/user";
 import {
   createMFAAction,
   deleteMFAAction,
-  getSetupMFAAction,
   setupMFAAction,
 } from "../../actions";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { useStore } from "@/hooks/use-store";
 import Link from "next/link";
-
-type MFAContext = {
-  mFAData: MFA | null;
-  step: number;
-  isOpenModal: boolean;
-  isCheckedSwitch: boolean;
-  totp: TOTPAuth | null;
-  handleTOTP: (totp: TOTPAuth | null) => void;
-  handleOpenModal: (open: boolean) => void;
-  handleCheckSwitch: (checked: boolean) => void;
-  handleMFA: (mfa: MFA | null) => void;
-  handleStep: (number: 4 | 5) => void;
-  next: () => void;
-  back: () => void;
-};
-
-const MFAContext = React.createContext<null | MFAContext>(null);
-
-const useMFA = () => {
-  const context = React.useContext(MFAContext);
-  if (!context) throw new Error("useMFA must be used within a MFAProvider.");
-  return context;
-};
-
-const MAX_STEP = 3;
-const MIN_STEP = 1;
-
-export const MFAProvider = ({
-  children,
-  mfa,
-}: Readonly<{ children: React.ReactNode; mfa: MFA | null }>) => {
-  const [step, setStep] = React.useState<number>(mfa ? 4 : 1);
-  const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false);
-  const [isCheckedSwitch, setIsCheckedSwitch] = React.useState<boolean>(!!mfa);
-  const [totp, setTotp] = React.useState<null | TOTPAuth>(null);
-  const [mFAData, setMFAData] = React.useState<MFA | null>(mfa);
-
-  React.useEffect(() => {
-    const loadSetupMFA = async () => {
-      if (totp == null) {
-        const totp = await getSetupMFAAction();
-        if (totp) setTotp(totp);
-      }
-    };
-    loadSetupMFA();
-  }, [isOpenModal]);
-
-  const handleMFA = (mfa: MFA | null) => {
-    setMFAData(mfa);
-  };
-
-  const handleTOTP = (totp: null | TOTPAuth) => {
-    setTotp(totp);
-  };
-
-  const handleNext = React.useCallback(() => {
-    setStep(step < MAX_STEP ? step + 1 : step);
-  }, [step]);
-
-  const handleBack = React.useCallback(() => {
-    setStep(step > MIN_STEP ? step - 1 : step);
-  }, [step]);
-
-  const handleStep = (step: 4 | 5) => {
-    setStep(step);
-  };
-
-  const handleCheckSwitch = (checked: boolean) => {
-    setIsCheckedSwitch(checked);
-  };
-
-  const handleOpenModal = (open: boolean) => {
-    setIsOpenModal(open);
-  };
-
-  const contextValue = React.useMemo<MFAContext>(
-    () => ({
-      mFAData,
-      step,
-      isOpenModal,
-      isCheckedSwitch,
-      totp,
-      handleTOTP,
-      handleCheckSwitch,
-      handleOpenModal,
-      handleMFA,
-      next: handleNext,
-      back: handleBack,
-      handleStep,
-    }),
-    [step, isOpenModal, isCheckedSwitch, totp, handleNext, handleBack]
-  );
-
-  return <MFAContext value={contextValue}>{children}</MFAContext>;
-};
+import { MFAProvider, useMFA } from "./MFAProvider";
 
 const StepOne = () => {
   const { handleCheckSwitch, handleOpenModal, handleTOTP, totp, next } =
@@ -700,7 +598,6 @@ const MFAHeader = () => {
 
 const MFABody = () => {
   const { step } = useMFA();
-
   return (
     <AlertDialogContent
       className={cn(
@@ -756,3 +653,24 @@ export const MFAContainer = () => {
     </AlertDialog>
   );
 };
+
+export const MFAModal = ({ mfa }: { mfa?: MFA | null }) => {
+  return (
+    <div className="flex w-full gap-4 border-b py-4">
+      <div className="w-full">
+        <p className="font-bold after:content-['*'] after:text-red-500">
+          Xác thực yếu tố đa yếu tố (MFA)
+        </p>
+        <p className="text-xs font-normal leading-snug text-muted-foreground">
+          Bảo mật cao hơn với mã xác thực khi đăng nhập.
+        </p>
+      </div>
+
+      <MFAProvider mfa={mfa}>
+        <MFAContainer />
+      </MFAProvider>
+    </div>
+  );
+};
+
+export default MFAModal;

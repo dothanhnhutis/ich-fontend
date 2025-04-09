@@ -12,7 +12,12 @@ import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { MFAProvider, useMFA } from "./MFAProvider1";
+import {
+  MFAProvider,
+  SetupMFAProvider,
+  useMFA,
+  useSetupMFA,
+} from "./MFAProvider1";
 import {
   createMFAAction,
   getSetupMFAAction,
@@ -37,7 +42,8 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
 function MFAStepOne() {
-  const { handleSwitch, handleModal, handleTOTP, totp, next } = useMFA();
+  const { handleSwitch, handleModal } = useMFA();
+  const { handleTOTP, totp, next } = useSetupMFA();
 
   const [deviceName, setDeviceName] = React.useState<string>(
     totp?.deviceName ?? ""
@@ -205,8 +211,8 @@ function MFAStepOne() {
 }
 
 function MFAStepTwo() {
-  const { totp, handleTOTP, handleModal, handleSwitch, back, next, handleMFA } =
-    useMFA();
+  const { handleModal, handleSwitch } = useMFA();
+  const { totp, handleTOTP, back, next, handleMFA } = useSetupMFA();
 
   const [codes, setCodes] = React.useState<string[]>(["", ""]);
   const { mutate, isPending } = useMutation({
@@ -384,7 +390,8 @@ function MFAStepTwo() {
 }
 
 function MFAStepThree() {
-  const { mfa, handleModal } = useMFA();
+  const { handleModal } = useMFA();
+  const { mfa } = useSetupMFA();
 
   return (
     <div className="flex flex-col gap-1">
@@ -424,8 +431,8 @@ function MFAStepThree() {
   );
 }
 
-function MFASetup() {
-  const { step } = useMFA();
+function SetupMFA() {
+  const { step } = useSetupMFA();
 
   return (
     <AlertDialogContent
@@ -469,9 +476,10 @@ function MFASetup() {
 
 function MFADetail({ mfa }: { mfa: MFA }) {
   const { handleModal } = useMFA();
+
   return (
     <AlertDialogContent
-      className={"p-3 min-[412px]:p-6 max-w-[calc(100%-2rem)] sm:max-w-sm"}
+      className={"p-3 min-[412px]:p-6 sm:max-w-[calc(100%-2rem)] lg:max-w-3xl"}
     >
       <AlertDialogHeader>
         <AlertDialogTitle>Xác thực đa yếu tố (MFA)</AlertDialogTitle>
@@ -519,8 +527,8 @@ function MFADetail({ mfa }: { mfa: MFA }) {
   );
 }
 
-function MFAContainer({ mfa }: { mfa: MFA | null }) {
-  const { open, checked, handleModal, handleSwitch, step, back } = useMFA();
+function MFAContainer({ mfa }: { mfa?: MFA | null }) {
+  const { open, checked, handleModal, handleSwitch } = useMFA();
 
   return (
     <AlertDialog open={open}>
@@ -528,35 +536,40 @@ function MFAContainer({ mfa }: { mfa: MFA | null }) {
         className="cursor-pointer"
         checked={checked}
         onCheckedChange={(v) => {
-          if (v && step == 2) {
-            back();
-          }
-          handleSwitch(v);
+          // if (!mfa) {
+          //   handleSwitch(v);
+          // }
           handleModal(true);
         }}
       />
 
-      {mfa ? <MFADetail mfa={mfa} /> : <MFASetup />}
+      {mfa ? (
+        <MFADetail mfa={mfa} />
+      ) : (
+        <SetupMFAProvider>
+          <SetupMFA />
+        </SetupMFAProvider>
+      )}
     </AlertDialog>
   );
 }
 
 const MFAModal1 = ({ mfa }: { mfa: MFA | null }) => {
   return (
-    <div className="flex w-full gap-4 border-b py-4">
-      <div className="w-full">
-        <p className="font-bold after:content-['*'] after:text-red-500">
-          Xác thực yếu tố đa yếu tố (MFA)
-        </p>
-        <p className="text-xs font-normal leading-snug text-muted-foreground">
-          Bảo mật cao hơn với mã xác thực khi đăng nhập.
-        </p>
-      </div>
+    <MFAProvider defaultMFa={mfa}>
+      <div className="flex w-full gap-4 border-b py-4">
+        <div className="w-full">
+          <p className="font-bold after:content-['*'] after:text-red-500">
+            Xác thực yếu tố đa yếu tố (MFA)
+          </p>
+          <p className="text-xs font-normal leading-snug text-muted-foreground">
+            Bảo mật cao hơn với mã xác thực khi đăng nhập.
+          </p>
+        </div>
 
-      <MFAProvider>
         <MFAContainer mfa={mfa} />
-      </MFAProvider>
-    </div>
+      </div>
+    </MFAProvider>
   );
 };
 

@@ -54,7 +54,7 @@ const SecurityPage = async () => {
       </div>
       {/* <MFAModal mfa={mfa} /> */}
       {/* <MFAModal1 mfa={mfa} /> */}
-      {mfa ? <p>12321</p> : <MFAModal2 mfa={mfa} />}
+      <MFAModal2 mfa={mfa} />
 
       <DisableAccountModal />
     </div>

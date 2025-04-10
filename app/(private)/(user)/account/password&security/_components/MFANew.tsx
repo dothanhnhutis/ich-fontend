@@ -531,72 +531,64 @@ function MFADetail() {
   });
 
   return (
-    <AlertDialogContent
-      className={"p-3 min-[412px]:p-6 sm:max-w-[calc(100%-2rem)] lg:max-w-3xl"}
-    >
-      <AlertDialogHeader>
-        <AlertDialogTitle>Xác thực đa yếu tố (MFA)</AlertDialogTitle>
-        <AlertDialogDescription className="hidden"></AlertDialogDescription>
-      </AlertDialogHeader>
-      <div className="flex flex-col gap-1">
-        <p className="text-muted-foreground text-center sm:text-left">
-          Mã dự phòng giúp đăng nhập khi không có thiết bị xác thực.
-        </p>
-        {mfa ? (
-          <>
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
-              {mfa.backupCode.map((code, idx) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    "flex items-center justify-center py-2",
-                    mfa.expiredBackupCodes.includes(code)
-                      ? "line-through text-muted-foreground"
-                      : ""
-                  )}
-                >
-                  {code}
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Mã dự phòng chỉ được tạo cách nhau ít nhất 24h. Lần tạo mã gần
-              nhất: {new Date(mfa.backupCodeCreatedAt).toLocaleString()}
-            </p>
-          </>
-        ) : null}
+    <div className="flex flex-col gap-1">
+      <p className="text-muted-foreground text-center sm:text-left">
+        Mã dự phòng giúp đăng nhập khi không có thiết bị xác thực.
+      </p>
+      {mfa ? (
+        <>
+          <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
+            {mfa.backupCode.map((code, idx) => (
+              <div
+                key={idx}
+                className={cn(
+                  "flex items-center justify-center py-2",
+                  mfa.expiredBackupCodes.includes(code)
+                    ? "line-through text-muted-foreground"
+                    : ""
+                )}
+              >
+                {code}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Mã dự phòng chỉ được tạo cách nhau ít nhất 24h. Lần tạo mã gần nhất:{" "}
+            {new Date(mfa.backupCodeCreatedAt).toLocaleString()}
+          </p>
+        </>
+      ) : null}
 
-        <div className="flex flex-col min-[412px]:flex-row items-center justify-end gap-2 mt-4 [&>button]:cursor-pointer">
-          <Button
-            disabled={isPending}
-            onClick={() => handleStep(5)}
-            variant="destructive"
-            className="w-full min-[412px]:w-auto"
-          >
-            Vô hiệu hoá
-          </Button>
-          <Button
-            onClick={() => mutate()}
-            disabled={
-              Date.now() - new Date(mfa!.backupCodeCreatedAt).getTime() <
-                24 * 60 * 60 * 1000 || isPending
-            }
-            className="w-full min-[412px]:w-auto"
-          >
-            Tạo mã dự phòng mới
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full min-[412px]:w-auto"
-            onClick={() => {
-              handleModal(false);
-            }}
-          >
-            Đóng
-          </Button>
-        </div>
+      <div className="flex flex-col min-[412px]:flex-row items-center justify-end gap-2 mt-4 [&>button]:cursor-pointer">
+        <Button
+          disabled={isPending}
+          onClick={() => handleStep(5)}
+          variant="destructive"
+          className="w-full min-[412px]:w-auto"
+        >
+          Vô hiệu hoá
+        </Button>
+        <Button
+          onClick={() => mutate()}
+          disabled={
+            Date.now() - new Date(mfa!.backupCodeCreatedAt).getTime() <
+              24 * 60 * 60 * 1000 || isPending
+          }
+          className="w-full min-[412px]:w-auto"
+        >
+          Tạo mã dự phòng mới
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full min-[412px]:w-auto"
+          onClick={() => {
+            handleModal(false);
+          }}
+        >
+          Đóng
+        </Button>
       </div>
-    </AlertDialogContent>
+    </div>
   );
 }
 

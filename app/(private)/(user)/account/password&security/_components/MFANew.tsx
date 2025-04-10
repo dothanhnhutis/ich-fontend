@@ -1,29 +1,7 @@
 "use client";
-import React, { useMemo } from "react";
-import { MFA } from "@/data/user";
-import { Button } from "@/components/ui/button";
-import {
-  CopyIcon,
-  KeyRoundIcon,
-  LoaderCircleIcon,
-  MonitorSmartphoneIcon,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
-import {
-  MFAProvider,
-  SetupMFAProvider,
-  useMFA,
-  useSetupMFA,
-} from "./MFAProvider1";
-import {
-  createMFAAction,
-  getSetupMFAAction,
-  setupMFAAction,
-} from "../../actions";
-import * as z from "zod";
+import React from "react";
+import { MFA, TOTP } from "@/data/user";
+
 import {
   AlertDialog,
   AlertDialogContent,
@@ -38,12 +16,116 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import {
+  createMFAAction,
+  deleteMFAAction,
+  generateMFACodeAction,
+  getSetupMFAAction,
+  setupMFAAction,
+} from "../../actions";
+import * as z from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import {
+  CopyIcon,
+  KeyRoundIcon,
+  LoaderCircleIcon,
+  MonitorSmartphoneIcon,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+
+type MFAContextState = {
+  open: boolean;
+  checked: boolean;
+  step: number;
+  totp: TOTP | null;
+  mfa: MFA | null;
+  next: () => void;
+  back: () => void;
+  handleTOTP: (totp: TOTP | null) => void;
+  handleMFA: (mfa: MFA | null) => void;
+  handleModal: (open: boolean) => void;
+  handleSwitch: (open: boolean) => void;
+  handleStep: (step: 4 | 5) => void;
+};
+
+const MFAContext = React.createContext<null | MFAContextState>(null);
+
+export function useMFA() {
+  const context = React.useContext(MFAContext);
+  if (!context) throw new Error("useMFA must be used within a MFAProvider.");
+  return context;
+}
+
+const MAX_STEP = 3;
+const MIN_STEP = 1;
+
+function MFAProvider({
+  children,
+  defaultMFa,
+}: Readonly<{ children: React.ReactNode; defaultMFa?: MFA | null }>) {
+  const [step, setStep] = React.useState<number>(defaultMFa ? 4 : 1);
+  const [totp, setTOTP] = React.useState<TOTP | null>(null);
+  const [mfa, setMFA] = React.useState<MFA | null>(defaultMFa ?? null);
+
+  const [open, setOpen] = React.useState<boolean>(false);
+  const [checked, setChecked] = React.useState<boolean>(!!defaultMFa);
+
+  const handleNext = React.useCallback(() => {
+    setStep(step < MAX_STEP ? step + 1 : step);
+  }, [step]);
+
+  const handleBack = React.useCallback(() => {
+    setStep(step > MIN_STEP ? step - 1 : step);
+  }, [step]);
+
+  const handleStep = (step: 4 | 5) => {
+    setStep(step);
+  };
+
+  const handleTOTP = (totp: TOTP | null) => {
+    setTOTP(totp);
+  };
+  const handleMFA = (mfa: MFA | null) => {
+    setMFA(mfa);
+  };
+
+  const handleModal = (open: boolean) => {
+    setOpen(open);
+  };
+  const handleSwitch = (checked: boolean) => {
+    setChecked(checked);
+  };
+
+  const contextValue = React.useMemo<MFAContextState>(
+    () => ({
+      open,
+      checked,
+      step,
+      totp,
+      mfa,
+      back: handleBack,
+      next: handleNext,
+      handleTOTP,
+      handleMFA,
+      handleModal,
+      handleSwitch,
+      handleStep,
+    }),
+    [step, handleBack, handleNext, totp, mfa, open, checked]
+  );
+  return (
+    <MFAContext.Provider value={contextValue}>{children}</MFAContext.Provider>
+  );
+}
 
 function MFAStepOne() {
-  const { handleSwitch, handleModal } = useMFA();
-  const { handleTOTP, totp, next } = useSetupMFA();
+  const { handleSwitch, handleModal, handleTOTP, totp, next } = useMFA();
 
   const [deviceName, setDeviceName] = React.useState<string>(
     totp?.deviceName ?? ""
@@ -86,7 +168,7 @@ function MFAStepOne() {
     return () => clearInterval(timerId);
   }, [countDown, deviceName, totp]);
 
-  const isDeviceNameError = useMemo(() => {
+  const isDeviceNameError = React.useMemo(() => {
     return deviceName.length > 0
       ? !z
           .string({
@@ -211,8 +293,8 @@ function MFAStepOne() {
 }
 
 function MFAStepTwo() {
-  const { handleModal, handleSwitch } = useMFA();
-  const { totp, handleTOTP, back, next, handleMFA } = useSetupMFA();
+  const { totp, handleTOTP, back, next, handleMFA, handleModal, handleSwitch } =
+    useMFA();
 
   const [codes, setCodes] = React.useState<string[]>(["", ""]);
   const { mutate, isPending } = useMutation({
@@ -390,8 +472,7 @@ function MFAStepTwo() {
 }
 
 function MFAStepThree() {
-  const { handleModal } = useMFA();
-  const { mfa } = useSetupMFA();
+  const { mfa, handleModal, handleStep } = useMFA();
 
   return (
     <div className="flex flex-col gap-1">
@@ -422,6 +503,7 @@ function MFAStepThree() {
           type="button"
           onClick={() => {
             handleModal(false);
+            handleStep(4);
           }}
         >
           Đóng
@@ -431,51 +513,22 @@ function MFAStepThree() {
   );
 }
 
-function SetupMFA() {
-  const { step } = useSetupMFA();
+function MFADetail() {
+  const { handleModal, mfa, handleStep, handleMFA } = useMFA();
 
-  return (
-    <AlertDialogContent
-      className={"p-3 min-[412px]:p-6 sm:max-w-[calc(100%-2rem)] lg:max-w-3xl"}
-    >
-      <AlertDialogHeader>
-        <AlertDialogTitle>Xác thực đa yếu tố (MFA)</AlertDialogTitle>
-        <AlertDialogDescription className="hidden"></AlertDialogDescription>
-        <Breadcrumb>
-          <BreadcrumbList className="flex-nowrap justify-center sm:justify-start">
-            <BreadcrumbItem
-              className={cn(step == 1 ? "text-foreground font-semibold" : "")}
-            >
-              Bước 1: Nhập tên thiết bị
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem
-              className={cn(step == 2 ? "text-foreground font-semibold" : "")}
-            >
-              Bước 2: Thiết lập liên kết
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem
-              className={cn(step == 3 ? "text-foreground font-semibold" : "")}
-            >
-              Bước 3: Hoàn thành
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </AlertDialogHeader>
-      {step == 1 ? (
-        <MFAStepOne />
-      ) : step == 2 ? (
-        <MFAStepTwo />
-      ) : step == 3 ? (
-        <MFAStepThree />
-      ) : null}
-    </AlertDialogContent>
-  );
-}
-
-function MFADetail({ mfa }: { mfa: MFA }) {
-  const { handleModal } = useMFA();
+  const { isPending, mutate } = useMutation({
+    mutationFn: async () => {
+      return await generateMFACodeAction();
+    },
+    onSuccess({ message, data }) {
+      if (data) {
+        handleMFA(data);
+        toast.success(message);
+      } else {
+        toast.error(message);
+      }
+    },
+  });
 
   return (
     <AlertDialogContent
@@ -490,28 +543,48 @@ function MFADetail({ mfa }: { mfa: MFA }) {
           Mã dự phòng giúp đăng nhập khi không có thiết bị xác thực.
         </p>
         {mfa ? (
-          <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
-            {mfa.backupCode.map((code, idx) => (
-              <div
-                key={idx}
-                className={cn(
-                  "flex items-center justify-center py-2",
-                  mfa.expiredBackupCodes.includes(code)
-                    ? "line-through text-muted-foreground"
-                    : ""
-                )}
-              >
-                {code}
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
+              {mfa.backupCode.map((code, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "flex items-center justify-center py-2",
+                    mfa.expiredBackupCodes.includes(code)
+                      ? "line-through text-muted-foreground"
+                      : ""
+                  )}
+                >
+                  {code}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Mã dự phòng chỉ được tạo cách nhau ít nhất 24h. Lần tạo mã gần
+              nhất: {new Date(mfa.backupCodeCreatedAt).toLocaleString()}
+            </p>
+          </>
         ) : null}
 
         <div className="flex flex-col min-[412px]:flex-row items-center justify-end gap-2 mt-4 [&>button]:cursor-pointer">
-          <Button variant="destructive" className="w-full min-[412px]:w-auto">
-            Tắt MFA
+          <Button
+            disabled={isPending}
+            onClick={() => handleStep(5)}
+            variant="destructive"
+            className="w-full min-[412px]:w-auto"
+          >
+            Vô hiệu hoá
           </Button>
-          <Button className="w-full min-[412px]:w-auto">Tạo mã mới</Button>
+          <Button
+            onClick={() => mutate()}
+            disabled={
+              Date.now() - new Date(mfa!.backupCodeCreatedAt).getTime() <
+                24 * 60 * 60 * 1000 || isPending
+            }
+            className="w-full min-[412px]:w-auto"
+          >
+            Tạo mã dự phòng mới
+          </Button>
           <Button
             variant="outline"
             className="w-full min-[412px]:w-auto"
@@ -527,8 +600,110 @@ function MFADetail({ mfa }: { mfa: MFA }) {
   );
 }
 
-function MFAContainer({ mfa }: { mfa?: MFA | null }) {
-  const { open, checked, handleModal, handleSwitch } = useMFA();
+const DisableMFA = () => {
+  const { back, handleModal, handleSwitch } = useMFA();
+  const [codes, setCodes] = React.useState<string[]>(["", ""]);
+  const { isPending, mutate } = useMutation({
+    mutationFn: async () => {
+      return await deleteMFAAction(codes);
+    },
+    onSuccess({ success, message }) {
+      if (success) {
+        handleModal(false);
+        // handleSwitch(false);
+        toast.success(message);
+      } else {
+        toast.error(message);
+      }
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    mutate();
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <p className="text-sm text-muted-foreground">
+        Bạn sắp vô hiệu hoá xác thực hai yếu tố (MFA). Điều này có thể làm giảm
+        tính bảo mật của tài khoản. Bạn có chắc chắn muốn tiếp tục?
+      </p>
+      <div className="col-span-6 sm:col-span-5 mt-4">
+        <p className="text-muted-foreground text-sm">
+          Nhập mã từ ứng dụng xác thực của bạn.
+        </p>
+        <div className="grid gap-2 py-2">
+          <div className="flex items-center gap-4">
+            <Label htmlFor="code1" className="text-right text-sm shrink-0">
+              Mã 1
+            </Label>
+            <div className="w-full">
+              <Input
+                id="code1"
+                required
+                placeholder="123456"
+                maxLength={6}
+                value={codes[0]}
+                onChange={(e) => {
+                  setCodes((prev) => [e.target.value, prev[1]]);
+                }}
+              />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Chờ 30s để nhập mã thứ 2
+          </p>
+
+          <div className="flex items-center gap-4">
+            <Label htmlFor="code2" className="text-right text-sm shrink-0">
+              Mã 2
+            </Label>
+            <Input
+              id="code2"
+              required
+              placeholder="123456"
+              maxLength={6}
+              value={codes[1]}
+              onChange={(e) => {
+                setCodes((prev) => [prev[0], e.target.value]);
+              }}
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-end">
+          <Link href="#" className="text-primary  text-sm">
+            Khắc phục sự cố MFA
+          </Link>
+        </div>
+      </div>
+      <div className="flex flex-col min-[413px]:flex-row gap-2 items-center  justify-end mt-4 [&>button]:cursor-pointer">
+        <Button
+          className="w-full min-[413px]:w-auto"
+          variant={"destructive"}
+          disabled={isPending}
+        >
+          {isPending ? (
+            <LoaderCircleIcon className="size-4 animate-spin" />
+          ) : null}
+          Vô hiệu hoá
+        </Button>
+        <Button
+          disabled={isPending}
+          type="button"
+          className="w-full min-[413px]:w-auto"
+          onClick={back}
+          variant={"outline"}
+        >
+          Huỷ
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+function MFAContainer() {
+  const { open, checked, handleModal, handleSwitch, step, back } = useMFA();
 
   return (
     <AlertDialog open={open}>
@@ -536,41 +711,92 @@ function MFAContainer({ mfa }: { mfa?: MFA | null }) {
         className="cursor-pointer"
         checked={checked}
         onCheckedChange={(v) => {
-          // if (!mfa) {
-          //   handleSwitch(v);
-          // }
+          if (step == 2) {
+            back();
+          }
+          handleSwitch(true);
           handleModal(true);
         }}
       />
 
-      {mfa ? (
-        <MFADetail mfa={mfa} />
-      ) : (
-        <SetupMFAProvider>
-          <SetupMFA />
-        </SetupMFAProvider>
-      )}
+      <AlertDialogContent
+        className={cn(
+          "p-3 min-[412px]:p-6",
+          step == 5
+            ? "max-w-[calc(100%-2rem)] sm:max-w-sm"
+            : "sm:max-w-[calc(100%-2rem)] lg:max-w-3xl"
+        )}
+      >
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {step < 4
+              ? "Xác thực đa yếu tố (MFA)"
+              : step == 5
+              ? "Vô hiệu hoá xác thực đa yếu tô (MFA)"
+              : "Xác thực đa yếu tố (MFA)"}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="hidden"></AlertDialogDescription>
+          {step < 4 ? (
+            <Breadcrumb>
+              <BreadcrumbList className="flex-nowrap justify-center sm:justify-start">
+                <BreadcrumbItem
+                  className={cn(
+                    step == 1 ? "text-foreground font-semibold" : ""
+                  )}
+                >
+                  Bước 1: Nhập tên thiết bị
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem
+                  className={cn(
+                    step == 2 ? "text-foreground font-semibold" : ""
+                  )}
+                >
+                  Bước 2: Thiết lập liên kết
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem
+                  className={cn(
+                    step == 3 ? "text-foreground font-semibold" : ""
+                  )}
+                >
+                  Bước 3: Hoàn thành
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          ) : null}
+        </AlertDialogHeader>
+        {step == 1 ? (
+          <MFAStepOne />
+        ) : step == 2 ? (
+          <MFAStepTwo />
+        ) : step == 3 ? (
+          <MFAStepThree />
+        ) : step == 4 ? (
+          <MFADetail />
+        ) : step == 5 ? (
+          <DisableMFA />
+        ) : null}
+      </AlertDialogContent>
     </AlertDialog>
   );
 }
 
-const MFAModal1 = ({ mfa }: { mfa: MFA | null }) => {
+export function MFAModal({ mfa }: { mfa?: MFA | null }) {
   return (
     <MFAProvider defaultMFa={mfa}>
       <div className="flex w-full gap-4 border-b py-4">
         <div className="w-full">
           <p className="font-bold after:content-['*'] after:text-red-500">
-            Xác thực yếu tố đa yếu tố (MFA)
+            Xác thực yếu tố đa yếu tố (MFA)1
           </p>
           <p className="text-xs font-normal leading-snug text-muted-foreground">
             Bảo mật cao hơn với mã xác thực khi đăng nhập.
           </p>
         </div>
 
-        <MFAContainer mfa={mfa} />
+        <MFAContainer />
       </div>
     </MFAProvider>
   );
-};
-
-export default MFAModal1;
+}

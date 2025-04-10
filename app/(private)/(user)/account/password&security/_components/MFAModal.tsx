@@ -384,7 +384,7 @@ const StepThree = () => {
               key={idx}
               className={cn(
                 "flex items-center justify-center py-2",
-                mFAData.codeExpires.includes(code)
+                mFAData.expiredBackupCodes.includes(code)
                   ? "line-through text-muted-foreground"
                   : ""
               )}
@@ -528,7 +528,7 @@ const DetailMFA = () => {
               key={idx}
               className={cn(
                 "flex items-center justify-center py-2",
-                mFAData.codeExpires.includes(code)
+                mFAData.expiredBackupCodes.includes(code)
                   ? "line-through text-muted-foreground"
                   : ""
               )}

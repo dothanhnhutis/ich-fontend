@@ -9,6 +9,7 @@ import { FcGoogle } from "react-icons/fc";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import MFAModal1 from "./_components/MFAModal1";
+import { MFAModal as MFAModal2 } from "./_components/MFANew";
 
 export const metadata: Metadata = {
   title: "Mật khẩu & Bảo mật",
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 
 const SecurityPage = async () => {
   const mfa = await getMFA();
+
   return (
     <div className="w-full">
       <EmailModal />
@@ -50,8 +52,10 @@ const SecurityPage = async () => {
           </div>
         </div>
       </div>
-      <MFAModal mfa={mfa} />
-      <MFAModal1 mfa={mfa} />
+      {/* <MFAModal mfa={mfa} /> */}
+      {/* <MFAModal1 mfa={mfa} /> */}
+      {mfa ? <p>12321</p> : <MFAModal2 mfa={mfa} />}
+
       <DisableAccountModal />
     </div>
   );

@@ -16,11 +16,12 @@ const userAPI = FetchAPI.create({
 
 export type MFA = {
   userId: string;
+  deviceName: string;
   secretKey: string;
   backupCode: string[];
   count: number;
-  codeExpires: string[];
-  deviceName: string;
+  expiredBackupCodes: string[];
+  backupCodeCreatedAt: Date;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -132,30 +133,31 @@ export const getSessions = async () => {
   }
 };
 
-export const deleteSessionById = async (sessionId: string) => {
+export const deleteSessionById = async (
+  sessionId: string
+): Promise<DefaultResponseData> => {
   try {
-    const { data } = await userAPI.delete<{
-      success: boolean;
-      message: string;
-      data: null;
-    }>(`/sessions/${sessionId}`, {
-      headers: await getHeaders(),
-    });
+    const { data } = await userAPI.delete<DefaultResponseData>(
+      `/sessions/${sessionId}`,
+      {
+        headers: await getHeaders(),
+      }
+    );
 
     revalidatePath("/account/sessions");
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";
     if (error instanceof FetchApiError) {
-      errMes = error.message;
+      return error.response.data as DefaultResponseData;
     } else if (error instanceof Error) {
       errMes = error.message;
     }
     console.log(errMes);
     return {
+      status: 400,
       success: false,
       message: errMes,
-      data: null,
     };
   }
 };
@@ -261,10 +263,9 @@ export async function getMFA(): Promise<MFAResponseData["data"]> {
   }
 }
 
-export async function deleteMFA(codes: string[]): Promise<DefaultResponseData> {
+export async function generateMFACode(): Promise<MFAResponseData> {
   try {
-    const { data } = await userAPI.delete<DefaultResponseData>(`/mfa`, {
-      body: JSON.stringify({ codes }),
+    const { data } = await userAPI.put<MFAResponseData>(`/mfa`, undefined, {
       headers: await getHeaders(),
     });
     revalidatePath("/account/password&security");
@@ -272,11 +273,35 @@ export async function deleteMFA(codes: string[]): Promise<DefaultResponseData> {
   } catch (error: unknown) {
     let errMes = "unknown error";
     if (error instanceof FetchApiError) {
-      errMes = error.message;
+      return error.response.data as MFAResponseData;
     } else if (error instanceof Error) {
       errMes = error.message;
     }
     console.log(errMes);
+    return {
+      status: 400,
+      success: false,
+      message: errMes,
+      data: null,
+    };
+  }
+}
+
+export async function deleteMFA(codes: string[]): Promise<DefaultResponseData> {
+  try {
+    const { data } = await userAPI.delete<DefaultResponseData>(`/mfa`, {
+      data: { codes },
+      headers: await getHeaders(),
+    });
+    revalidatePath("/account/password&security");
+    return data;
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof FetchApiError) {
+      return error.response.data as DefaultResponseData;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
     return {
       status: 400,
       success: false,

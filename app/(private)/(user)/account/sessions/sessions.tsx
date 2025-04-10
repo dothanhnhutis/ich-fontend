@@ -84,7 +84,7 @@ const SessionItem = ({
 };
 
 const Sessions = ({ sessions }: { sessions: Session[] }) => {
-  const { state } = useUser();
+  const { user } = useUser();
 
   return (
     <div className="grid w-full gap-4 py-4">
@@ -99,7 +99,7 @@ const Sessions = ({ sessions }: { sessions: Session[] }) => {
           <SessionItem
             key={session.id}
             session={session}
-            isCurrentSession={session.id == state?.session.id}
+            isCurrentSession={session.id == user?.session.id}
           />
         ))
       )}

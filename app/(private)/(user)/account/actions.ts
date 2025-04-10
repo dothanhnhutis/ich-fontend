@@ -5,6 +5,7 @@ import {
   deleteMFA,
   deleteSessionById,
   disableAccount,
+  generateMFACode,
   getMFA,
   getSetupMFA,
   setupMFA,
@@ -32,6 +33,10 @@ export async function getSetupMFAAction() {
 
 export async function deleteMFAAction(codes: string[]) {
   return await deleteMFA(codes);
+}
+
+export async function generateMFACodeAction() {
+  return await generateMFACode();
 }
 
 export async function disableAccountAction() {

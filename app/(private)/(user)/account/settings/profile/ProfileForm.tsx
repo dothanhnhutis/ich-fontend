@@ -1,20 +1,20 @@
 "use client";
 import React from "react";
-import { useUser } from "../../user-provider";
+import { useUser } from "../../../../UserProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const ProfileForm = () => {
-  const { state } = useUser();
+  const { user } = useUser();
   return (
     <div className="w-full">
       <div className="flex gap-2 items-center mb-4">
         <Avatar className="h-16 w-16 rounded-full">
           <AvatarImage
-            src={state?.avatar?.url || "/user-picture.jpg"}
-            alt={state?.username}
+            src={user?.avatar?.url || "/user-picture.jpg"}
+            alt={user?.username}
           />
           <AvatarFallback className="h-16 w-16 rounded-full">CN</AvatarFallback>
         </Avatar>

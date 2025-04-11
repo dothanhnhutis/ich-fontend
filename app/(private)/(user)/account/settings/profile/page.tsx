@@ -1,9 +1,9 @@
 import React from "react";
 import { Metadata } from "next";
-import ProfileForm from "./profile-form";
+import ProfileForm from "./ProfileForm";
 
 export const metadata: Metadata = {
-  title: "Cơ sở",
+  title: "Hồ sơ",
 };
 
 const ProfilePage = () => {

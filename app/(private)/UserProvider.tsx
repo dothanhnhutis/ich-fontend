@@ -30,8 +30,6 @@ export const UserProvider = ({
   children,
   user,
 }: Readonly<{ children: React.ReactNode; user?: CurrentUser | null }>) => {
-  // const [state, setState] = React.useState<CurrentUser | null>(user || null);
-
   const { isPending, data, refetch } = useQuery({
     enabled: !user,
     initialData: user,

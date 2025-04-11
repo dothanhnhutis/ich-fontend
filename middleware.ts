@@ -51,6 +51,15 @@ export async function middleware(request: NextRequest) {
     if (nextUrl.pathname.startsWith("/login")) {
       return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, url));
     }
+    if (
+      nextUrl.pathname == "/account" ||
+      nextUrl.pathname == "/account/settings"
+    ) {
+      const response = NextResponse.rewrite(
+        new URL("/account/settings/profile", request.url)
+      );
+      return response;
+    }
   } else {
     if (nextUrl.pathname.startsWith("/account")) {
       const response = NextResponse.redirect(new URL("/login", request.url));

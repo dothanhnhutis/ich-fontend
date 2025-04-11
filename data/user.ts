@@ -293,7 +293,6 @@ export async function deleteMFA(codes: string[]): Promise<DefaultResponseData> {
       data: { codes },
       headers: await getHeaders(),
     });
-    revalidatePath("/account/password&security");
     return data;
   } catch (error: unknown) {
     let errMes = "unknown error";

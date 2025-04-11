@@ -1,5 +1,5 @@
 import React from "react";
-import { UserProvider } from "./user-provider";
+import { UserProvider } from "./UserProvider";
 import { getCurrrentUser } from "@/data/user";
 
 const PrivateLayout = async ({

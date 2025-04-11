@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import PasswordInput from "@/components/password-input";
-import { useUser } from "@/app/(private)/user-provider";
+import { useUser } from "@/app/(private)/UserProvider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";

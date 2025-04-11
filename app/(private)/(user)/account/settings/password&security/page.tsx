@@ -3,13 +3,11 @@ import { getMFA } from "@/data/user";
 import { Metadata } from "next";
 import EmailModal from "./_components/EmailModal";
 import PasswordModal from "./_components/PasswordModal";
-import MFAModal from "./_components/MFAModal";
 import DisableAccountModal from "./_components/DisableAccountModal";
 import { FcGoogle } from "react-icons/fc";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import MFAModal1 from "./_components/MFAModal1";
-import { MFAModal as MFAModal2 } from "./_components/MFANew";
+import { MFAModal as MFAModal2 } from "./_components/MFAModal";
 
 export const metadata: Metadata = {
   title: "Mật khẩu & Bảo mật",
@@ -17,7 +15,6 @@ export const metadata: Metadata = {
 
 const SecurityPage = async () => {
   const mfa = await getMFA();
-
   return (
     <div className="w-full">
       <EmailModal />

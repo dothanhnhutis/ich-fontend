@@ -1,3 +1,4 @@
+import { string2Cookie } from "@/lib/utils";
 import { cookies, headers } from "next/headers";
 
 export const getHeaders = async () => {
@@ -16,6 +17,14 @@ export const getHeaders = async () => {
     "user-agent": userAgent,
   };
 };
+
+export async function loadCookie(rawCookie: string) {
+  const cookiesParse = string2Cookie(rawCookie);
+  const cookieStore = await cookies();
+  for (const { name, value, options } of cookiesParse) {
+    cookieStore.set(name, value, options);
+  }
+}
 
 export type DefaultResponseData = {
   status: number;

@@ -1,6 +1,6 @@
 import "server-only";
 import { FetchAPI, FetchApiError } from "@/lib/axios";
-import { DefaultResponseData, getHeaders } from "./common";
+import { DefaultResponseData, getHeaders, loadCookie } from "./common";
 import { string2Cookie } from "@/lib/utils";
 import { cookies } from "next/headers";
 
@@ -36,11 +36,7 @@ export const lognIn = async (input: LognIn): Promise<LognInResponse> => {
     );
 
     const rawCookie = headers.get("set-cookie") ?? "";
-    const cookiesParse = string2Cookie(rawCookie);
-    const cookieStore = await cookies();
-    for (const { name, value, options } of cookiesParse) {
-      cookieStore.set(name, value, options);
-    }
+    await loadCookie(rawCookie);
 
     return data;
   } catch (error: unknown) {
@@ -70,6 +66,68 @@ export const lognIn = async (input: LognIn): Promise<LognInResponse> => {
     };
   }
 };
+
+export type Register = {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+export async function register(input: Register): Promise<DefaultResponseData> {
+  try {
+    const { data, headers } = await authInstance.post<DefaultResponseData>(
+      "/signup",
+      input,
+      {
+        headers: await getHeaders(),
+      }
+    );
+    const rawCookie = headers.get("set-cookie") ?? "";
+    await loadCookie(rawCookie);
+
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof FetchApiError) {
+      const data = error.response.data as DefaultResponseData;
+      return data;
+    }
+    console.error("Unknown error", error);
+    return {
+      status: 400,
+      success: false,
+      message: "Email này đã đăng ký.",
+    };
+  }
+}
+
+export async function sendRecoverAccount(email: string) {
+  try {
+    const { data, headers } = await authInstance.post<DefaultResponseData>(
+      "/recover",
+      { email },
+      {
+        headers: await getHeaders(),
+      }
+    );
+    const rawCookie = headers.get("set-cookie") ?? "";
+    await loadCookie(rawCookie);
+
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof FetchApiError) {
+      const data = error.response.data as DefaultResponseData;
+      data.message = "Email đổi mật khẩu đã được gửi.";
+      return data;
+    }
+    console.error("Unknown error", error);
+    return {
+      status: 400,
+      success: false,
+      message: "Email đổi mật khẩu đã được gửi.",
+    };
+  }
+}
 
 export const sendReactivateAccount = async (
   email: string

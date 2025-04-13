@@ -63,7 +63,7 @@ export async function middleware(request: NextRequest) {
   } else {
     if (nextUrl.pathname.startsWith("/account")) {
       const response = NextResponse.redirect(new URL("/login", request.url));
-      // response.cookies.set("sid", "", { maxAge: 0, path: "/" });
+      response.cookies.set("sid", "", { maxAge: 0, path: "/" });
       return response;
     }
   }

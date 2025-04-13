@@ -8,34 +8,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoaderCircleIcon } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { mainFetch } from "@/lib/custom-fetch";
-import * as z from "zod";
 import { toast } from "sonner";
+import { sendRecoverAccountAction } from "../actions";
 type RecoverFormProps = {
   email?: string;
 };
 
-const recoverSchema = z.object({
-  email: z
-    .string({
-      required_error: "Email là trường bắt buộc",
-      invalid_type_error: "Email phải là chuỗi",
-    })
-    .email("Email không hợp lệ"),
-});
-
 const RecoverForm = ({ email }: RecoverFormProps) => {
-  const [formData, setFormData] = React.useState<z.infer<typeof recoverSchema>>(
-    { email: email || "" }
-  );
+  const [formData, setFormData] = React.useState<string>(email || "");
 
-  const recoverMutation = useMutation({
-    mutationFn: async (input: z.infer<typeof recoverSchema>) => {
-      return await mainFetch.post<{ message: string }>("/auth/recover", input);
+  const { isPending, mutate } = useMutation({
+    mutationFn: async () => {
+      return await sendRecoverAccountAction(formData);
     },
-    onSuccess({ data }) {
-      setFormData({ email: "" });
-      toast.success(data.message);
+    onSuccess({ message }) {
+      setFormData("");
+      toast.success(message);
     },
     onError(error) {
       toast.error(error.message);
@@ -44,9 +32,7 @@ const RecoverForm = ({ email }: RecoverFormProps) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const parse = recoverSchema.safeParse(formData);
-    if (!parse.success) return;
-    recoverMutation.mutate(formData);
+    mutate();
   };
   return (
     <div
@@ -67,23 +53,22 @@ const RecoverForm = ({ email }: RecoverFormProps) => {
             </div>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-center mt-4">
-            <span>Cập nhật mật khẩu của bạn</span>
+            <span>Lấy lại mật khẩu</span>
           </h1>
           <p className="text-center text-muted-foreground text-base">
-            Nhập địa chỉ email của bạn và chọn <strong>Gửi</strong>.
+            Nhập địa chỉ email tài khoản của bạn và chọn <strong>Gửi</strong>.
           </p>
           <form onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
-                value={formData.email}
+                value={formData}
                 onChange={(e) => {
-                  setFormData({
-                    email: e.target.value,
-                  });
+                  setFormData(e.target.value);
                 }}
                 id="email"
                 type="email"
+                required
                 placeholder="example@gmail.com"
                 className="focus-visible:ring-offset-0 focus-visible:ring-transparent"
               />
@@ -97,8 +82,8 @@ const RecoverForm = ({ email }: RecoverFormProps) => {
                 Huỷ bỏ
               </Link>
 
-              <Button variant="default" disabled={recoverMutation.isPending}>
-                {recoverMutation.isPending && (
+              <Button variant="default" disabled={isPending}>
+                {isPending && (
                   <LoaderCircleIcon className="h-4 w-4 animate-spin flex-shrink-0 mr-2" />
                 )}
                 Gửi

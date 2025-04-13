@@ -89,6 +89,25 @@ type CurrentUserResponse = DefaultResponseData & {
   data: CurrentUser | null;
 };
 
+export async function logOut() {
+  try {
+    await userAPI.delete<CurrentUserResponse>("/signout", {
+      headers: await getHeaders(),
+    });
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof FetchApiError) {
+      errMes = error.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+  } finally {
+    revalidatePath("/account", "layout");
+    const cookieStore = await cookies();
+    cookieStore.delete("sid");
+  }
+}
+
 export async function getCurrrentUser(): Promise<CurrentUserResponse["data"]> {
   try {
     const {

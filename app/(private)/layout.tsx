@@ -6,6 +6,7 @@ const PrivateLayout = async ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
   const user = await getCurrrentUser();
+  console.log("PrivateLayout", user);
   return <UserProvider user={user}>{children}</UserProvider>;
 };
 

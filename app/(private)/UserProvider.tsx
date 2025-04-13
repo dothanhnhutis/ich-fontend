@@ -6,11 +6,12 @@ import {
   RefetchOptions,
   useQuery,
 } from "@tanstack/react-query";
-import { getCurrentUserAction } from "./actions";
+import { getCurrentUserAction, logOutAction } from "./actions";
 
 type UserProvider = {
   isPending: boolean;
   user: CurrentUser | null;
+  logOut: () => Promise<void>;
   refetch: (
     options?: RefetchOptions
   ) => Promise<QueryObserverResult<CurrentUser | null, Error>>;
@@ -39,11 +40,16 @@ export const UserProvider = ({
     },
   });
 
+  async function handleLogOut() {
+    await logOutAction();
+  }
+
   const contextValue = React.useMemo<UserProvider>(
     () => ({
       isPending,
       user: data ?? null,
       refetch,
+      logOut: handleLogOut,
     }),
     [data, isPending, refetch]
   );

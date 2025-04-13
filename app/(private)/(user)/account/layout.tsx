@@ -28,7 +28,7 @@ import { usePathname } from "next/navigation";
 const AccountLayout = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
-  const { user } = useUser();
+  const { user, logOut } = useUser();
   const pathName = usePathname();
 
   return (
@@ -115,7 +115,12 @@ const AccountLayout = ({
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    console.log("first");
+                    await logOut();
+                  }}
+                >
                   <LogOut />
                   Log out
                 </DropdownMenuItem>

@@ -1,5 +1,5 @@
 import React from "react";
-import LogInModal from "./_components/LogInModal";
+import LogInModal from "./_components/LognInModal";
 
 const LogInModalPage = () => {
   return <LogInModal />;

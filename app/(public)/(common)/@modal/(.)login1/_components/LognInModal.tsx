@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import SignInForm from "@/app/(public)/_components/forms/signin-form";
+import SignInForm from "@/app/(public)/_components/forms/SignInForm";
 
 const LogInModal = () => {
   const router = useRouter();

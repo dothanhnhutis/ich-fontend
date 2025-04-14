@@ -27,6 +27,7 @@ const passwordSchema = z
 
 const SignUpForm = () => {
   const [hiddenPassword, setHiddenPassword] = React.useState<boolean>(true);
+  const [emailExists, setEmailExists] = React.useState<boolean>(false);
 
   const [formData, setFormData] = React.useState({
     username: "",
@@ -45,6 +46,7 @@ const SignUpForm = () => {
   };
 
   const handleOnchange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.name == "email") setEmailExists(false);
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -53,6 +55,14 @@ const SignUpForm = () => {
     if (success) return [];
     return error.issues;
   }, [formData.password]);
+
+  const isPasswordError = React.useMemo(() => {
+    return (
+      formData.password.length > 0 &&
+      focusAt != "password" &&
+      isPasswordSchemaErrors.length > 0
+    );
+  }, [formData, focusAt]);
 
   const isConfirmNewPassword = React.useMemo(() => {
     return (
@@ -64,13 +74,15 @@ const SignUpForm = () => {
     );
   }, [formData, focusAt]);
 
-  const { isPending, mutate, status, data } = useMutation({
+  const { isPending, mutate } = useMutation({
     mutationFn: async function () {
       return await registerAction(formData);
     },
     onSuccess({ success, message }) {
       if (success) {
         toast.success(message);
+      } else {
+        setEmailExists(true);
       }
     },
     onSettled() {
@@ -135,21 +147,14 @@ const SignUpForm = () => {
               onBlur={handleOnBlur}
               onFocus={handleOnFocus}
               className={
-                status != "idle" && !data?.success
+                emailExists
                   ? "border-red-500 bg-red-50 outline-red-50 ring-red-50"
                   : ""
               }
             />
-            {status != "idle" && (
-              <p
-                className={cn(
-                  "font-bold text-xs",
-                  data?.success ? "text-green-400" : "text-destructive"
-                )}
-              >
-                {data?.success
-                  ? "Đăng ký thành công. "
-                  : "Email này đã đăng ký. "}
+            {emailExists && (
+              <p className={"font-bold text-xs text-destructive"}>
+                Email này đã đăng ký.{" "}
                 <Link
                   className="text-primary text-xs"
                   href={`/login${
@@ -177,11 +182,7 @@ const SignUpForm = () => {
               onTypeChange={setHiddenPassword}
               onBlur={handleOnBlur}
               onFocus={handleOnFocus}
-              isError={
-                formData.password.length > 0 &&
-                focusAt != "password" &&
-                isPasswordSchemaErrors.length > 0
-              }
+              isError={isPasswordError}
             />
             <div className="flex flex-col gap-y-1 text-xs">
               <p className="font-normal text-muted-foreground">
@@ -242,7 +243,12 @@ const SignUpForm = () => {
           </div>
 
           <Button
-            disabled={isPending}
+            disabled={
+              isPending ||
+              emailExists ||
+              isConfirmNewPassword ||
+              isPasswordError
+            }
             type="submit"
             className="w-full cursor-pointer"
           >

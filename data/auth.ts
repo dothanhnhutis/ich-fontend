@@ -193,9 +193,12 @@ export async function forgotPassword(
 
 export async function confirmEmail(token: string) {
   try {
-    const { data } = await authInstance.get<DefaultResponseData>("/activate", {
-      headers: { ...(await getHeaders()), Authorization: token },
-    });
+    const { data } = await authInstance.get<DefaultResponseData>(
+      "/confirm-email",
+      {
+        headers: { ...(await getHeaders()), Authorization: token },
+      }
+    );
     return data;
   } catch (error: unknown) {
     if (error instanceof FetchApiError) {

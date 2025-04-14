@@ -15,7 +15,7 @@ const GoogleButton = ({
   return (
     <Button
       variant="outline"
-      className="w-full"
+      className="w-full cursor-pointer"
       type="button"
       onClick={handleOnClick}
     >

@@ -190,3 +190,23 @@ export async function forgotPassword(
     };
   }
 }
+
+export async function confirmEmail(token: string) {
+  try {
+    const { data } = await authInstance.get<DefaultResponseData>("/activate", {
+      headers: { ...(await getHeaders()), Authorization: token },
+    });
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof FetchApiError) {
+      const data = error.response.data as DefaultResponseData;
+      return data;
+    }
+    console.error("Unknown error", error);
+    return {
+      status: 400,
+      success: false,
+      message: "",
+    };
+  }
+}

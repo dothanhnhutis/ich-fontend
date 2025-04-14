@@ -125,6 +125,7 @@ export type ImgDataFormSrc = {
   aspectRatio: string;
   imageHtml: HTMLImageElement;
 };
+
 export const getImgProperty = (src: string): Promise<ImgDataFormSrc> => {
   return new Promise((resolve, reject) => {
     const img = new Image();

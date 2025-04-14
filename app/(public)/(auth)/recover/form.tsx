@@ -76,7 +76,7 @@ const RecoverForm = ({ email }: RecoverFormProps) => {
             <div className="flex gap-1 justify-end items-center mt-4">
               <Link
                 prefetch
-                href="/signin"
+                href="/login"
                 className={buttonVariants({ variant: "link" })}
               >
                 Huỷ bỏ

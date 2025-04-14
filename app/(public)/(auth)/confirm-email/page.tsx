@@ -1,20 +1,19 @@
-import { Button } from "@/components/ui/button";
-import envs from "@/configs/envs";
-import { verifyJWT } from "@/lib/utils";
-import { UserToken } from "@/schema/user.schema";
-import { checkToken, confirmEmail } from "@/services/auth.service";
-import Link from "next/link";
 import React from "react";
+import Link from "next/link";
 
-const ConfirmEmailPage = async ({
-  searchParams,
-}: {
-  searchParams: { token?: string | string[] | undefined };
+import env from "@/configs/env";
+import { Button } from "@/components/ui/button";
+import { verifyJWT } from "@/lib/jwt";
+import { confirmEmailAction } from "../actions";
+
+const ConfirmEmailPage = async (props: {
+  searchParams: Promise<{ token?: string | string[] | undefined }>;
 }) => {
+  const searchParams = await props.searchParams;
   const token =
     typeof searchParams.token == "string" ? searchParams.token : undefined;
 
-  const expiredElement: JSX.Element = (
+  const expiredElement: React.JSX.Element = (
     <div className="flex flex-col items-center sm:mx-auto sm:max-w-md gap-2 text-center text-red-500">
       <h4 className="font-semibold text-2xl text-black">Xác Thực Tài Khoản</h4>
       <p>Xác thực email không thành công.</p>
@@ -30,15 +29,9 @@ const ConfirmEmailPage = async ({
     return expiredElement;
   }
 
-  const data = verifyJWT<UserToken>(token, envs.NEXT_PUBLIC_JWT_SECRET, {
-    ignoreExpiration: false,
-  });
+  const { success } = await confirmEmailAction(token);
 
-  if (!data || data.type != "emailVerification") return expiredElement;
-
-  const isSuccess = await confirmEmail(token);
-
-  if (!isSuccess) return expiredElement;
+  if (!success) return expiredElement;
 
   return (
     <div className="flex flex-col items-center sm:mx-auto sm:max-w-md gap-2 text-center text-green-500">

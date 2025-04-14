@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user) {
-    if (nextUrl.pathname.startsWith("/login")) {
+    if (nextUrl.pathname == "/login") {
       return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, url));
     }
     if (

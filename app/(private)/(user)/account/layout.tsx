@@ -117,7 +117,6 @@ const AccountLayout = ({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={async () => {
-                    console.log("first");
                     await logOut();
                   }}
                 >

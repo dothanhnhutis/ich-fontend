@@ -342,7 +342,6 @@ const DisplayContainer = () => {
   );
 
   const handleAlarm = (data: unknown) => {
-    console.log(data);
     toast.success("oker");
   };
 

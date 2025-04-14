@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import SignInForm from "@/app/(public)/_components/forms/SignInForm";
 
-const LogInModal = () => {
+const SignInModal = () => {
   const router = useRouter();
   return (
     <Dialog
@@ -57,4 +57,4 @@ const LogInModal = () => {
   );
 };
 
-export default LogInModal;
+export default SignInModal;

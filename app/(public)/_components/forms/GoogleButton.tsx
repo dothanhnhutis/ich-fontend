@@ -7,44 +7,10 @@ const GoogleButton = ({
 }: {
   label?: string;
 }) => {
-  const popupWindowRef = React.useRef<WindowProxy | null>(null);
-
-  function handleOnClick() {
-    const width = 500;
-    const height = 600;
-    const left = window.screenX + (window.innerWidth - width) / 2;
-    const top = window.screenY + (window.innerHeight - height) / 2;
-    popupWindowRef.current = window.open(
-      "http://localhost:4000/api/v1/auth/google",
-      "googleLogin",
-      `toolbar=no, menubar=no, width=${width}, height=${height}, left=${left}, top=${top}`
-    );
-
-    // window.addEventListener("message", (event) => {
-    //   if (event.origin !== window.location.origin) return;
-
-    //   const { token } = event.data;
-    //   if (token) {
-    //     console.log("Access Token từ Google:", token);
-    //   }
-    // });
-  }
-
-  React.useEffect(() => {
-    const handleMessage = (event: any) => {
-      if (event.origin === "http://localhost:3000") {
-        // Xử lý dữ liệu nhận được từ popup
-        console.log("Xử lý dữ liệu nhận được từ popup");
-        popupWindowRef.current?.close();
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-
-    return () => {
-      window.removeEventListener("message", handleMessage);
-    };
-  });
+  const handleOnClick = () => {
+    const authorizationUrl = `http://localhost:4000/api/v1/auth/google`;
+    window.location.href = authorizationUrl;
+  };
 
   return (
     <Button

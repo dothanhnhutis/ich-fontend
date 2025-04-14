@@ -5,7 +5,7 @@ import SignInForm from "../../_components/forms/SignInForm";
 export const metadata: Metadata = {
   title: "Đăng Nhập",
 };
-const LognInPage = () => {
+const LogInPage = () => {
   return (
     <div className="flex  flex-col items-center gap-6 bg-background p-2 sm:p-10">
       <div className="w-full max-w-sm">
@@ -24,4 +24,4 @@ const LognInPage = () => {
   );
 };
 
-export default LognInPage;
+export default LogInPage;

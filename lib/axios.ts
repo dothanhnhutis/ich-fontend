@@ -112,7 +112,6 @@ export class FetchAPI {
 
     // Nếu phản hồi không thành công, ném lỗi
     if (!res.ok) {
-      console.log(response.data);
       throw new FetchApiError(processedResponse.statusText, processedResponse);
     }
     return processedResponse;

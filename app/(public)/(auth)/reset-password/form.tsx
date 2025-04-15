@@ -5,203 +5,208 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { CheckIcon, LoaderCircleIcon } from "lucide-react";
-import { UserToken } from "@/schema/user.schema";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { mainFetch } from "@/lib/custom-fetch";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { DEFAULT_LOGOUT_REDIRECT } from "@/routes";
-const resetPasswordSchema = z
-  .object({
-    newPassword: z
-      .string({
-        required_error: "Mật khẩu mới là bắt buộc",
-        invalid_type_error: "Mật khẩu mới phải là chuỗi",
-      })
-      .min(8, "Mật khẩu mới quá ngắn")
-      .max(40, "Mật khẩu mới quá dài")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]*$/,
-        "Mật khẩu mới phải có ký tự hoa, thường, sô và ký tự đặc biệt"
-      ),
-    confirmPassword: z.string({
-      required_error: "Xác nhận mật khẩu là bắt buộc",
-      invalid_type_error: "Xác nhận mật khẩu phải là chuỗi",
-    }),
+import { resetPasswordAction } from "../actions";
+import Link from "next/link";
+const passwordSchema = z
+  .string({
+    required_error: "Mật khẩu mới là bắt buộc",
+    invalid_type_error: "Mật khẩu mới phải là chuỗi",
   })
-  .strict()
-  .refine((data) => data.confirmPassword == data.newPassword, {
-    message: "Xác nhận mật khẩu không khớp",
-    path: ["confirmPassword"],
-  });
+  .min(8, "Mật khẩu mới quá ngắn")
+  .max(60, "Mật khẩu mới quá dài")
+  .regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]*$/,
+    "Mật khẩu mới phải có ký tự hoa, thường, sô và ký tự đặc biệt"
+  );
 
 const ResetPasswordForm = ({ token }: { token: string }) => {
-  const routes = useRouter();
-  const [isHiddenPassword, setIsHiddenPassword] = React.useState<boolean>(true);
-  const [formData, setFormData] = React.useState<
-    z.infer<typeof resetPasswordSchema>
-  >({
-    newPassword: "",
+  const [isResetPassswordSuccess, setIsResetPasswordSuccess] =
+    React.useState<boolean>(false);
+  const [hiddenPassword, setHiddenPassword] = React.useState<boolean>(true);
+  const [focusAt, setFocusAt] = React.useState<string>("");
+  const handleOnFocus = (e: React.FocusEvent<HTMLInputElement, Element>) => {
+    setFocusAt(e.target.name);
+  };
+  const handleOnBlur = () => {
+    setFocusAt("");
+  };
+
+  const [formData, setFormData] = React.useState<{
+    password: string;
+    confirmPassword: string;
+  }>({
+    password: "",
     confirmPassword: "",
   });
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
+  const isPasswordSchemaErrors = React.useMemo(() => {
+    const { success, error } = passwordSchema.safeParse(formData.password);
+    if (success) return [];
+    return error.issues;
+  }, [formData.password]);
 
-  const [focused, setFocused] = React.useState<string[]>([]);
-  const handleOnChangFocus = (
-    e: React.FocusEvent<HTMLInputElement, Element>
-  ) => {
-    if (e.type == "blur" && !focused.includes(e.target.name)) {
-      setFocused((prev) => [...prev, e.target.name]);
-    }
-  };
+  const isPasswordError = React.useMemo(() => {
+    return (
+      formData.password.length > 0 &&
+      focusAt != "password" &&
+      isPasswordSchemaErrors.length > 0
+    );
+  }, [formData, focusAt]);
 
-  const handleError = React.useCallback(
-    (path: string) => {
-      const parse = resetPasswordSchema.safeParse(formData);
-      if (parse.success) return [];
-      const errors: z.ZodIssue[] = parse.error.issues;
-      return errors.filter((e) => e.path.join("_") == path);
+  const isConfirmNewPassword = React.useMemo(() => {
+    return (
+      formData.password.length > 0 &&
+      formData.confirmPassword.length > 0 &&
+      focusAt != "confirmPassword" &&
+      focusAt != "password" &&
+      formData.password != formData.confirmPassword
+    );
+  }, [formData, focusAt]);
+
+  const { isPending, mutate } = useMutation({
+    mutationFn: async () => {
+      return await resetPasswordAction(token, formData);
     },
-    [formData]
-  );
-
-  const resetPasswordMutation = useMutation({
-    mutationFn: async (input: z.infer<typeof resetPasswordSchema>) => {
-      return mainFetch.post<{ message: string }>(
-        "/auth/reset-password?token=" + token,
-        input
-      );
-    },
-    onMutate() {
+    onSettled() {
       setFormData({
-        newPassword: "",
+        password: "",
         confirmPassword: "",
       });
-      setFocused([]);
     },
-    onSuccess({ data }) {
-      toast.success(data.message);
-      routes.push(DEFAULT_LOGOUT_REDIRECT);
-    },
-    onError(error) {
-      toast.error(error.message);
-      if (error.message == "Phiên của bạn đã hết hạn.") {
-        routes.push(DEFAULT_LOGOUT_REDIRECT);
+    onSuccess({ success, message }) {
+      if (!success) {
+        toast.error(message);
+      } else {
+        setIsResetPasswordSuccess(true);
       }
     },
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const parse = resetPasswordSchema.safeParse(formData);
-    if (!parse.success) return;
-    resetPasswordMutation.mutate(formData);
+    mutate();
   };
 
   return (
     <div className="flex flex-col flex-grow mx-auto w-full sm:max-w-[570px] p-4 transition-all">
       <div className="flex flex-col flex-grow space-y-6">
         <h1 className="text-4xl font-semibold tracking-tight text-center mt-4">
-          Đặt lại mật khẩu bảo mật
+          Đặt lại mật khẩu tài khoản của bạn
         </h1>
 
-        <p className="text-muted-foreground text-center">
-          Nhập mật khẩu bảo mật và khôi phục lại tài khoản của bạn
-        </p>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-y-4 w-full">
-          <div className="flex flex-col gap-y-1.5">
-            <Label htmlFor="newPassword">Mật khẩu mới</Label>
-            <PasswordInput
-              id="newPassword"
-              name="newPassword"
-              autoComplete="off"
-              placeholder="********"
-              open={isHiddenPassword}
-              onOpenChange={setIsHiddenPassword}
-              value={formData.newPassword}
-              onChange={handleOnChange}
-              onBlur={handleOnChangFocus}
-              className={cn(
-                focused.includes("newPassword") &&
-                  handleError("newPassword").length > 0
-                  ? "border-red-500"
-                  : ""
-              )}
-            />
-
-            <div className="flex flex-col gap-y-1">
-              <p className="font-normal text-xs">
-                Mật khẩu của bạn phải bao gồm:
-              </p>
-              <p
-                className={cn(
-                  "inline-flex gap-x-2 items-center text-gray-500",
-                  handleError("newPassword").filter(
-                    (e) => e.code == "too_small"
-                  ).length == 0
-                    ? "text-green-400"
-                    : ""
-                )}
-              >
-                <CheckIcon size={16} />
-                <span className="font-medium text-xs">8 đến 40 ký tự</span>
-              </p>
-              <p
-                className={cn(
-                  "inline-flex gap-x-2 items-center text-gray-500",
-                  handleError("newPassword").filter(
-                    (e) => "validation" in e && e.validation == "regex"
-                  ).length == 0
-                    ? "text-green-400"
-                    : ""
-                )}
-              >
-                <CheckIcon size={16} />
-                <span className="font-medium text-xs">
-                  Chữ cái, số và ký tự đặc biệt @$!%*?&
-                </span>
-              </p>
-            </div>
+        {isResetPassswordSuccess ? (
+          <div className="flex flex-col justify-center gap-2">
+            <p className="text-green-400 text-center">
+              Khôi phục tài khoản thành công.{" "}
+            </p>
+            <Button asChild className="inline-flex">
+              <Link href="/login">Về trang đăng nhập</Link>
+            </Button>
           </div>
-          <div className="flex flex-col gap-y-1.5">
-            <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
+        ) : (
+          <>
+            <p className="text-muted-foreground text-center">
+              Nhập mật khẩu và khôi phục lại tài khoản của bạn
+            </p>
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-y-4 w-full"
+            >
+              <div className="flex flex-col gap-y-1.5">
+                <Label htmlFor="password">Mật khẩu mới</Label>
+                <PasswordInput
+                  id="password"
+                  name="password"
+                  autoComplete="off"
+                  placeholder="********"
+                  required
+                  isPassword={hiddenPassword}
+                  onTypeChange={setHiddenPassword}
+                  value={formData.password}
+                  onChange={handleOnChange}
+                  onBlur={handleOnBlur}
+                  onFocus={handleOnFocus}
+                  isError={isPasswordError}
+                />
 
-            <PasswordInput
-              id="confirmPassword"
-              name="confirmPassword"
-              autoComplete="off"
-              placeholder="********"
-              open={isHiddenPassword}
-              onOpenChange={setIsHiddenPassword}
-              value={formData.confirmPassword}
-              onChange={handleOnChange}
-              onBlur={handleOnChangFocus}
-              className={cn(
-                focused.includes("confirmPassword") &&
-                  handleError("confirmPassword").length > 0
-                  ? "border-red-500"
-                  : ""
-              )}
-            />
+                <div className="flex flex-col gap-y-1 text-xs">
+                  <p className="font-normal text-muted-foreground">
+                    Mật khẩu của bạn phải bao gồm:
+                  </p>
+                  <p
+                    className={cn(
+                      "inline-flex gap-x-2 items-center text-muted-foreground",
+                      isPasswordSchemaErrors.filter(
+                        (err) =>
+                          err.code == "too_small" || err.code == "too_big"
+                      ).length > 0
+                        ? ""
+                        : "text-green-400"
+                    )}
+                  >
+                    <CheckIcon size={16} />
+                    <span>8 đến 40 ký tự</span>
+                  </p>
+                  <p
+                    className={cn(
+                      "inline-flex gap-x-2 items-center text-muted-foreground",
+                      isPasswordSchemaErrors.filter(
+                        (err) =>
+                          err.code == "invalid_string" &&
+                          err.validation == "regex"
+                      ).length > 0
+                        ? ""
+                        : "text-green-400"
+                    )}
+                  >
+                    <CheckIcon size={16} />
+                    <span>Chữ cái, số và ký tự đặc biệt @$!%*?&</span>
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-y-1.5">
+                <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
 
-            {focused.includes("confirmPassword") &&
-              handleError("confirmPassword").map((e, idx) => (
-                <p key={idx} className="font-bold text-xs text-red-500">
-                  {e.message}
-                </p>
-              ))}
-          </div>
-          <Button disabled={resetPasswordMutation.isPending}>
-            {resetPasswordMutation.isPending && (
-              <LoaderCircleIcon className="h-4 w-4 animate-spin flex-shrink-0 mr-2" />
-            )}
-            Khôi phục
-          </Button>
-        </form>
+                <PasswordInput
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  autoComplete="off"
+                  placeholder="********"
+                  required
+                  isPassword={hiddenPassword}
+                  onTypeChange={setHiddenPassword}
+                  value={formData.confirmPassword}
+                  onChange={handleOnChange}
+                  onBlur={handleOnBlur}
+                  onFocus={handleOnFocus}
+                  isError={isConfirmNewPassword}
+                />
+
+                {isConfirmNewPassword ? (
+                  <p className="text-red-500 text-xs">
+                    Xác nhận mật khẩu không đúng.
+                  </p>
+                ) : null}
+              </div>
+              <Button
+                disabled={isPending || isConfirmNewPassword || isPasswordError}
+              >
+                {isPending && (
+                  <LoaderCircleIcon className="h-4 w-4 animate-spin flex-shrink-0 mr-2" />
+                )}
+                Khôi phục
+              </Button>
+            </form>{" "}
+          </>
+        )}
       </div>
     </div>
   );

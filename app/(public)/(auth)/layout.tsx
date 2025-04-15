@@ -23,7 +23,6 @@ const AuthLayout = ({
           </Link>
         </div>
       </div>
-
       {children}
     </>
   );

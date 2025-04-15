@@ -1,17 +1,26 @@
 import React from "react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Metadata } from "next";
 
-import env from "@/configs/env";
 import { Button } from "@/components/ui/button";
-import { verifyJWT } from "@/lib/jwt";
-import { confirmEmailAction } from "../actions";
+import { confirmEmailAction, getTokenAction } from "../actions";
 
+export const metadata: Metadata = {
+  title: "Xác Thực Tài Khoản",
+};
 const ConfirmEmailPage = async (props: {
   searchParams: Promise<{ token?: string | string[] | undefined }>;
 }) => {
   const searchParams = await props.searchParams;
   const token =
-    typeof searchParams.token == "string" ? searchParams.token : undefined;
+    typeof searchParams.token == "string"
+      ? searchParams.token
+      : Array.isArray(searchParams.token)
+      ? searchParams.token.pop()
+      : undefined;
+
+  if (!token) notFound();
 
   const expiredElement: React.JSX.Element = (
     <div className="flex flex-col items-center sm:mx-auto sm:max-w-md gap-2 text-center text-red-500">
@@ -25,13 +34,14 @@ const ConfirmEmailPage = async (props: {
     </div>
   );
 
-  if (!token) {
-    return expiredElement;
+  const tokenData = await getTokenAction(token);
+
+  if (!tokenData) return expiredElement;
+  if (tokenData.sessionType != "verifyEmail") return notFound();
+  if (tokenData.disableAt == null) {
+    const { success } = await confirmEmailAction(token);
+    if (!success) return expiredElement;
   }
-
-  const { success } = await confirmEmailAction(token);
-
-  if (!success) return expiredElement;
 
   return (
     <div className="flex flex-col items-center sm:mx-auto sm:max-w-md gap-2 text-center text-green-500">

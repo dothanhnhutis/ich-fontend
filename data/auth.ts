@@ -213,3 +213,56 @@ export async function confirmEmail(token: string) {
     };
   }
 }
+
+type TokenData = {
+  sessionType: string;
+  userId: string;
+  disableAt: null | Date;
+};
+
+export async function getToken(token: string): Promise<TokenData | null> {
+  try {
+    const { data } = await authInstance.get<
+      DefaultResponseData & { data: TokenData }
+    >("/token", {
+      headers: { ...(await getHeaders()), Authorization: token },
+    });
+    return data.data;
+  } catch (error: unknown) {
+    if (error instanceof FetchApiError) {
+      const data = error.response.data as DefaultResponseData & {
+        data: TokenData;
+      };
+      return data.data;
+    }
+    console.error("Unknown error", error);
+    return null;
+  }
+}
+
+export async function resetPassword(
+  token: string,
+  input: { password: string; confirmPassword: string }
+): Promise<DefaultResponseData> {
+  try {
+    const { data } = await authInstance.post<DefaultResponseData>(
+      "/reset-password",
+      input,
+      {
+        headers: { ...(await getHeaders()), Authorization: token },
+      }
+    );
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof FetchApiError) {
+      const data = error.response.data as DefaultResponseData;
+      return data;
+    }
+    console.error("Unknown error", error);
+    return {
+      status: 400,
+      message: "Cập nhật mật khẩu thất bại",
+      success: false,
+    };
+  }
+}

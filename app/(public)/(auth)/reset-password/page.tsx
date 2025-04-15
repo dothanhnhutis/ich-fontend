@@ -1,31 +1,41 @@
 import React from "react";
 import ResetPasswordForm from "./form";
-import { verifyJWT } from "@/lib/utils";
-import { UserToken } from "@/schema/user.schema";
-import env from "@/configs/env";
+import { notFound } from "next/navigation";
+import { getTokenAction } from "../actions";
+import { Metadata } from "next";
 
-const ResetPasswordPage = ({
-  searchParams,
-}: {
-  searchParams: { token?: string | string[] | undefined };
+export const metadata: Metadata = {
+  title: "Khôi Phục Tài Khoản",
+};
+
+const ResetPasswordPage = async (props: {
+  searchParams: Promise<{ token?: string | string[] | undefined }>;
 }) => {
+  const searchParams = await props.searchParams;
   const token =
-    typeof searchParams.token == "string" ? searchParams.token : undefined;
+    typeof searchParams.token == "string"
+      ? searchParams.token
+      : Array.isArray(searchParams.token)
+      ? searchParams.token.pop()
+      : null;
 
-  const expiredElement: JSX.Element = (
+  if (!token) return notFound();
+
+  const expiredElement: React.JSX.Element = (
     <p className="text-sm text-red-500 text-center">
       Your change password token has expired
     </p>
   );
 
-  if (!token) {
-    return expiredElement;
-  }
-  const data = verifyJWT<UserToken>(token, env.NEXT_PUBLIC_JWT_SECRET, {
-    ignoreExpiration: false,
-  });
-  if (!data || data.type != "recover") return expiredElement;
-  return <ResetPasswordForm token={token} />;
+  const tokenData = await getTokenAction(token);
+
+  if (!tokenData) return expiredElement;
+
+  if (tokenData.sessionType != "recoverAccount") return notFound();
+
+  if (tokenData.disableAt == null) return <ResetPasswordForm token={token} />;
+
+  return expiredElement;
 };
 
 export default ResetPasswordPage;

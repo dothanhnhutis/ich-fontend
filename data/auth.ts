@@ -25,46 +25,10 @@ type LognInResponse = DefaultResponseData & {
   };
 };
 
-export const lognIn = async (input: LognIn): Promise<LognInResponse> => {
-  try {
-    const { data, headers } = await authInstance.post<LognInResponse>(
-      "/signin",
-      input,
-      {
-        headers: await getHeaders(),
-      }
-    );
-
-    const rawCookie = headers.get("set-cookie") ?? "";
-    await loadCookie(rawCookie);
-
-    return data;
-  } catch (error: unknown) {
-    if (error instanceof FetchApiError) {
-      const data = error.response.data as LognInResponse;
-      if (data.data.isDisabled) {
-        const cookieStore = await cookies();
-        cookieStore.set({
-          name: "reActiveAccount",
-          value: input.email,
-          httpOnly: true,
-          path: "/reactivate",
-          maxAge: 5 * 60,
-        });
-      }
-      return data;
-    }
-    console.error("Unknown error", error);
-    return {
-      status: 400,
-      success: false,
-      message: "Email và mật khẩu không hợp lệ.",
-      data: {
-        isBanned: false,
-        isDisabled: false,
-      },
-    };
-  }
+type TokenData = {
+  sessionType: string;
+  userId: string;
+  disableAt: null | Date;
 };
 
 export type Register = {
@@ -74,195 +38,242 @@ export type Register = {
   confirmPassword: string;
 };
 
-export async function register(input: Register): Promise<DefaultResponseData> {
-  try {
-    const { data, headers } = await authInstance.post<DefaultResponseData>(
-      "/signup",
-      input,
-      {
-        headers: await getHeaders(),
-      }
-    );
-    const rawCookie = headers.get("set-cookie") ?? "";
-    await loadCookie(rawCookie);
+export default class AuthApi {
+  static async lognIn(input: LognIn) {
+    try {
+      const { data, headers } = await authInstance.post<LognInResponse>(
+        "/signin",
+        input,
+        {
+          headers: await getHeaders(),
+        }
+      );
 
-    return data;
-  } catch (error: unknown) {
-    if (error instanceof FetchApiError) {
-      const data = error.response.data as DefaultResponseData;
+      const rawCookie = headers.get("set-cookie") ?? "";
+      await loadCookie(rawCookie);
+
       return data;
-    }
-    console.error("Unknown error", error);
-    return {
-      status: 400,
-      success: false,
-      message: "Email này đã đăng ký.",
-    };
-  }
-}
-
-export async function sendRecoverAccount(email: string) {
-  try {
-    const { data, headers } = await authInstance.post<DefaultResponseData>(
-      "/recover",
-      { email },
-      {
-        headers: await getHeaders(),
+    } catch (error: unknown) {
+      if (error instanceof FetchApiError) {
+        const data = error.response.data as LognInResponse;
+        if (data.data.isDisabled) {
+          const cookieStore = await cookies();
+          cookieStore.set({
+            name: "reActiveAccount",
+            value: input.email,
+            httpOnly: true,
+            path: "/reactivate",
+            maxAge: 5 * 60,
+          });
+        }
+        return data;
       }
-    );
-    const rawCookie = headers.get("set-cookie") ?? "";
-    await loadCookie(rawCookie);
-
-    return data;
-  } catch (error: unknown) {
-    if (error instanceof FetchApiError) {
-      const data = error.response.data as DefaultResponseData;
-      data.message = "Email đổi mật khẩu đã được gửi.";
-      return data;
-    }
-    console.error("Unknown error", error);
-    return {
-      status: 400,
-      success: false,
-      message: "Email đổi mật khẩu đã được gửi.",
-    };
-  }
-}
-
-export const sendReactivateAccount = async (
-  email: string
-): Promise<DefaultResponseData> => {
-  try {
-    const { data } = await authInstance.post<DefaultResponseData>(
-      "/reactivate",
-      { email },
-      {
-        headers: await getHeaders(),
-      }
-    );
-
-    const cookieStore = await cookies();
-    cookieStore.set({
-      name: "reActiveAccount",
-      value: "",
-      httpOnly: true,
-      path: "/reactivate",
-      maxAge: 0,
-    });
-
-    return data;
-  } catch (error: unknown) {
-    if (error instanceof FetchApiError) {
-      const data = error.response.data as DefaultResponseData;
-      return data;
-    }
-    console.error("Unknown error", error);
-    return {
-      status: 400,
-      success: false,
-      message: "",
-    };
-  }
-};
-
-export async function forgotPassword(
-  email: string
-): Promise<DefaultResponseData> {
-  try {
-    const { data } = await authInstance.post<DefaultResponseData>(
-      "/recover",
-      { email },
-      {
-        headers: await getHeaders(),
-      }
-    );
-    return data;
-  } catch (error: unknown) {
-    if (error instanceof FetchApiError) {
-      const data = error.response.data as DefaultResponseData;
-      return data;
-    }
-    console.error("Unknown error", error);
-    return {
-      status: 400,
-      success: false,
-      message: "",
-    };
-  }
-}
-
-export async function confirmEmail(token: string) {
-  try {
-    const { data } = await authInstance.get<DefaultResponseData>(
-      "/confirm-email",
-      {
-        headers: { ...(await getHeaders()), Authorization: token },
-      }
-    );
-    return data;
-  } catch (error: unknown) {
-    if (error instanceof FetchApiError) {
-      const data = error.response.data as DefaultResponseData;
-      return data;
-    }
-    console.error("Unknown error", error);
-    return {
-      status: 400,
-      success: false,
-      message: "",
-    };
-  }
-}
-
-type TokenData = {
-  sessionType: string;
-  userId: string;
-  disableAt: null | Date;
-};
-
-export async function getToken(token: string): Promise<TokenData | null> {
-  try {
-    const { data } = await authInstance.get<
-      DefaultResponseData & { data: TokenData }
-    >("/token", {
-      headers: { ...(await getHeaders()), Authorization: token },
-    });
-    return data.data;
-  } catch (error: unknown) {
-    if (error instanceof FetchApiError) {
-      const data = error.response.data as DefaultResponseData & {
-        data: TokenData;
+      console.error("Unknown error", error);
+      return {
+        status: 400,
+        success: false,
+        message: "Email và mật khẩu không hợp lệ.",
+        data: {
+          isBanned: false,
+          isDisabled: false,
+        },
       };
-      return data.data;
     }
-    console.error("Unknown error", error);
-    return null;
   }
-}
 
-export async function resetPassword(
-  token: string,
-  input: { password: string; confirmPassword: string }
-): Promise<DefaultResponseData> {
-  try {
-    const { data } = await authInstance.post<DefaultResponseData>(
-      "/reset-password",
-      input,
-      {
-        headers: { ...(await getHeaders()), Authorization: token },
-      }
-    );
-    return data;
-  } catch (error: unknown) {
-    if (error instanceof FetchApiError) {
-      const data = error.response.data as DefaultResponseData;
+  static async signUp(input: Register): Promise<DefaultResponseData> {
+    try {
+      const { data, headers } = await authInstance.post<DefaultResponseData>(
+        "/signup",
+        input,
+        {
+          headers: await getHeaders(),
+        }
+      );
+      const rawCookie = headers.get("set-cookie") ?? "";
+      await loadCookie(rawCookie);
+
       return data;
+    } catch (error: unknown) {
+      if (error instanceof FetchApiError) {
+        const data = error.response.data as DefaultResponseData;
+        return data;
+      }
+      console.error("Unknown error", error);
+      return {
+        status: 400,
+        success: false,
+        message: "Email này đã đăng ký.",
+      };
     }
-    console.error("Unknown error", error);
-    return {
-      status: 400,
-      message: "Cập nhật mật khẩu thất bại",
-      success: false,
-    };
+  }
+
+  static async sendRecoverAccount(email: string) {
+    try {
+      const { data, headers } = await authInstance.post<DefaultResponseData>(
+        "/recover",
+        { email },
+        {
+          headers: await getHeaders(),
+        }
+      );
+      const rawCookie = headers.get("set-cookie") ?? "";
+      await loadCookie(rawCookie);
+
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof FetchApiError) {
+        const data = error.response.data as DefaultResponseData;
+        data.message = "Email đổi mật khẩu đã được gửi.";
+        return data;
+      }
+      console.error("Unknown error", error);
+      return {
+        status: 400,
+        success: false,
+        message: "Email đổi mật khẩu đã được gửi.",
+      };
+    }
+  }
+
+  static async sendReactivateAccount(): Promise<DefaultResponseData> {
+    try {
+      const { data } = await authInstance.get<DefaultResponseData>(
+        "/reactivate",
+        {
+          headers: await getHeaders(),
+        }
+      );
+
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof FetchApiError) {
+        const data = error.response.data as DefaultResponseData;
+        return data;
+      }
+      console.error("Unknown error", error);
+      return {
+        status: 400,
+        success: false,
+        message: "",
+      };
+    }
+  }
+
+  static async activateAccount(token: string) {
+    try {
+      const { data } = await authInstance.get<DefaultResponseData>(
+        "/activate",
+        {
+          headers: { ...(await getHeaders()), Authorization: token },
+        }
+      );
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof FetchApiError) {
+        const data = error.response.data as DefaultResponseData;
+        return data;
+      }
+      console.error("Unknown error", error);
+      return {
+        status: 400,
+        success: false,
+        message: "Kích hoạt tài khoản thất bại",
+      };
+    }
+  }
+
+  static async forgotPassword(email: string): Promise<DefaultResponseData> {
+    try {
+      const { data } = await authInstance.post<DefaultResponseData>(
+        "/recover",
+        { email },
+        {
+          headers: await getHeaders(),
+        }
+      );
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof FetchApiError) {
+        const data = error.response.data as DefaultResponseData;
+        return data;
+      }
+      console.error("Unknown error", error);
+      return {
+        status: 400,
+        success: false,
+        message: "",
+      };
+    }
+  }
+
+  static async confirmEmail(token: string) {
+    try {
+      const { data } = await authInstance.get<DefaultResponseData>(
+        "/confirm-email",
+        {
+          headers: { ...(await getHeaders()), Authorization: token },
+        }
+      );
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof FetchApiError) {
+        const data = error.response.data as DefaultResponseData;
+        return data;
+      }
+      console.error("Unknown error", error);
+      return {
+        status: 400,
+        success: false,
+        message: "",
+      };
+    }
+  }
+
+  static async getToken(token: string): Promise<TokenData | null> {
+    try {
+      const { data } = await authInstance.get<
+        DefaultResponseData & { data: TokenData }
+      >("/token", {
+        headers: { ...(await getHeaders()), Authorization: token },
+      });
+      return data.data;
+    } catch (error: unknown) {
+      if (error instanceof FetchApiError) {
+        const data = error.response.data as DefaultResponseData & {
+          data: TokenData;
+        };
+        return data.data;
+      }
+      console.error("Unknown error", error);
+      return null;
+    }
+  }
+
+  static async resetPassword(
+    token: string,
+    input: { password: string; confirmPassword: string }
+  ): Promise<DefaultResponseData> {
+    try {
+      const { data } = await authInstance.post<DefaultResponseData>(
+        "/reset-password",
+        input,
+        {
+          headers: { ...(await getHeaders()), Authorization: token },
+        }
+      );
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof FetchApiError) {
+        const data = error.response.data as DefaultResponseData;
+        return data;
+      }
+      console.error("Unknown error", error);
+      return {
+        status: 400,
+        message: "Cập nhật mật khẩu thất bại",
+        success: false,
+      };
+    }
   }
 }

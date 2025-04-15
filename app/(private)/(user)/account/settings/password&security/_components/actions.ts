@@ -1,6 +1,6 @@
 "use server";
 
-import { forgotPassword } from "@/data/auth";
+import AuthApi from "@/data/auth";
 import {
   createPassword,
   sendOTPUpdateEmail,
@@ -29,5 +29,5 @@ export async function createPasswordAction(input: UpdatePassword) {
 }
 
 export async function forgotPasswordAction(email: string) {
-  return await forgotPassword(email);
+  return await AuthApi.forgotPassword(email);
 }

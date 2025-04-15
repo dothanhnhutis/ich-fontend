@@ -1,10 +1,10 @@
 "use server";
-import { lognIn, LognIn, register, Register } from "@/data/auth";
+import AuthApi, { type LognIn, type Register } from "@/data/auth";
 
 export const lognInAction = async (input: LognIn) => {
-  return await lognIn(input);
+  return await AuthApi.lognIn(input);
 };
 
 export async function registerAction(input: Register) {
-  return await register(input);
+  return await AuthApi.signUp(input);
 }

@@ -1,3 +1,4 @@
+import "server-only";
 import { string2Cookie } from "@/lib/utils";
 import { cookies, headers } from "next/headers";
 

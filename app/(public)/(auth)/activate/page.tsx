@@ -1,5 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
+import { activateAccountAction } from "../actions";
 
 const ReactivatePage = async (props: {
   searchParams: Promise<{ token?: string | string[] | undefined }>;
@@ -14,7 +15,10 @@ const ReactivatePage = async (props: {
 
   if (!token) notFound();
 
-  return <p>123</p>;
+  const { success, message } = await activateAccountAction(token);
+  if (success) return <p>{message}</p>;
+
+  return <p>{message}</p>;
 };
 
 export default ReactivatePage;

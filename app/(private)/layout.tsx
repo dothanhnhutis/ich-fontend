@@ -1,11 +1,11 @@
 import React from "react";
 import { UserProvider } from "./UserProvider";
-import { getCurrrentUser } from "@/data/user";
+import UserApi from "@/data/user";
 
 const PrivateLayout = async ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
-  const user = await getCurrrentUser();
+  const user = await UserApi.getCurrrentUser();
   return <UserProvider user={user}>{children}</UserProvider>;
 };
 

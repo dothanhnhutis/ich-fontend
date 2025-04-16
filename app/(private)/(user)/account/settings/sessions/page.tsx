@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import { getSessions } from "@/data/user";
+import UserApi from "@/data/user";
 import Sessions from "./sessions";
 
 export const metadata: Metadata = {
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const SessionsPage = async () => {
-  const sessions = await getSessions();
+  const sessions = await UserApi.getSessions();
 
   return (
     <div className="w-full">

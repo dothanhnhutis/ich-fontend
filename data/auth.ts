@@ -144,6 +144,8 @@ export default class AuthApi {
           headers: await getHeaders(),
         }
       );
+      const cookieStore = await cookies();
+      cookieStore.delete("reactivate");
 
       return data;
     } catch (error: unknown) {

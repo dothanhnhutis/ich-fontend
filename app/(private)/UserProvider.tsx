@@ -7,6 +7,8 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { getCurrentUserAction, logOutAction } from "./actions";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type UserProvider = {
   isPending: boolean;
@@ -31,6 +33,8 @@ export const UserProvider = ({
   children,
   user,
 }: Readonly<{ children: React.ReactNode; user?: CurrentUser | null }>) => {
+  const router = useRouter();
+
   const { isPending, data, refetch } = useQuery({
     enabled: !user,
     initialData: user,
@@ -42,6 +46,7 @@ export const UserProvider = ({
 
   async function handleLogOut() {
     await logOutAction();
+    router.push("/login");
   }
 
   const contextValue = React.useMemo<UserProvider>(

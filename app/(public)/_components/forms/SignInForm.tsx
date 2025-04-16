@@ -29,6 +29,13 @@ const SignInForm = ({
     password: "",
   });
 
+  React.useEffect(() => {
+    if (statusError) {
+      document.cookie =
+        "oauth2_error_type=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+  }, [statusError]);
+
   const {
     data: resData,
     mutate,
@@ -77,14 +84,7 @@ const SignInForm = ({
       ) : statusError == "USER_DISABLED" ? (
         <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
           Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
-          <Link
-            href={
-              emailSchema.safeParse(formData.email).success
-                ? `/reactivate?email=${formData.email}`
-                : "/reactivate"
-            }
-            className="text-primary"
-          >
+          <Link href={"/reactivate"} className="text-primary">
             kích hoạt lại
           </Link>{" "}
           trước khi đăng nhập.

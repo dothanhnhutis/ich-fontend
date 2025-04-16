@@ -84,18 +84,18 @@ const PrivateUserLayout = ({
         </div>
         <div className="md:flex md:gap-4">
           <div className="flex gap-2 overflow-x-scroll md:overflow-visible md:block md:w-[200px] pb-1 mb-4">
-            {navs.map((nav, index) => (
+            {navs.map((nav1, index) => (
               <Link
                 key={index}
-                href={nav.link}
+                href={nav1.link}
                 className={cn(
                   "md:py-2 md:px-0 px-2 py-1 rounded-lg text-[15px] whitespace-nowrap block",
-                  pathName == nav.link
+                  nav1.link == nav?.link
                     ? "font-bold bg-accent md:bg-transparent"
                     : ""
                 )}
               >
-                {nav.label}
+                {nav1.label}
               </Link>
             ))}
           </div>

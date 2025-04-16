@@ -1,11 +1,7 @@
-import {
-  NextRequest,
-  NextResponse,
-  // userAgent
-} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { DEFAULT_LOGIN_REDIRECT } from "./routes";
-import { CurrentUser, getCurrrentUser } from "./data/user";
+import UserApi, { CurrentUser } from "./data/user";
 
 // function redirect(request: NextRequest, path?: string) {
 //   const { nextUrl, url } = request;
@@ -44,7 +40,7 @@ export async function middleware(request: NextRequest) {
 
   let user: CurrentUser | null = null;
   if (sid) {
-    user = await getCurrrentUser();
+    user = await UserApi.getCurrrentUser();
   }
 
   if (user) {

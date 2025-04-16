@@ -151,7 +151,11 @@ const EmailModal = () => {
               user?.email
             )}
           </p>
-          <div className="text-green-500">Verified</div>
+          {user?.emailVerified ? (
+            <div className="text-green-500">Đã xác thực</div>
+          ) : (
+            <div className="text-destructive">Chưa xác thực</div>
+          )}
         </div>
 
         <AlertDialog

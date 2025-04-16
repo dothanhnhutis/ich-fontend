@@ -27,18 +27,18 @@ function LinkGoogleAccount({
   linkData?: Account;
   hasPassword?: boolean;
 }) {
-  const { isPending, mutate } = useMutation({
-    mutationFn: async () => {
-      return await disableAccountAction();
-    },
-    onSuccess({ success, message }) {
-      if (success) {
-        toast.success(message);
-      } else {
-        toast.error(message);
-      }
-    },
-  });
+  // const { isPending, mutate } = useMutation({
+  //   mutationFn: async () => {
+  //     return await disableAccountAction();
+  //   },
+  //   onSuccess({ success, message }) {
+  //     if (success) {
+  //       toast.success(message);
+  //     } else {
+  //       toast.error(message);
+  //     }
+  //   },
+  // });
 
   return (
     <div className="flex items-center gap-4 justify-between">

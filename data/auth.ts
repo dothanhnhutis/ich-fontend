@@ -37,7 +37,7 @@ export type Register = {
 };
 
 export default class AuthApi {
-  static async lognIn(input: LognIn) {
+  static async lognIn(input: LognIn): Promise<LognInResponse> {
     try {
       const { data, headers } = await authInstance.post<LognInResponse>(
         "/signin",
@@ -53,17 +53,17 @@ export default class AuthApi {
       return data;
     } catch (error: unknown) {
       if (error instanceof FetchApiError) {
-        const {errorType } = error.response.data as LognInResponse;
-        if (data.) {
-          const cookieStore = await cookies();
-          cookieStore.set({
-            name: "reActiveAccount",
-            value: input.email,
-            httpOnly: true,
-            path: "/reactivate",
-            maxAge: 5 * 60,
-          });
-        }
+        const data = error.response.data as LognInResponse;
+        // if (errorType) {
+        //   const cookieStore = await cookies();
+        //   cookieStore.set({
+        //     name: "reActiveAccount",
+        //     value: input.email,
+        //     httpOnly: true,
+        //     path: "/reactivate",
+        //     maxAge: 5 * 60,
+        //   });
+        // }
         return data;
       }
       console.error("Unknown error", error);
@@ -71,10 +71,11 @@ export default class AuthApi {
         status: 400,
         success: false,
         message: "Email và mật khẩu không hợp lệ.",
-        data: {
-          isBanned: false,
-          isDisabled: false,
-        },
+        errorType: "PASSWORD",
+        // data: {
+        //   isBanned: false,
+        //   isDisabled: false,
+        // },
       };
     }
   }

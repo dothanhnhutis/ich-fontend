@@ -139,7 +139,7 @@ const SignInForm = ({
                 value={formData.password}
                 disabled={isPending}
               />
-              {resData && !resData.success ? (
+              {/* {resData && !resData.success ? (
                 resData.data.isDisabled ? (
                   <p className="text-destructive text-xs">
                     Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
@@ -151,7 +151,7 @@ const SignInForm = ({
                 ) : (
                   <p className="text-destructive text-xs">{resData.message}</p>
                 )
-              ) : null}
+              ) : null} */}
             </div>
             <Button
               type="submit"

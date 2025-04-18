@@ -19,10 +19,8 @@ export type LognIn = {
 };
 
 type LognInResponse = DefaultResponseData & {
-  data: {
-    isBanned: boolean;
-    isDisabled: boolean;
-  };
+  errorType: "PASSWORD" | "BANNED" | "DISABLED" | "MFA_REQUIRED" | "NONE";
+  token?: string;
 };
 
 type TokenData = {
@@ -49,14 +47,14 @@ export default class AuthApi {
         }
       );
 
-      const rawCookie = headers.get("set-cookie") ?? "";
-      await loadCookie(rawCookie);
+      // const rawCookie = headers.get("set-cookie") ?? "";
+      // await loadCookie(rawCookie);
 
       return data;
     } catch (error: unknown) {
       if (error instanceof FetchApiError) {
-        const data = error.response.data as LognInResponse;
-        if (data.data.isDisabled) {
+        const {errorType } = error.response.data as LognInResponse;
+        if (data.) {
           const cookieStore = await cookies();
           cookieStore.set({
             name: "reActiveAccount",

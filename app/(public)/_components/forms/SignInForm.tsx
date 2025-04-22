@@ -45,7 +45,7 @@ const SignInForm = ({
     mutationFn: async () => {
       return await lognInAction(formData);
     },
-    onSuccess({ success }) {
+    onSuccess({ success, errorType, token }) {
       if (success) {
         router.refresh();
       }

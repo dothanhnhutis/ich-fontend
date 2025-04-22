@@ -1,40 +1,83 @@
 import React from "react";
 
+function Order() {
+  return (
+    <div className="grid p-2 bg-white rounded-md basis-1/2">
+      <p>Tên Khách Hàng</p>
+      <div className="grid gap-2">
+        <div className="flex gap-2 items-center">
+          <div className="bg-green-300 h-12 w-12"></div>
+          <div>
+            <p>Tên Sản Phẩm</p>
+            <div className="flex items-center gap-2">
+              <div>Default</div> <p>10 Thùng x 100SP = 1000SP </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2 items-center">
+          <div className="bg-green-300 h-12 w-12"></div>
+          <div>
+            <p>Tên Sản Phẩm</p>
+            <div className="flex items-center gap-2">
+              <div>SKU</div> <p>1000SP </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p>Đ/c: 159 Nguyễn Đình Chiểu, Phường 4, Tp. Sóc Trăng, T. Sóc Trăng</p>
+      <p>SĐT: 0948548844 - 094000000</p>
+    </div>
+  );
+}
+
+function Product() {
+  return (
+    <div className="flex gap-2 items-center bg-white p-2 rounded-md">
+      <div className="bg-green-300 h-12 w-12 shrink-0"></div>
+      <div className="w-full">
+        <p>Tên Sản Phẩm</p>
+        <div>Default</div>
+      </div>
+      <p className="shrink-0">2000 sp</p>
+    </div>
+  );
+}
 const TVPage = () => {
   return (
     <div className="flex w-full relative h-svh">
-      <div className="bg-yellow-300 w-full">
-        <p></p>
+      <div className="basis-full lg:basis-2/3 max-h-svh overflow-y-scroll bg-green-500">
+        <p className="">Danh sách đơn hàng</p>
+        <div className="flex gap-2 p-2">
+          <div className="flex flex-col gap-2 w-full">
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+          </div>
+          {/* <div className="flex flex-col gap-2 w-full ">
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+            <Order />
+          </div> */}
+        </div>
       </div>
-      <div className="absolute top-0 right-0 bottom-0 w-full max-w-[300px] bg-red-300 sm:static sm:max-w-[500px] ">
-        <p>Đơn Hàng Hôm Nay</p>
+      <div className="absolute top-0 right-0 bottom-0 w-full max-w-lg lg:max-w-none lg:static lg:basis-1/3 bg-blue-500">
+        <p>Tổng hợp</p>
         <div className="grid gap-2 p-1">
-          <div className="grid p-2 bg-white rounded-md">
-            <p>Tên Khách Hàng</p>
-            <div className="grid gap-2">
-              <div className="flex gap-2 items-center">
-                <div className="bg-green-300 h-12 w-12"></div>
-                <div>
-                  <p>Tên Sản Phẩm</p>
-                  <div className="flex items-center gap-2">
-                    <div>Default</div> <p>10 Thùng x 100SP = 1000SP </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2 items-center">
-                <div className="bg-green-300 h-12 w-12"></div>
-                <div>
-                  <p>Tên Sản Phẩm</p>
-                  <div className="flex items-center gap-2">
-                    <div>SKU</div> <p>1000SP </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <p>
-              Đ/c: 159 Nguyễn Đình Chiểu, Phường 4, Tp. Sóc Trăng, T. Sóc Trăng
-            </p>
-            <p>SĐT: 0948548844 - 094000000</p>
+          <div className="grid gap-2 ">
+            <Product />
+            <Product />
           </div>
         </div>
       </div>

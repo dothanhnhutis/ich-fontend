@@ -47,8 +47,8 @@ export default class AuthApi {
         }
       );
 
-      // const rawCookie = headers.get("set-cookie") ?? "";
-      // await loadCookie(rawCookie);
+      const rawCookie = headers.get("set-cookie") ?? "";
+      await loadCookie(rawCookie);
 
       return data;
     } catch (error: unknown) {

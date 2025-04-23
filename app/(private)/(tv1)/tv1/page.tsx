@@ -1,3 +1,6 @@
+"use client";
+import { cn } from "@/lib/utils";
+import { SettingsIcon } from "lucide-react";
 import React from "react";
 
 function Order() {
@@ -32,7 +35,7 @@ function Order() {
 
 function Product() {
   return (
-    <div className="flex gap-2 items-center bg-white p-2 rounded-md">
+    <div className="flex gap-2 items-center bg-white p-2 rounded-md ">
       <div className="bg-green-300 h-12 w-12 shrink-0"></div>
       <div className="w-full">
         <p>Tên Sản Phẩm</p>
@@ -43,12 +46,26 @@ function Product() {
   );
 }
 const TVPage = () => {
+  const [open, setOpen] = React.useState<boolean>(false);
+  const [column, setColumn] = React.useState<number>(1);
   return (
-    <div className="flex w-full relative h-svh">
-      <div className="basis-full lg:basis-2/3 max-h-svh overflow-y-scroll bg-green-500">
-        <p className="">Danh sách đơn hàng</p>
-        <div className="flex gap-2 p-2">
-          <div className="flex flex-col gap-2 w-full">
+    <div className="flex w-full relative h-svh overflow-hidden">
+      <div
+        className={cn("basis-full  bg-green-500", open ? "2xl:basis-2/3" : "")}
+      >
+        <div className="flex gap-2 p-2 bg-white z-[1] relative">
+          <p className="w-full">Danh sách đơn hàng</p>
+
+          <SettingsIcon
+            className="shrink-0 h-5 w-5"
+            onClick={() => setOpen(!open)}
+          />
+        </div>
+        <div className="flex gap-2 p-2 ">
+          <div
+            className="flex flex-col gap-2 w-full "
+            style={{ transform: "translateY(-100px)" }}
+          >
             <Order />
             <Order />
             <Order />
@@ -59,7 +76,7 @@ const TVPage = () => {
             <Order />
             <Order />
           </div>
-          {/* <div className="flex flex-col gap-2 w-full ">
+          <div className="flex flex-col gap-2 w-full ">
             <Order />
             <Order />
             <Order />
@@ -69,18 +86,27 @@ const TVPage = () => {
             <Order />
             <Order />
             <Order />
-          </div> */}
-        </div>
-      </div>
-      <div className="absolute top-0 right-0 bottom-0 w-full max-w-lg lg:max-w-none lg:static lg:basis-1/3 bg-blue-500">
-        <p>Tổng hợp</p>
-        <div className="grid gap-2 p-1">
-          <div className="grid gap-2 ">
-            <Product />
-            <Product />
           </div>
         </div>
       </div>
+      {open ? (
+        <>
+          <div className="fixed top-0 left-0 right-0 bottom-0 z-[2] bg-black/30 2xl:hidden"></div>
+          <div
+            className={cn(
+              "absolute top-0 right-0 bottom-0 z-[3] w-full max-w-lg 2xl:max-w-none 2xl:static 2xl:basis-1/3 bg-blue-500"
+            )}
+          >
+            <p>Tổng hợp</p>
+            <div className="grid gap-2 p-1">
+              <div className="grid gap-2 ">
+                <Product />
+                <Product />
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };

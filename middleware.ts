@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { DEFAULT_LOGIN_REDIRECT } from "./routes";
-import UserApi, { CurrentUser } from "./data/user";
+import { DEFAULT_LOGIN_REDIRECT } from "./constants/routes";
+import UserApi, { CurrentUser } from "./lib/services/user";
 
 // function redirect(request: NextRequest, path?: string) {
 //   const { nextUrl, url } = request;

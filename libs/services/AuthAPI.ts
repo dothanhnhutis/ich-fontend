@@ -1,10 +1,10 @@
 import "server-only";
-import { FetchAPI, FetchApiError } from "@/lib/axios";
-import { DefaultResponseData, getHeaders, loadCookie } from "./common";
-import { string2Cookie } from "@/lib/utils";
+import { API, APIError } from "./api";
+import { getHeaders, loadCookie } from "./common";
 import { cookies } from "next/headers";
+import { DefaultResponseData } from "@/types/api";
 
-const authInstance = FetchAPI.create({
+const authInstance = API.create({
   baseUrl: "http://localhost:4000" + "/api/v1/auth",
   credentials: "include",
   headers: {
@@ -16,11 +16,6 @@ const authInstance = FetchAPI.create({
 export type LognIn = {
   email: string;
   password: string;
-};
-
-type LognInResponse = DefaultResponseData & {
-  errorType: "PASSWORD" | "BANNED" | "DISABLED" | "MFA_REQUIRED" | "NONE";
-  token?: string;
 };
 
 type TokenData = {
@@ -37,47 +32,19 @@ export type Register = {
 };
 
 export default class AuthApi {
-  static async lognIn(input: LognIn): Promise<LognInResponse> {
-    try {
-      const { data, headers } = await authInstance.post<LognInResponse>(
-        "/signin",
-        input,
-        {
-          headers: await getHeaders(),
-        }
-      );
+  static async lognIn(input: LognIn) {
+    const { data, headers } = await authInstance.post<{
+      token: string;
+      status: string;
+      message: string;
+    }>("/signin", input, {
+      headers: await getHeaders(),
+    });
 
-      const rawCookie = headers.get("set-cookie") ?? "";
-      await loadCookie(rawCookie);
+    const rawCookie = headers.get("set-cookie") ?? "";
+    await loadCookie(rawCookie);
 
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
-        const data = error.response.data as LognInResponse;
-        // if (errorType) {
-        //   const cookieStore = await cookies();
-        //   cookieStore.set({
-        //     name: "reActiveAccount",
-        //     value: input.email,
-        //     httpOnly: true,
-        //     path: "/reactivate",
-        //     maxAge: 5 * 60,
-        //   });
-        // }
-        return data;
-      }
-      console.error("Unknown error", error);
-      return {
-        status: 400,
-        success: false,
-        message: "Email và mật khẩu không hợp lệ.",
-        errorType: "PASSWORD",
-        // data: {
-        //   isBanned: false,
-        //   isDisabled: false,
-        // },
-      };
-    }
+    return data;
   }
 
   static async signUp(input: Register): Promise<DefaultResponseData> {
@@ -94,14 +61,12 @@ export default class AuthApi {
 
       return data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData;
         return data;
       }
       console.error("Unknown error", error);
       return {
-        status: 400,
-        success: false,
         message: "Email này đã đăng ký.",
       };
     }
@@ -121,7 +86,7 @@ export default class AuthApi {
 
       return data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData;
         data.message = "Email đổi mật khẩu đã được gửi.";
         return data;
@@ -148,14 +113,12 @@ export default class AuthApi {
 
       return data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData;
         return data;
       }
       console.error("Unknown error", error);
       return {
-        status: 400,
-        success: false,
         message: "",
       };
     }
@@ -171,7 +134,7 @@ export default class AuthApi {
       );
       return data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData;
         return data;
       }
@@ -195,14 +158,12 @@ export default class AuthApi {
       );
       return data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData;
         return data;
       }
       console.error("Unknown error", error);
       return {
-        status: 400,
-        success: false,
         message: "",
       };
     }
@@ -218,7 +179,7 @@ export default class AuthApi {
       );
       return data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData;
         return data;
       }
@@ -240,7 +201,7 @@ export default class AuthApi {
       });
       return data.data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData & {
           data: TokenData;
         };
@@ -265,15 +226,13 @@ export default class AuthApi {
       );
       return data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData;
         return data;
       }
       console.error("Unknown error", error);
       return {
-        status: 400,
         message: "Cập nhật mật khẩu thất bại",
-        success: false,
       };
     }
   }

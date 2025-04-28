@@ -1,7 +1,7 @@
 "use server";
 import FetchAPI, { FetchError } from "@/lib/_fetchApi";
 import { revalidatePath } from "next/cache";
-import env from "@/configs/env";
+import env from "@/config";
 import { getHeaders } from "@/lib/action";
 
 const locationApi = FetchAPI.createInstance({

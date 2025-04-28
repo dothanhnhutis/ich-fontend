@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { CurrentUser } from "@/data/user";
+import { CurrentUser } from "@/lib/services/user";
 import {
   QueryObserverResult,
   RefetchOptions,

@@ -9,7 +9,7 @@ import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { DEFAULT_LOGOUT_REDIRECT } from "@/routes";
+import { DEFAULT_LOGOUT_REDIRECT } from "@/constants/routes";
 import { resetPasswordAction } from "../actions";
 import Link from "next/link";
 const passwordSchema = z

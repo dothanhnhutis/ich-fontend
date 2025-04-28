@@ -1,5 +1,5 @@
 "use server";
-import AuthApi from "@/data/auth";
+import AuthApi from "@/lib/services/AuthAPI";
 
 export async function activateAccountAction(token: string) {
   return await AuthApi.activateAccount(token);

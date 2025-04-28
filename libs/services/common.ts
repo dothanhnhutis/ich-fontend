@@ -1,5 +1,5 @@
 import "server-only";
-import { string2Cookie } from "@/lib/utils";
+import string2Cookie from "@/utils/string2Cookie";
 import { cookies, headers } from "next/headers";
 
 export const getHeaders = async () => {
@@ -26,9 +26,3 @@ export async function loadCookie(rawCookie: string) {
     cookieStore.set(name, value, options);
   }
 }
-
-export type DefaultResponseData = {
-  status: number;
-  success: boolean;
-  message: string;
-};

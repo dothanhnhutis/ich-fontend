@@ -1,6 +1,6 @@
 "use server";
 
-import env from "@/configs/env";
+import env from "@/config";
 import { getHeaders } from "@/lib/action";
 import FetchAPI, { FetchError } from "@/lib/_fetchApi";
 import { revalidatePath } from "next/cache";

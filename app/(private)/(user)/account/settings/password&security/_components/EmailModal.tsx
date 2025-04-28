@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useUser } from "@/app/(private)/UserProvider";
 import { useMutation } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { useStore } from "@/hooks/use-store";
+import { useStore } from "@/lib/hooks/use-store";
 import { sendOTPUpdateEmailAction, updateEmailByOTPAction } from "./actions";
 import { LoaderCircleIcon } from "lucide-react";
 import { toast } from "sonner";

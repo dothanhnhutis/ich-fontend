@@ -1,49 +1,49 @@
-export class FetchApiError<T = any> extends Error {
-  isFetchApiError: boolean;
-  response: FetchApiResponse<T>;
-  config: FetchApiRequestConfig;
+export class APIError<T = any> extends Error {
+  isAPIError: boolean;
+  response: APIResponse<T>;
+  config: APIRequestConfig;
 
-  constructor(message: string, response: FetchApiResponse<T>) {
+  constructor(message: string, response: APIResponse<T>) {
     super(message);
     this.name = "FechApiError";
-    this.isFetchApiError = true;
+    this.isAPIError = true;
     this.response = response;
     this.config = response.config;
   }
 }
 
-interface FetchApiRequestConfig extends RequestInit {
+interface APIRequestConfig extends RequestInit {
   url?: string;
   baseUrl?: string;
   params?: Record<string, any>;
   data?: any;
 }
 
-interface FetchApiResponse<T = any> {
+interface APIResponse<T = any> {
   data: T;
   status: number;
   statusText: string;
   headers: Headers;
-  config: FetchApiRequestConfig;
+  config: APIRequestConfig;
   request: Response;
 }
 
 type RequestInterceptor = (
-  config: FetchApiRequestConfig
-) => FetchApiRequestConfig | Promise<FetchApiRequestConfig>;
+  config: APIRequestConfig
+) => APIRequestConfig | Promise<APIRequestConfig>;
 
 type ResponseInterceptor<T = any> = (
-  response: FetchApiResponse<T>
-) => FetchApiResponse<T> | Promise<FetchApiResponse<T>>;
+  response: APIResponse<T>
+) => APIResponse<T> | Promise<APIResponse<T>>;
 
-export class FetchAPI {
-  defaults: FetchApiRequestConfig;
+export class API {
+  defaults: APIRequestConfig;
   interceptors: {
     request: RequestInterceptor[];
     response: ResponseInterceptor[];
   };
 
-  constructor(defaults: FetchApiRequestConfig = {}) {
+  constructor(defaults: APIRequestConfig = {}) {
     this.defaults = defaults;
     this.interceptors = {
       request: [],
@@ -51,13 +51,13 @@ export class FetchAPI {
     };
   }
 
-  static create(defaults: FetchApiRequestConfig = {}): FetchAPI {
-    return new FetchAPI(defaults);
+  static create(defaults: APIRequestConfig = {}): API {
+    return new API(defaults);
   }
 
   private async request<T = any>(
-    config: FetchApiRequestConfig
-  ): Promise<FetchApiResponse<T>> {
+    config: APIRequestConfig
+  ): Promise<APIResponse<T>> {
     // Gộp cấu hình mặc định và cấu hình truyền vào
     config = { ...this.defaults, ...config };
 
@@ -95,7 +95,7 @@ export class FetchAPI {
 
     // Gọi fetch
     const res = await fetch(url, fetchConfig);
-    const response: FetchApiResponse<T> = {
+    const response: APIResponse<T> = {
       data: await res.json().catch(() => null),
       status: res.status,
       statusText: res.statusText,
@@ -112,46 +112,46 @@ export class FetchAPI {
 
     // Nếu phản hồi không thành công, ném lỗi
     if (!res.ok) {
-      throw new FetchApiError(processedResponse.statusText, processedResponse);
+      throw new APIError(processedResponse.statusText, processedResponse);
     }
     return processedResponse;
   }
 
   get<T = any>(
     url: string,
-    config?: FetchApiRequestConfig
-  ): Promise<FetchApiResponse<T>> {
+    config?: APIRequestConfig
+  ): Promise<APIResponse<T>> {
     return this.request({ ...config, url, method: "GET" });
   }
 
   post<T = any>(
     url: string,
     data?: any,
-    config?: FetchApiRequestConfig
-  ): Promise<FetchApiResponse<T>> {
+    config?: APIRequestConfig
+  ): Promise<APIResponse<T>> {
     return this.request({ ...config, url, data, method: "POST" });
   }
 
   patch<T = any>(
     url: string,
     data?: any,
-    config?: FetchApiRequestConfig
-  ): Promise<FetchApiResponse<T>> {
+    config?: APIRequestConfig
+  ): Promise<APIResponse<T>> {
     return this.request({ ...config, url, data, method: "PATCH" });
   }
 
   put<T = any>(
     url: string,
     data?: any,
-    config?: FetchApiRequestConfig
-  ): Promise<FetchApiResponse<T>> {
+    config?: APIRequestConfig
+  ): Promise<APIResponse<T>> {
     return this.request({ ...config, url, data, method: "PUT" });
   }
 
   delete<T = any>(
     url: string,
-    config?: FetchApiRequestConfig
-  ): Promise<FetchApiResponse<T>> {
+    config?: APIRequestConfig
+  ): Promise<APIResponse<T>> {
     return this.request({ ...config, url, method: "DELETE" });
   }
 }
@@ -159,7 +159,7 @@ export class FetchAPI {
 // // Ví dụ sử dụng:
 
 // // Tạo instance với cấu hình mặc định
-// const api = new FetchAPI({
+// const api = new API({
 //   baseUrl: "https://api.example.com",
 //   headers: {
 //     Authorization: "Bearer token",

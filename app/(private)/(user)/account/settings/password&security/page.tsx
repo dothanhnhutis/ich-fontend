@@ -1,5 +1,5 @@
 import React from "react";
-import UserApi from "@/data/user";
+import UserApi from "@/lib/services/user";
 import { Metadata } from "next";
 import EmailModal from "./_components/EmailModal";
 import PasswordModal from "./_components/PasswordModal";

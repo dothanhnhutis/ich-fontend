@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { LoaderCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { LognIn } from "@/data/auth";
+import { LognIn } from "@/lib/services/AuthAPI";
 import PasswordInput from "@/components/password-input";
 import { lognInAction } from "../actions";
 import Link from "next/link";
@@ -29,6 +29,9 @@ const SignInForm = ({
     password: "",
   });
 
+  const [mfaStep, setMFAStep] = React.useState(false);
+  const [mfaCode, setMfaCode] = React.useState<string>("");
+
   React.useEffect(() => {
     if (statusError) {
       document.cookie =
@@ -36,18 +39,15 @@ const SignInForm = ({
     }
   }, [statusError]);
 
-  const {
-    data: resData,
-    mutate,
-    isPending,
-    reset,
-  } = useMutation({
+  const { data, mutate, isPending, reset } = useMutation({
     mutationFn: async () => {
       return await lognInAction(formData);
     },
-    onSuccess({ success, errorType, token }) {
-      if (success) {
+    onSuccess({ status, token, message }) {
+      if (status == "SUCCESS") {
         router.refresh();
+      } else if (status == "MFA_REQUIRED") {
+        setMFAStep(true);
       }
     },
     onSettled() {
@@ -75,7 +75,12 @@ const SignInForm = ({
   };
 
   return (
-    <>
+    <div className="w-full max-w-sm">
+      <div className="flex flex-col gap-1.5 py-6">
+        <h3 className="font-semibold tracking-tight text-2xl">Đăng nhập</h3>
+        <p className="text-muted-foreground text-sm">Chào mừng bạn trở lại</p>
+      </div>
+
       {statusError == "USER_SIGN_IN_PASSWORD" ? (
         <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
           Tài khoản E-mail đã đăng ký với mật khẩu. Vui lòng đăng nhập rồi liên
@@ -88,6 +93,22 @@ const SignInForm = ({
             kích hoạt lại
           </Link>{" "}
           trước khi đăng nhập.
+        </p>
+      ) : null}
+
+      {data && data.status == "ACTIVATE_REQUIRED" ? (
+        <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
+          Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
+          <Link href={"/reactivate"} className="text-primary">
+            kích hoạt lại
+          </Link>{" "}
+          trước khi đăng nhập.
+        </p>
+      ) : null}
+
+      {data && data.status == "" ? (
+        <p className="bg-red-100/70 text-sm text-red-600 p-2 mb-2 rounded-md">
+          {data.message}
         </p>
       ) : null}
 
@@ -139,19 +160,9 @@ const SignInForm = ({
                 value={formData.password}
                 disabled={isPending}
               />
-              {/* {resData && !resData.success ? (
-                resData.data.isDisabled ? (
-                  <p className="text-destructive text-xs">
-                    Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
-                    <Link href="/reactivate" className="text-primary">
-                      kích hoạt lại
-                    </Link>{" "}
-                    trước khi đăng nhập.
-                  </p>
-                ) : (
-                  <p className="text-destructive text-xs">{resData.message}</p>
-                )
-              ) : null} */}
+              {data && data.status == "ERROR" ? (
+                <p className="text-destructive text-xs">{data.message}</p>
+              ) : null}
             </div>
             <Button
               type="submit"
@@ -172,7 +183,12 @@ const SignInForm = ({
           </div>
         </div>
       </form>
-    </>
+      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary py-6">
+        Bằng cách nhấp vào tiếp tục, bạn đồng ý với{" "}
+        <Link href="#">Điều khoản dịch vụ</Link> và{" "}
+        <Link href="#">Chính sách bảo mật</Link> của chúng tôi.
+      </div>
+    </div>
   );
 };
 

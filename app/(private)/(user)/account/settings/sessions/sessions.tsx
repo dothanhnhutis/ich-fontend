@@ -7,7 +7,7 @@ import { EllipsisIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useUser } from "@/app/(private)/UserProvider";
-import { Session } from "@/data/user";
+import { Session } from "@/lib/services/user";
 import { useMutation } from "@tanstack/react-query";
 import { deleteSessionByIdAction } from "../actions";
 

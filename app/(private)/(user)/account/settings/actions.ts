@@ -1,5 +1,5 @@
 "use server";
-import UserApi from "@/data/user";
+import UserApi from "@/lib/services/user";
 
 export async function deleteSessionByIdAction(sessionId: string) {
   return await UserApi.deleteSessionById(sessionId);

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { MFA, TOTP } from "@/data/user";
+import { MFA, TOTP } from "@/lib/services/user";
 
 import {
   AlertDialog,

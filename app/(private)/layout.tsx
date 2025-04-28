@@ -1,6 +1,6 @@
 import React from "react";
 import { UserProvider } from "./UserProvider";
-import UserApi from "@/data/user";
+import UserApi from "@/lib/services/user";
 
 const PrivateLayout = async ({
   children,

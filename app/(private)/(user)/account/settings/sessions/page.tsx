@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import UserApi from "@/data/user";
+import UserApi from "@/lib/services/user";
 import Sessions from "./sessions";
 
 export const metadata: Metadata = {

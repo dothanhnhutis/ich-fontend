@@ -1,11 +1,11 @@
 import "server-only";
-import { FetchAPI, FetchApiError } from "@/lib/axios";
-import { DefaultResponseData, getHeaders } from "./common";
-import { CookieOpt } from "@/lib/utils";
+import { API, APIError } from "./api";
+import { getHeaders } from "./common";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
+import { DefaultResponseData } from "@/types/api";
 
-const userAPI = FetchAPI.create({
+const userAPI = API.create({
   baseUrl: "http://localhost:4000" + "/api/v1/users",
   credentials: "include",
   headers: {
@@ -14,97 +14,6 @@ const userAPI = FetchAPI.create({
   },
 });
 
-export type MFA = {
-  userId: string;
-  deviceName: string;
-  secretKey: string;
-  backupCode: string[];
-  count: number;
-  expiredBackupCodes: string[];
-  backupCodeCreatedAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type Account = {
-  id: string;
-  provider: string;
-  providerId: string;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type TOTP = {
-  ascii: string;
-  hex: string;
-  base32: string;
-  oauthUrl: string;
-  deviceName: string;
-  qrCodeUrl: string;
-  createdAt: Date;
-};
-
-type Avatar = {
-  id: string;
-  url: string;
-  fileName: string;
-  originalname: string;
-  width: number | null;
-  height: number | null;
-};
-
-export type Session = {
-  id: string;
-  userId: string;
-  cookie: CookieOpt;
-  ip: string;
-  userAgent: {
-    ua: string;
-    browser: Record<string, string>;
-    cpu: Record<string, string>;
-    device: Record<string, string>;
-    engine: Record<string, string>;
-    os: Record<string, string>;
-  };
-  lastAccess: Date;
-  createAt: Date;
-};
-
-type Role = {
-  id: string;
-  name: string;
-  permissions: string[];
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type CurrentUser = {
-  id: string;
-  email: string;
-  emailVerified: Date | null;
-  password: string;
-  username: string;
-  avatar: Avatar | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  session: Session;
-  roles: Role[];
-  hasPassword: boolean;
-};
-
-type CurrentUserResponse = DefaultResponseData & {
-  data: CurrentUser | null;
-};
-type SetupMFA = DefaultResponseData & { data: TOTP | null };
-type MFAResponseData = DefaultResponseData & { data: MFA | null };
-export type UpdatePassword = {
-  oldPassword: string;
-  newPassword: string;
-  confirmNewPassword: string;
-  isSignOut: boolean;
-};
 export default class UserApi {
   static async logOut() {
     try {
@@ -113,7 +22,7 @@ export default class UserApi {
       });
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         errMes = error.message;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -138,7 +47,7 @@ export default class UserApi {
       return data;
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         errMes = error.message;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -161,7 +70,7 @@ export default class UserApi {
       return data;
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         errMes = error.message;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -186,7 +95,7 @@ export default class UserApi {
       return data;
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         return error.response.data as DefaultResponseData;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -217,7 +126,7 @@ export default class UserApi {
       return data;
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         errMes = error.message;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -242,7 +151,7 @@ export default class UserApi {
       return data;
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         errMes = error.message;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -265,7 +174,7 @@ export default class UserApi {
       return data;
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         errMes = error.message;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -290,7 +199,7 @@ export default class UserApi {
       return data;
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         errMes = error.message;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -309,7 +218,7 @@ export default class UserApi {
       return data;
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         return error.response.data as MFAResponseData;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -333,7 +242,7 @@ export default class UserApi {
       return data;
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         return error.response.data as DefaultResponseData;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -360,7 +269,7 @@ export default class UserApi {
       return data;
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         errMes = error.message;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -384,7 +293,7 @@ export default class UserApi {
       );
     } catch (error: unknown) {
       let errMes = "unknown error";
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         errMes = error.message;
       } else if (error instanceof Error) {
         errMes = error.message;
@@ -407,7 +316,7 @@ export default class UserApi {
       );
       return data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData;
 
         return data;
@@ -432,7 +341,7 @@ export default class UserApi {
       );
       return data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData;
         return data;
       }
@@ -459,7 +368,7 @@ export default class UserApi {
       );
       return data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData;
         return data;
       }
@@ -481,7 +390,7 @@ export default class UserApi {
       });
       return data.data;
     } catch (error: unknown) {
-      if (error instanceof FetchApiError) {
+      if (error instanceof APIError) {
         const data = error.response.data as DefaultResponseData & {
           data: Account[];
         };

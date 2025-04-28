@@ -1,6 +1,6 @@
 "use server";
 
-import UserApi from "@/data/user";
+import UserApi from "@/lib/services/user";
 
 export async function getCurrentUserAction() {
   return await UserApi.getCurrrentUser();

@@ -1,7 +1,7 @@
 "use server";
 
-import AuthApi from "@/data/auth";
-import UserApi, { UpdatePassword } from "@/data/user";
+import AuthApi from "@/lib/services/AuthAPI";
+import UserApi, { UpdatePassword } from "@/lib/services/user";
 
 export async function sendOTPUpdateEmailAction(email: string) {
   await UserApi.sendOTPUpdateEmail(email);

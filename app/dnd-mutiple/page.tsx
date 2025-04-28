@@ -13,7 +13,7 @@ import {
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, PlusIcon, Trash2Icon } from "lucide-react";
-import { generateUniqueID } from "@/lib/utils";
+import generateId from "@/utils/generateId";
 
 type Note = {
   id: string;
@@ -266,7 +266,7 @@ const DndMutiplePage = () => {
         prod.id == prodId
           ? {
               ...prod,
-              notes: [...prod.notes, { id: generateUniqueID(), value: "" }],
+              notes: [...prod.notes, { id: generateId(), value: "" }],
             }
           : prod
       )

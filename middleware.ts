@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { DEFAULT_LOGIN_REDIRECT } from "./constants/routes";
-import UserApi, { CurrentUser } from "./lib/services/user";
+// import { DEFAULT_LOGIN_REDIRECT } from "./constants/routes";
+// import UserApi, { CurrentUser } from "./lib/services/user";
 
 // function redirect(request: NextRequest, path?: string) {
 //   const { nextUrl, url } = request;
@@ -34,35 +34,35 @@ import UserApi, { CurrentUser } from "./lib/services/user";
 // }
 
 export async function middleware(request: NextRequest) {
-  const { nextUrl, url } = request;
+  // const { nextUrl, url } = request;
 
-  const sid = request.cookies.get("sid");
+  // const sid = request.cookies.get("sid");
 
-  let user: CurrentUser | null = null;
-  if (sid) {
-    user = await UserApi.getCurrrentUser();
-  }
+  // let user: CurrentUser | null = null;
+  // if (sid) {
+  //   user = await UserApi.getCurrrentUser();
+  // }
 
-  if (user) {
-    if (nextUrl.pathname == "/login") {
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, url));
-    }
-    if (
-      nextUrl.pathname == "/account" ||
-      nextUrl.pathname == "/account/settings"
-    ) {
-      const response = NextResponse.rewrite(
-        new URL("/account/settings/profile", request.url)
-      );
-      return response;
-    }
-  } else {
-    if (nextUrl.pathname.startsWith("/account")) {
-      const response = NextResponse.redirect(new URL("/login", request.url));
-      response.cookies.set("sid", "", { maxAge: 0, path: "/" });
-      return response;
-    }
-  }
+  // if (user) {
+  //   if (nextUrl.pathname == "/login") {
+  //     return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, url));
+  //   }
+  //   if (
+  //     nextUrl.pathname == "/account" ||
+  //     nextUrl.pathname == "/account/settings"
+  //   ) {
+  //     const response = NextResponse.rewrite(
+  //       new URL("/account/settings/profile", request.url)
+  //     );
+  //     return response;
+  //   }
+  // } else {
+  //   if (nextUrl.pathname.startsWith("/account")) {
+  //     const response = NextResponse.redirect(new URL("/login", request.url));
+  //     response.cookies.set("sid", "", { maxAge: 0, path: "/" });
+  //     return response;
+  //   }
+  // }
 
   return NextResponse.next();
 }

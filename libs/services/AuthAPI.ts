@@ -3,6 +3,7 @@ import { API, APIError } from "./api";
 import { getHeaders, loadCookie } from "./common";
 import { cookies } from "next/headers";
 import { DefaultResponseData } from "@/types/api";
+import { SignIn, SignUp, TokenData } from "@/types/auth";
 
 const authInstance = API.create({
   baseUrl: "http://localhost:4000" + "/api/v1/auth",
@@ -13,26 +14,8 @@ const authInstance = API.create({
   },
 });
 
-export type LognIn = {
-  email: string;
-  password: string;
-};
-
-type TokenData = {
-  sessionType: string;
-  userId: string;
-  disableAt: null | Date;
-};
-
-export type Register = {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-};
-
 export default class AuthApi {
-  static async lognIn(input: LognIn) {
+  static async signIn(input: SignIn) {
     const { data, headers } = await authInstance.post<{
       token: string;
       status: string;
@@ -47,29 +30,15 @@ export default class AuthApi {
     return data;
   }
 
-  static async signUp(input: Register): Promise<DefaultResponseData> {
-    try {
-      const { data, headers } = await authInstance.post<DefaultResponseData>(
-        "/signup",
-        input,
-        {
-          headers: await getHeaders(),
-        }
-      );
-      const rawCookie = headers.get("set-cookie") ?? "";
-      await loadCookie(rawCookie);
-
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof APIError) {
-        const data = error.response.data as DefaultResponseData;
-        return data;
+  static async signUp(input: SignUp): Promise<DefaultResponseData> {
+    const { data } = await authInstance.post<DefaultResponseData>(
+      "/signup",
+      input,
+      {
+        headers: await getHeaders(),
       }
-      console.error("Unknown error", error);
-      return {
-        message: "Email này đã đăng ký.",
-      };
-    }
+    );
+    return data;
   }
 
   static async sendRecoverAccount(email: string) {

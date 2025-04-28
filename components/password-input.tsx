@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/lib/utils";
+import cn from "@/utils/cn";
 import { EyeIcon, EyeClosedIcon } from "lucide-react";
 import React from "react";
 

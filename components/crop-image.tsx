@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  getDataFromImageFile,
-  ImgDataUpload,
-  isValidAspectRatio,
-} from "@/lib/utils";
+import ImageUtils, { ImgDataUpload } from "@/utils/image";
 import {
   Dialog,
   DialogContent,
@@ -11,8 +7,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "@/components/commons/dialog";
+import { Button } from "@/components/commons/button";
 import { Cropper, ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import {
@@ -22,9 +18,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/commons/select";
 import { RotateCwIcon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/commons/separator";
 import { toast } from "sonner";
 
 type Props = {
@@ -71,14 +67,14 @@ const CropImage = ({
     React.useState<ImgDataUpload | null>(null);
 
   const validateAspectRatios = React.useMemo(
-    () => aspectRatios.filter(isValidAspectRatio),
+    () => aspectRatios.filter(ImageUtils.isValidAspectRatio),
     [aspectRatios]
   );
 
   React.useEffect(() => {
     const handleInit = async () => {
       if (imageFile) {
-        const imgData = await getDataFromImageFile(imageFile);
+        const imgData = await ImageUtils.getDataFromImageFile(imageFile);
 
         setImgUploadData(imgData);
       }
@@ -108,7 +104,7 @@ const CropImage = ({
       return;
     }
     e.target.value = "";
-    const imgData = await getDataFromImageFile(file);
+    const imgData = await ImageUtils.getDataFromImageFile(file);
 
     if (validateAspectRatios.includes(imgData.aspectRatio)) {
       if (onSave)

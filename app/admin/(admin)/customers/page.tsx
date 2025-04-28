@@ -3,9 +3,9 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
-} from "@/components/ui/breadcrumb";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
+} from "@/components/commons/breadcrumb";
+import { SidebarTrigger } from "@/components/commons/sidebar";
+import { Separator } from "@/components/commons/separator";
 import { Metadata } from "next";
 
 import CustomerBody from "./customer-body";
@@ -14,7 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/commons/dropdown-menu";
 import { getCustomersAction } from "./actions";
 
 export const metadata: Metadata = {

@@ -10,7 +10,11 @@ import {
 } from "lucide-react";
 import { useIsMobile } from "@/lib/hooks/use-mobile";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/commons/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,13 +23,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/commons/dropdown-menu";
 import {
   SidebarFooter,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@/components/commons/sidebar";
 const AdminSidebarFooter = () => {
   const isMobile = useIsMobile();
   const currentUser = {

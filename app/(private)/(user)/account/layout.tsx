@@ -1,5 +1,9 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/commons/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,8 +12,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { DEFAULT_AVATAR } from "@/configs/constant";
+} from "@/components/commons/dropdown-menu";
+import { DEFAULT_AVATAR } from "@/constants/temp";
 import {
   Bell,
   BellIcon,
@@ -19,11 +23,10 @@ import {
   ShoppingBagIcon,
   Sparkles,
 } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 import { useUser } from "../../UserProvider";
 import { usePathname } from "next/navigation";
+import BrandLogo from "@/components/commons/brand-logo";
 
 const AccountLayout = ({
   children,
@@ -35,16 +38,7 @@ const AccountLayout = ({
     <>
       <div className="sticky top-0 left-0 right-0 z-50 bg-accent-foreground">
         <div className="flex items-center justify-between gap-2 px-2 sm:px-3 py-1 h-[64px] mx-auto max-w-7xl">
-          <Link href={"/"}>
-            <Image
-              priority
-              className="object-cover"
-              src="/logo2.png"
-              alt="logo"
-              width={200}
-              height={56}
-            />
-          </Link>
+          <BrandLogo />
 
           <div className="flex items-center gap-2">
             {pathName != "/account/cart" ? (

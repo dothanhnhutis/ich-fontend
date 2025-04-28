@@ -1,7 +1,7 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/commons/button";
+import { Input } from "@/components/commons/input";
+import { Label } from "@/components/commons/label";
 import CropImage from "@/components/crop-image";
 import {
   ImageUpscaleIcon,

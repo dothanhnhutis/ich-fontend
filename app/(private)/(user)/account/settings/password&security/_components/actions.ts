@@ -1,27 +1,28 @@
 "use server";
 
-import AuthApi from "@/lib/services/AuthAPI";
-import UserApi, { UpdatePassword } from "@/lib/services/user";
+import AuthAPI from "@/libs/services/AuthAPI";
+import UserAPI from "@/libs/services/UserAPI";
+import { UpdatePassword } from "@/types/user";
 
 export async function sendOTPUpdateEmailAction(email: string) {
-  await UserApi.sendOTPUpdateEmail(email);
+  await UserAPI.sendOTPUpdateEmail(email);
 }
 
 export async function updateEmailByOTPAction(input: {
   email: string;
   otp: string;
 }) {
-  return await UserApi.updateEmailByOTP(input);
+  return await UserAPI.updateEmailByOTP(input);
 }
 
 export async function updatePasswordAction(input: UpdatePassword) {
-  return await UserApi.updatePassword(input);
+  return await UserAPI.updatePassword(input);
 }
 
 export async function createPasswordAction(input: UpdatePassword) {
-  return await UserApi.createPassword(input);
+  return await UserAPI.createPassword(input);
 }
 
 export async function forgotPasswordAction(email: string) {
-  return await AuthApi.forgotPassword(email);
+  return await AuthAPI.forgotPassword(email);
 }

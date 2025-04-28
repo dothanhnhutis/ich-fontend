@@ -28,6 +28,14 @@ export const privateRegexRoutes = [
   adminRoutes,
 ];
 
+export const ROUTES = {
+  homePage: "/",
+  signIn: "/login",
+  signUp: "/register",
+  recover: "/recover",
+  accountPage: "/account",
+};
+
 // export const privateRegExpRoutes = [
 //   BaseRoutes,
 //   PostRoutes,

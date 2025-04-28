@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { SearchIcon } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/commons/separator";
 import CustomerList from "./customer-list";
 import { Customer } from "./actions";
 import CustomerForm from "./customer-form";

@@ -10,7 +10,7 @@ import {
   SidebarMenu,
   SidebarProvider,
   SidebarRail,
-} from "@/components/ui/sidebar";
+} from "@/components/commons/sidebar";
 import React from "react";
 import Image from "next/image";
 import { cookies } from "next/headers";

@@ -8,4 +8,5 @@ export const AUTH_MESSAGES = {
   EMAIL_OR_PASSWORD_INVALID: "Invalid email or password.",
   EMAIL_ALREADY_REGISTERED: "Email already registered.",
   PASSWORD_MISMATCH: "Passwords do not match.",
+  USER_BANNED: "Account has been banned",
 };

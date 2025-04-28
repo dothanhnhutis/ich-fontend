@@ -1,11 +1,14 @@
 import React from "react";
-import Link from "next/link";
-import Image from "next/image";
 import { Metadata } from "next";
 import BrandLogo from "@/components/commons/brand-logo";
 
 export const metadata: Metadata = {
-  title: "Authentication Page",
+  title: {
+    default: "Nhà Máy Sản Xuất Gia Công Mỹ Phẩm I.C.H",
+    template: "%s | Nhà Máy Sản Xuất Gia Công Mỹ Phẩm I.C.H",
+  },
+  description:
+    "Công ty TNHH MTV Sản Xuất I.C.H chuyên cung cấp các dịch vụ gia công, sản xuất mỹ phẩm và phát triển sản phẩm theo trend trên thị trường.",
   robots: {
     index: false,
     follow: false,

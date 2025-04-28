@@ -1,11 +1,11 @@
 "use client";
 import React, { Fragment } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/commons/button";
+import { Label } from "@/components/commons/label";
+import { Input } from "@/components/commons/input";
 import { ChevronRightIcon, EllipsisIcon, PlusIcon } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/commons/separator";
 import {
   CreateCustomerFormData,
   useCreateCustomer,
@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/commons/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/commons/dropdown-menu";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import Image from "next/image";
 

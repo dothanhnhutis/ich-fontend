@@ -10,13 +10,13 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarRail,
-} from "@/components/ui/sidebar";
+} from "@/components/commons/sidebar";
 import { PinIcon, PinOffIcon } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@/components/commons/sidebar";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import AdminSidebarFooter from "../admin/(admin)/siderbar-footer";

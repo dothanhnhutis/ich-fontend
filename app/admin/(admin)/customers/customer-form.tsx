@@ -7,12 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "@/components/commons/dialog";
+import { Button } from "@/components/commons/button";
 import { PlusIcon } from "lucide-react";
 import { createNewCustomerAction, Customer } from "./actions";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Label } from "@/components/commons/label";
+import { Input } from "@/components/commons/input";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 

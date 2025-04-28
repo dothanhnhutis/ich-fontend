@@ -1,7 +1,7 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Account } from "@/lib/services/user";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/commons/button";
+import { Account } from "@/types/user";
+import cn from "@/utils/cn";
 import React from "react";
 import { FcGoogle } from "react-icons/fc";
 
@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@/components/commons/alert-dialog";
 import { useUser } from "@/app/(private)/UserProvider";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";

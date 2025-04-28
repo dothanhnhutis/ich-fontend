@@ -9,9 +9,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/commons/input";
+import { Label } from "@/components/commons/label";
+import { Separator } from "@/components/commons/separator";
 import {
   Select,
   SelectContent,
@@ -20,7 +20,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/commons/select";
 import {
   Dialog,
   DialogContent,
@@ -29,16 +29,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+} from "@/components/commons/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/commons/radio-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/commons/tooltip";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/commons/button";
 import { cn, generateUniqueID } from "@/lib/utils";
 import {
   ChevronRightIcon,

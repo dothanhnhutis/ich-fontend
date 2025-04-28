@@ -1,6 +1,6 @@
 import React from "react";
 import { Customer } from "../../actions";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/commons/button";
 import Link from "next/link";
 import {
   Grid2X2Icon,
@@ -8,8 +8,8 @@ import {
   SlidersHorizontalIcon,
   Table2Icon,
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/commons/separator";
+import { Input } from "@/components/commons/input";
 
 const OrdersBody = ({ customer }: { customer: Customer }) => {
   return (

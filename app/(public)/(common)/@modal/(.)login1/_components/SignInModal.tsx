@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/commons/dialog";
 import SignInForm from "@/app/(public)/_components/forms/SignInForm";
 
 const SignInModal = () => {

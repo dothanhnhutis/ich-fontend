@@ -10,14 +10,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+} from "@/components/commons/alert-dialog";
+import { Button } from "@/components/commons/button";
+import { Label } from "@/components/commons/label";
+import { Input } from "@/components/commons/input";
 import { useUser } from "@/app/(private)/UserProvider";
 import { useMutation } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
-import { useStore } from "@/lib/hooks/use-store";
+import cn from "@/utils/cn";
+import { useStore } from "@/libs/hooks/use-store";
 import { sendOTPUpdateEmailAction, updateEmailByOTPAction } from "./actions";
 import { LoaderCircleIcon } from "lucide-react";
 import { toast } from "sonner";

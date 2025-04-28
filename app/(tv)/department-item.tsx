@@ -1,6 +1,9 @@
 "use client";
 import { useTV } from "@/components/providers/tv-provider";
-import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import {
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/commons/sidebar";
 import { cn } from "@/lib/utils";
 import { Department } from "@/schema/department.schema";
 import { PinIcon, PinOffIcon } from "lucide-react";

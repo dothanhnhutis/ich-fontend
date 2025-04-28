@@ -2,12 +2,12 @@
 import React from "react";
 import { z } from "zod";
 import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/commons/button";
 import { EllipsisIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import cn from "@/utils/cn";
 import { toast } from "sonner";
 import { useUser } from "@/app/(private)/UserProvider";
-import { Session } from "@/lib/services/user";
+import { Session } from "@/types/user";
 import { useMutation } from "@tanstack/react-query";
 import { deleteSessionByIdAction } from "../actions";
 

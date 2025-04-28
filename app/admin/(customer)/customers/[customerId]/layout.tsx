@@ -14,7 +14,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
-} from "@/components/ui/sidebar";
+} from "@/components/commons/sidebar";
 import Image from "next/image";
 import Link from "next/link";
 import {

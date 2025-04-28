@@ -1,7 +1,6 @@
 import "server-only";
 import { API, APIError } from "./api";
 import { getHeaders, loadCookie } from "./common";
-import { cookies } from "next/headers";
 import { DefaultResponseData } from "@/types/api";
 import { SignIn, SignUp, TokenData } from "@/types/auth";
 
@@ -69,28 +68,17 @@ export default class AuthApi {
     }
   }
 
-  static async sendReactivateAccount(): Promise<DefaultResponseData> {
-    try {
-      const { data } = await authInstance.get<DefaultResponseData>(
-        "/reactivate",
-        {
-          headers: await getHeaders(),
-        }
-      );
-      const cookieStore = await cookies();
-      cookieStore.delete("reactivate");
-
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof APIError) {
-        const data = error.response.data as DefaultResponseData;
-        return data;
+  static async sendReactivateAccount(
+    token: string
+  ): Promise<DefaultResponseData> {
+    const { data } = await authInstance.get<DefaultResponseData>(
+      "/reactivate",
+      {
+        headers: { ...(await getHeaders()), Authorization: token },
       }
-      console.error("Unknown error", error);
-      return {
-        message: "",
-      };
-    }
+    );
+
+    return data;
   }
 
   static async activateAccount(token: string) {

@@ -2,8 +2,12 @@
 import React from "react";
 // import Image from "next/image";
 import { useAuth } from "@/components/providers/auth-provider";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/commons/avatar";
+import { Skeleton } from "@/components/commons/skeleton";
 
 const UserFooter = () => {
   const { currentUser } = useAuth();

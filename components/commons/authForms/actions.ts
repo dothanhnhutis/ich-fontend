@@ -6,14 +6,12 @@ import AuthApi from "@/libs/services/AuthAPI";
 import { DefaultResponseData } from "@/types/api";
 import { SignIn, SignUp } from "@/types/auth";
 
-const signIn = async (
-  input: SignIn
-): Promise<
+export async function signInAction(input: SignIn): Promise<
   DefaultResponseData & {
     token: string | null;
     status: string;
   }
-> => {
+> {
   try {
     return await AuthApi.signIn(input);
   } catch (error: unknown) {
@@ -31,9 +29,9 @@ const signIn = async (
       token: null,
     };
   }
-};
+}
 
-const signUp = async (input: SignUp) => {
+export async function signUpAction(input: SignUp) {
   try {
     const data = await AuthApi.signUp(input);
     return {
@@ -53,11 +51,4 @@ const signUp = async (input: SignUp) => {
       message: AUTH_MESSAGES.EMAIL_ALREADY_REGISTERED,
     };
   }
-};
-
-const AuthAction = {
-  signIn,
-  signUp,
-};
-
-export default AuthAction;
+}

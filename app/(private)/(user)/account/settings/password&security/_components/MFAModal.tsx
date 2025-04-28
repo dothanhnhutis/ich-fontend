@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { MFA, TOTP } from "@/lib/services/user";
+import { MFA, TOTP } from "@/types/user";
 
 import {
   AlertDialog,
@@ -8,15 +8,15 @@ import {
   AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Switch } from "@/components/ui/switch";
+} from "@/components/commons/alert-dialog";
+import { Switch } from "@/components/commons/switch";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { cn } from "@/lib/utils";
+} from "@/components/commons/breadcrumb";
+import cn from "@/utils/cn";
 import {
   createMFAAction,
   deleteMFAAction,
@@ -28,16 +28,16 @@ import {
 import * as z from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/components/commons/label";
 import {
   CopyIcon,
   KeyRoundIcon,
   LoaderCircleIcon,
   MonitorSmartphoneIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/commons/button";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/commons/input";
 import Link from "next/link";
 
 type MFAContextState = {

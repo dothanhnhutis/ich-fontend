@@ -1,11 +1,11 @@
 "use server";
 
-import UserApi from "@/lib/services/user";
+import UserAPI from "@/libs/services/UserAPI";
 
 export async function getCurrentUserAction() {
-  return await UserApi.getCurrrentUser();
+  return await UserAPI.getCurrrentUser();
 }
 
 export async function logOutAction() {
-  return await UserApi.logOut();
+  return await UserAPI.logOut();
 }

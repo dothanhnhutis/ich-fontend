@@ -1,17 +1,16 @@
 "use client";
 import React from "react";
 import PasswordInput from "@/components/password-input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/commons/button";
+import { Label } from "@/components/commons/label";
+import cn from "@/utils/cn";
 import { CheckIcon, LoaderCircleIcon } from "lucide-react";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { DEFAULT_LOGOUT_REDIRECT } from "@/constants/routes";
 import { resetPasswordAction } from "../actions";
 import Link from "next/link";
+
 const passwordSchema = z
   .string({
     required_error: "Mật khẩu mới là bắt buộc",

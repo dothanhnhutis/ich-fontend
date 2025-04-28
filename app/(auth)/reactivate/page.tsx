@@ -1,21 +1,28 @@
 import React from "react";
 import { Metadata } from "next";
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { sendReactivateAccountAction } from "../actions";
-import ReactivateAlert from "./ReactivateAlert";
 
 export const metadata: Metadata = {
   title: "Khôi Phục Tài Khoản",
 };
 
-const ReactivatePage = async () => {
-  const cookieStore = await cookies();
+const ReactivatePage = async (props: {
+  searchParams: Promise<{ token?: string | string[] | undefined }>;
+}) => {
+  const searchParams = await props.searchParams;
+  const token =
+    typeof searchParams.token == "string"
+      ? searchParams.token
+      : Array.isArray(searchParams.token)
+      ? searchParams.token.pop()
+      : null;
 
-  const reactivateCookie = cookieStore.get("reactivate");
-  if (!reactivateCookie) return notFound();
+  if (!token) return notFound();
 
-  return <ReactivateAlert />;
+  const { isSuccess, message } = await sendReactivateAccountAction(token);
+
+  return <div>{message}</div>;
 };
 
 export default ReactivatePage;

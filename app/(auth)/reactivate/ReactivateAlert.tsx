@@ -3,11 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { sendReactivateAccountAction } from "../actions";
 
-const ReactivateAlert = () => {
+const ReactivateAlert = ({ token }: { token: string }) => {
   const { isPending, data } = useQuery({
     queryKey: ["reactivate"],
     queryFn: async function () {
-      return await sendReactivateAccountAction();
+      return await sendReactivateAccountAction(token);
     },
   });
 

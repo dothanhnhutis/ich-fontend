@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { CurrentUser } from "@/lib/services/user";
+import { User } from "@/types/user";
 import {
   QueryObserverResult,
   RefetchOptions,
@@ -12,11 +12,11 @@ import { useRouter } from "next/navigation";
 
 type UserProvider = {
   isPending: boolean;
-  user: CurrentUser | null;
+  user: User | null;
   logOut: () => Promise<void>;
   refetch: (
     options?: RefetchOptions
-  ) => Promise<QueryObserverResult<CurrentUser | null, Error>>;
+  ) => Promise<QueryObserverResult<User | null, Error>>;
 };
 
 const UserContext = React.createContext<UserProvider | null>(null);
@@ -32,7 +32,7 @@ export const useUser = () => {
 export const UserProvider = ({
   children,
   user,
-}: Readonly<{ children: React.ReactNode; user?: CurrentUser | null }>) => {
+}: Readonly<{ children: React.ReactNode; user?: User | null }>) => {
   const router = useRouter();
 
   const { isPending, data, refetch } = useQuery({

@@ -1,12 +1,16 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/commons/avatar";
 
-import { cn } from "@/lib/utils";
+import cn from "@/utils/cn";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { useUser } from "../../../UserProvider";
-import { DEFAULT_AVATAR } from "@/configs/constant";
+import { DEFAULT_AVATAR } from "@/constants/temp";
 
 const navs = [
   {
@@ -51,6 +55,7 @@ const PrivateUserLayout = ({
     return navs.find((nav) => nav.regex.test(pathName));
   }, [pathName]);
 
+  console.log(user);
   return (
     <div className="p-4 sm:p-8 pb-10">
       <div className="mx-auto max-w-3xl py-8">

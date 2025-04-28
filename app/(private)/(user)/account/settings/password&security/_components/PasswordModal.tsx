@@ -1,10 +1,10 @@
 "use client";
 import React, { use } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/commons/button";
 
 import { CheckIcon, LoaderCircleIcon, XIcon } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { Label } from "@/components/commons/label";
+import cn from "@/utils/cn";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -12,11 +12,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@/components/commons/alert-dialog";
 
 import PasswordInput from "@/components/password-input";
 import { useUser } from "@/app/(private)/UserProvider";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/commons/checkbox";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import {

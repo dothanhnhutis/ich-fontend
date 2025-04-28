@@ -1,5 +1,5 @@
 import React from "react";
-import UserApi from "@/lib/services/user";
+import UserAPI from "@/libs/services/UserAPI";
 import { Metadata } from "next";
 import EmailModal from "./_components/EmailModal";
 import PasswordModal from "./_components/PasswordModal";
@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 };
 
 const SecurityPage = async () => {
-  const mfa = await UserApi.getMFA();
-  const links = await UserApi.getLinked();
+  const mfa = await UserAPI.getMFA();
+  const links = await UserAPI.getLinked();
   return (
     <div className="w-full">
       <EmailModal />

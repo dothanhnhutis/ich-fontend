@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/commons/input";
+import { Label } from "@/components/commons/label";
+import { Separator } from "@/components/commons/separator";
+import { Button } from "@/components/commons/button";
 
 import { Trash2Icon } from "lucide-react";
 import {
@@ -15,7 +15,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/commons/select";
 import { useMutation } from "@tanstack/react-query";
 import { createLocationAction, CreateLocationActionData } from "../action";
 import { toast } from "sonner";

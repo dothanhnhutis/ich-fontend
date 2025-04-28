@@ -10,8 +10,11 @@ import PasswordInput from "@/components/password-input";
 import Link from "next/link";
 import GoogleButton from "./GoogleButton";
 import { z } from "zod";
-import AuthAction from "./actions";
+import { signInAction } from "./actions";
 import { SignIn } from "@/types/auth";
+import { AUTH_MESSAGES } from "@/constants/systemMessages";
+import { ROUTES } from "@/constants/routes";
+import { toast } from "sonner";
 
 const emailSchema = z.string().email();
 
@@ -29,7 +32,6 @@ const SignInForm = ({
     password: "",
   });
 
-  const [mfaStep, setMFAStep] = React.useState(false);
   const [mfaCode, setMfaCode] = React.useState<string>("");
 
   React.useEffect(() => {
@@ -41,13 +43,12 @@ const SignInForm = ({
 
   const { data, mutate, isPending, reset } = useMutation({
     mutationFn: async () => {
-      return await AuthAction.signIn(formData);
+      return await signInAction(formData);
     },
     onSuccess({ status, token, message }) {
       if (status == "SUCCESS") {
         router.refresh();
-      } else if (status == "MFA_REQUIRED") {
-        setMFAStep(true);
+        toast.success(message);
       }
     },
     onSettled() {
@@ -74,6 +75,73 @@ const SignInForm = ({
     }
   };
 
+  if (data && data.status == "MFA_REQUIRED") {
+    return (
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col gap-1.5 py-6">
+          <h1 className="font-semibold tracking-tight text-2xl">
+            Xác thực đa yếu tố (MFA)
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Tài khoản của bạn được đảm bảo bằng xác thực đa yếu tố (MFA). Để
+            hoàn tất đăng nhập, hãy bật hoặc xem thiết bị MFA của bạn và nhập mã
+            xác thực bên dưới.
+          </p>
+        </div>
+
+        <form>
+          <div className="grid gap-6">
+            <div className="grid gap-6">
+              <div className="grid gap-2">
+                <p>
+                  <span className="font-medium text-sm">E-mail</span>:
+                  dothanhnhutis@gmail.com
+                </p>
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="code">Mã xác thực</Label>
+                  <button
+                    type="button"
+                    className="text-primary text-sm cursor-pointer hover:underline"
+                  >
+                    Khắc phục sự cố MFA
+                  </button>
+                </div>
+                <Input
+                  id="code"
+                  name="code"
+                  placeholder="123456"
+                  maxLength={6}
+                  required
+                  onChange={(e) => setMfaCode(e.target.value)}
+                  value={mfaCode}
+                  disabled={isPending}
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full cursor-pointer"
+                disabled={isPending}
+              >
+                {isPending && (
+                  <LoaderCircleIcon className="size-4 animate-spin" />
+                )}
+                Xác thực
+              </Button>
+            </div>
+            <button
+              type="button"
+              className="text-primary justify-self-start cursor-pointer text-sm hover:underline"
+            >
+              Đăng nhập với tài khoản khác
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-sm">
       <div className="flex flex-col gap-1.5 py-6">
@@ -81,30 +149,29 @@ const SignInForm = ({
         <p className="text-muted-foreground text-sm">Chào mừng bạn trở lại</p>
       </div>
 
-      <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
+      {/* <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
         Tài khoản E-mail đã đăng ký với mật khẩu. Vui lòng đăng nhập rồi liên
         kết với tài khoản google.
       </p>
+*/}
 
-      <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
-        Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
-        <Link href={"/reactivate"} className="text-primary">
-          kích hoạt lại
-        </Link>{" "}
-        trước khi đăng nhập.
-      </p>
-
-      <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
-        Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
-        <Link href={"/reactivate"} className="text-primary">
-          kích hoạt lại
-        </Link>{" "}
-        trước khi đăng nhập.
-      </p>
-
-      <p className="bg-red-100/70 text-sm text-red-600 p-2 mb-2 rounded-md">
-        {data?.message}
-      </p>
+      {data && data.status == "ACTIVATE_REQUIRED" ? (
+        <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
+          Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
+          <Link
+            href={`/reactivate?token=${data.token}`}
+            className="text-primary"
+          >
+            kích hoạt lại
+          </Link>{" "}
+          trước khi đăng nhập.
+        </p>
+      ) : null}
+      {data && data.status == "ERROR" ? (
+        <p className="bg-red-100/70 text-sm text-red-600 p-2 mb-2 rounded-md">
+          {data?.message ?? AUTH_MESSAGES.USER_BANNED}
+        </p>
+      ) : null}
 
       <form onSubmit={handleSubmit}>
         <div className="grid gap-6">
@@ -136,8 +203,8 @@ const SignInForm = ({
                 <Link
                   href={
                     emailSchema.safeParse(formData.email).success
-                      ? `/recover?email=${formData.email}`
-                      : "/recover"
+                      ? `${ROUTES.recover}?email=${formData.email}`
+                      : ROUTES.recover
                   }
                   className="ml-auto text-sm underline-offset-4 hover:underline"
                 >
@@ -154,9 +221,6 @@ const SignInForm = ({
                 value={formData.password}
                 disabled={isPending}
               />
-              {data && data.status == "ERROR" ? (
-                <p className="text-destructive text-xs">{data.message}</p>
-              ) : null}
             </div>
             <Button
               type="submit"

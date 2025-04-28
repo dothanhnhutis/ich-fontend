@@ -1,34 +1,34 @@
 "use server";
-import UserApi from "@/lib/services/user";
+import UserAPI from "@/libs/services/UserAPI";
 
 export async function deleteSessionByIdAction(sessionId: string) {
-  return await UserApi.deleteSessionById(sessionId);
+  return await UserAPI.deleteSessionById(sessionId);
 }
 
 export async function setupMFAAction(deviceName: string) {
-  return await UserApi.setupMFA(deviceName);
+  return await UserAPI.setupMFA(deviceName);
 }
 
 export async function createMFAAction(codes: string[]) {
-  return await UserApi.createMFA(codes);
+  return await UserAPI.createMFA(codes);
 }
 
 export async function getMFAAction() {
-  return await UserApi.getMFA();
+  return await UserAPI.getMFA();
 }
 
 export async function getSetupMFAAction() {
-  return await UserApi.getSetupMFA();
+  return await UserAPI.getSetupMFA();
 }
 
 export async function deleteMFAAction(codes: string[]) {
-  return await UserApi.deleteMFA(codes);
+  return await UserAPI.deleteMFA(codes);
 }
 
 export async function generateMFACodeAction() {
-  return await UserApi.generateMFACode();
+  return await UserAPI.generateMFACode();
 }
 
 export async function disableAccountAction() {
-  return await UserApi.disableAccount();
+  return await UserAPI.disableAccount();
 }

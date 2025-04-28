@@ -1,15 +1,15 @@
 import React from "react";
 import { getCustomerById } from "../../../actions";
 import { notFound } from "next/navigation";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/commons/sidebar";
+import { Separator } from "@/components/commons/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@/components/commons/breadcrumb";
 import CreateOrderForm from "./form";
 
 const CreateOrderPage = async (

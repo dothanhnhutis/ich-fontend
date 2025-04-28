@@ -4,8 +4,17 @@ import { getHeaders } from "./common";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { DefaultResponseData } from "@/types/api";
+import {
+  Account,
+  MFAResponseData,
+  Session,
+  SetupMFA,
+  TOTP,
+  UpdatePassword,
+  User,
+} from "@/types/user";
 
-const userAPI = API.create({
+const userInstance = API.create({
   baseUrl: "http://localhost:4000" + "/api/v1/users",
   credentials: "include",
   headers: {
@@ -14,10 +23,10 @@ const userAPI = API.create({
   },
 });
 
-export default class UserApi {
+export default class UserAPI {
   static async logOut() {
     try {
-      await userAPI.delete<CurrentUserResponse>("/signout", {
+      await userInstance.delete("/signout", {
         headers: await getHeaders(),
       });
     } catch (error: unknown) {
@@ -34,11 +43,9 @@ export default class UserApi {
     }
   }
 
-  static async getCurrrentUser(): Promise<CurrentUserResponse["data"]> {
+  static async getCurrrentUser(): Promise<User | null> {
     try {
-      const {
-        data: { data },
-      } = await userAPI.get<CurrentUserResponse>("/me", {
+      const { data } = await userInstance.get<User>("/me", {
         headers: await getHeaders(),
         next: {
           tags: ["me"],
@@ -52,6 +59,7 @@ export default class UserApi {
       } else if (error instanceof Error) {
         errMes = error.message;
       }
+      console.log(errMes);
       return null;
     }
   }
@@ -60,7 +68,7 @@ export default class UserApi {
     try {
       const {
         data: { data },
-      } = await userAPI.get<{
+      } = await userInstance.get<{
         success: boolean;
         message: string;
         data: Session[];
@@ -84,7 +92,7 @@ export default class UserApi {
     sessionId: string
   ): Promise<DefaultResponseData> {
     try {
-      const { data } = await userAPI.delete<DefaultResponseData>(
+      const { data } = await userInstance.delete<DefaultResponseData>(
         `/sessions/${sessionId}`,
         {
           headers: await getHeaders(),
@@ -111,7 +119,7 @@ export default class UserApi {
 
   static async setupMFA(deviceName: string): Promise<SetupMFA> {
     try {
-      const { data } = await userAPI.post<{
+      const { data } = await userInstance.post<{
         status: number;
         success: boolean;
         message: string;
@@ -145,7 +153,7 @@ export default class UserApi {
     try {
       const {
         data: { data },
-      } = await userAPI.get<SetupMFA>("/setup-mfa", {
+      } = await userInstance.get<SetupMFA>("/setup-mfa", {
         headers: await getHeaders(),
       });
       return data;
@@ -163,7 +171,7 @@ export default class UserApi {
 
   static async createMFA(codes: string[]): Promise<MFAResponseData> {
     try {
-      const { data } = await userAPI.post<MFAResponseData>(
+      const { data } = await userInstance.post<MFAResponseData>(
         `/mfa`,
         { codes },
         {
@@ -193,7 +201,7 @@ export default class UserApi {
     try {
       const {
         data: { data },
-      } = await userAPI.get<MFAResponseData>("/mfa", {
+      } = await userInstance.get<MFAResponseData>("/mfa", {
         headers: await getHeaders(),
       });
       return data;
@@ -211,9 +219,13 @@ export default class UserApi {
 
   static async generateMFACode(): Promise<MFAResponseData> {
     try {
-      const { data } = await userAPI.put<MFAResponseData>(`/mfa`, undefined, {
-        headers: await getHeaders(),
-      });
+      const { data } = await userInstance.put<MFAResponseData>(
+        `/mfa`,
+        undefined,
+        {
+          headers: await getHeaders(),
+        }
+      );
       revalidatePath("/account/password&security");
       return data;
     } catch (error: unknown) {
@@ -235,7 +247,7 @@ export default class UserApi {
 
   static async deleteMFA(codes: string[]): Promise<DefaultResponseData> {
     try {
-      const { data } = await userAPI.delete<DefaultResponseData>(`/mfa`, {
+      const { data } = await userInstance.delete<DefaultResponseData>(`/mfa`, {
         data: { codes },
         headers: await getHeaders(),
       });
@@ -257,7 +269,7 @@ export default class UserApi {
 
   static async disableAccount() {
     try {
-      const { data } = await userAPI.delete<{
+      const { data } = await userInstance.delete<{
         success: boolean;
         message: string;
       }>(`/deactivate`, {
@@ -284,7 +296,7 @@ export default class UserApi {
 
   static async sendOTPUpdateEmail(email: string): Promise<void> {
     try {
-      await userAPI.post<DefaultResponseData>(
+      await userInstance.post<DefaultResponseData>(
         `/email`,
         { email },
         {
@@ -307,7 +319,7 @@ export default class UserApi {
     otp: string;
   }): Promise<DefaultResponseData> {
     try {
-      const { data } = await userAPI.patch<DefaultResponseData>(
+      const { data } = await userInstance.patch<DefaultResponseData>(
         "/email",
         input,
         {
@@ -332,7 +344,7 @@ export default class UserApi {
 
   static async updatePassword(input: UpdatePassword) {
     try {
-      const { data } = await userAPI.patch<DefaultResponseData>(
+      const { data } = await userInstance.patch<DefaultResponseData>(
         "/password",
         input,
         {
@@ -356,7 +368,7 @@ export default class UserApi {
 
   static async createPassword(input: UpdatePassword) {
     try {
-      const { data } = await userAPI.post<DefaultResponseData>(
+      const { data } = await userInstance.post<DefaultResponseData>(
         "/password",
         {
           password: input.newPassword,
@@ -383,7 +395,7 @@ export default class UserApi {
 
   static async getLinked(): Promise<Account[]> {
     try {
-      const { data } = await userAPI.get<
+      const { data } = await userInstance.get<
         DefaultResponseData & { data: Account[] }
       >("/links", {
         headers: await getHeaders(),

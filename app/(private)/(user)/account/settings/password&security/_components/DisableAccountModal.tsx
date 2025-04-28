@@ -10,8 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from "@/components/commons/alert-dialog";
+import { Button } from "@/components/commons/button";
 import { useMutation } from "@tanstack/react-query";
 import { disableAccountAction } from "../../actions";
 import { toast } from "sonner";

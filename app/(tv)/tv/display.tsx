@@ -1,7 +1,7 @@
 "use client";
 import { useTV } from "@/components/providers/tv-provider";
 
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/commons/sidebar";
 import { audioPath } from "@/configs/constants";
 import { cn, sortByFields } from "@/lib/utils";
 import { Display } from "@/schema/display.schema";
@@ -9,12 +9,15 @@ import { getDisplaysOfDepartment } from "@/services/display.service";
 import { format } from "date-fns";
 import { PackageIcon, PanelLeftIcon, SettingsIcon, XIcon } from "lucide-react";
 import React from "react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/commons/toggle-group";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/commons/popover";
 import { toast } from "sonner";
 
 // const DisplayItem = ({ data }: { data: Display }) => {

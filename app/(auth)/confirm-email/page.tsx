@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/commons/button";
 import { confirmEmailAction, getTokenAction } from "../actions";
 
 export const metadata: Metadata = {

@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Label } from "@/components/commons/label";
+import { Input } from "@/components/commons/input";
+import { Button } from "@/components/commons/button";
 import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/commons/separator";
 import CropImage from "@/components/crop-image";
 import { cn, generateUniqueID } from "@/lib/utils";
 import { ImageIcon, ImageUpIcon, SquarePenIcon, TrashIcon } from "lucide-react";

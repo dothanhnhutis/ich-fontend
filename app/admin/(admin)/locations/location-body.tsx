@@ -8,9 +8,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+} from "@/components/commons/table";
+import { Button } from "@/components/commons/button";
+import { Separator } from "@/components/commons/separator";
 import {
   EllipsisIcon,
   Grid2X2Icon,
@@ -26,8 +26,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+} from "@/components/commons/dropdown-menu";
+import { Input } from "@/components/commons/input";
 import { deleteLocationByIdAction, Location } from "./action";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";

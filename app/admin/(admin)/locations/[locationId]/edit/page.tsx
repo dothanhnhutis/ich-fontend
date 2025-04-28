@@ -6,9 +6,9 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
+} from "@/components/commons/breadcrumb";
+import { SidebarTrigger } from "@/components/commons/sidebar";
+import { Separator } from "@/components/commons/separator";
 import { Metadata } from "next";
 import UpdateLocationForm from "./form";
 import { getLocationByIdAction, getRoomsOfLocationAction } from "../../action";

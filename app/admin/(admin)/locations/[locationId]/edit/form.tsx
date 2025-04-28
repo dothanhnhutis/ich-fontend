@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/commons/input";
+import { Label } from "@/components/commons/label";
+import { Separator } from "@/components/commons/separator";
 import { RotateCcwIcon, Trash2Icon } from "lucide-react";
 import {
   Select,
@@ -12,8 +12,8 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+} from "@/components/commons/select";
+import { Button } from "@/components/commons/button";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { updateLocationByIdAction, UpdateLocationData } from "../../action";

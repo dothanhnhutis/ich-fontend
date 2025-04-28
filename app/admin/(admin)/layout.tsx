@@ -15,7 +15,7 @@ import {
   SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,
-} from "@/components/ui/sidebar";
+} from "@/components/commons/sidebar";
 import Link from "next/link";
 import {
   BoxesIcon,
@@ -33,12 +33,12 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@/components/commons/collapsible";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@/components/commons/sidebar";
 import AdminSidebarFooter from "./siderbar-footer";
 
 const AdminLayout = async ({

@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/commons/table";
 import {
   EllipsisIcon,
   MapPinHouseIcon,
@@ -15,7 +15,7 @@ import {
   PlusIcon,
   SmartphoneIcon,
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/commons/separator";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 const invoices = [

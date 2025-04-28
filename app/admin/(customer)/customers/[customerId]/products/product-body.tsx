@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/commons/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/commons/dropdown-menu";
 import Link from "next/link";
 import {
   EllipsisIcon,
@@ -25,9 +25,9 @@ import {
   SlidersHorizontalIcon,
   Table2Icon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/commons/button";
+import { Input } from "@/components/commons/input";
+import { Separator } from "@/components/commons/separator";
 import { Product } from "./action";
 import { toast } from "sonner";
 import Image from "next/image";

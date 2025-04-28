@@ -6,9 +6,9 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+} from "@/components/commons/breadcrumb";
+import { Separator } from "@/components/commons/separator";
+import { SidebarTrigger } from "@/components/commons/sidebar";
 
 import { getCustomerProducts } from "./action";
 import ProductBody from "./product-body";

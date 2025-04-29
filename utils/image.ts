@@ -62,16 +62,13 @@ export default class ImageUtils {
     try {
       // Bước 1: Tải image từ URL
       const response = await fetch(url);
-
       // Bước 2: Chuyển response thành Blob
       const blob = await response.blob();
-
       // Bước 3: Chuyển Blob thành File
       const filename = url.split("/").pop(); // Lấy tên file từ URL
       const file = new File([blob], filename!, {
         type: blob.type || "image/jpeg", // Fallback type
       });
-
       return file;
     } catch (error) {
       console.error("Error converting URL to File:", error);

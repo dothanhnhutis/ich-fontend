@@ -3,144 +3,119 @@ import React from "react";
 import { Button } from "@/components/commons/button";
 import { Input } from "@/components/commons/input";
 import { Label } from "@/components/commons/label";
-import { useMutation } from "@tanstack/react-query";
 import { LoaderCircleIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import PasswordInput from "@/components/password-input";
 import Link from "next/link";
 import GoogleButton from "./GoogleButton";
 import { z } from "zod";
-import { signInAction } from "./actions";
-import { SignIn } from "@/types/auth";
 import { AUTH_MESSAGES } from "@/constants/systemMessages";
 import { ROUTES } from "@/constants/routes";
-import { toast } from "sonner";
+import useSignIn from "@/libs/hooks/use-signin";
 
 const emailSchema = z.string().email();
 
-const SignInForm = ({
-  email = "",
-  statusError,
-}: {
-  email?: string;
-  statusError?: string;
-}) => {
-  const router = useRouter();
+function MFAForm() {
+  const { data, handleChangeData, signInMutation, signInMFAMutation } =
+    useSignIn();
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    signInMFAMutation.mutate();
+  };
+  return (
+    <div className="w-full max-w-sm">
+      <div className="flex flex-col gap-1.5 py-6">
+        <h1 className="font-semibold tracking-tight text-2xl">
+          Xác thực đa yếu tố (MFA)
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Tài khoản của bạn được đảm bảo bằng xác thực đa yếu tố (MFA). Để hoàn
+          tất đăng nhập, hãy bật hoặc xem thiết bị MFA của bạn và nhập mã xác
+          thực bên dưới.
+        </p>
+      </div>
 
-  const [formData, setFormData] = React.useState<SignIn>({
-    email,
-    password: "",
-  });
+      {signInMFAMutation.data && signInMFAMutation.data.status == "ERROR" ? (
+        <p className="bg-red-100/70 text-sm text-red-600 p-2 mb-2 rounded-md">
+          {signInMFAMutation.data.message}
+        </p>
+      ) : null}
 
-  const [mfaCode, setMfaCode] = React.useState<string>("");
+      <form onSubmit={handleSubmit}>
+        <div className="grid gap-6">
+          <div className="grid gap-6">
+            <div className="grid gap-2">
+              <p>
+                <span className="font-medium text-sm">E-mail</span>:{" "}
+                {data.email}
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="code">Mã xác thực</Label>
+                <button
+                  type="button"
+                  className="text-primary text-sm cursor-pointer hover:underline"
+                >
+                  Khắc phục sự cố MFA
+                </button>
+              </div>
+              <Input
+                id="code"
+                name="code"
+                placeholder="123456"
+                maxLength={6}
+                required
+                onChange={(e) => handleChangeData({ code: e.target.value })}
+                value={data.code}
+                disabled={signInMFAMutation.isPending}
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer"
+              disabled={signInMFAMutation.isPending}
+            >
+              {signInMFAMutation.isPending && (
+                <LoaderCircleIcon className="size-4 animate-spin" />
+              )}
+              Xác thực
+            </Button>
+          </div>
+          <button
+            type="button"
+            className="text-primary justify-self-start cursor-pointer text-sm hover:underline"
+            onClick={() => {
+              handleChangeData({
+                email: "",
+                password: "",
+                code: "",
+              });
+              signInMutation.reset();
+            }}
+          >
+            Đăng nhập với tài khoản khác
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
 
-  React.useEffect(() => {
-    if (statusError) {
-      document.cookie =
-        "oauth2_error_type=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    }
-  }, [statusError]);
-
-  const { data, mutate, isPending, reset } = useMutation({
-    mutationFn: async () => {
-      return await signInAction(formData);
-    },
-    onSuccess({ status, token, message }) {
-      if (status == "SUCCESS") {
-        router.refresh();
-        toast.success(message);
-      }
-    },
-    onSettled() {
-      setFormData({
-        email: "",
-        password: "",
-      });
-    },
-  });
+const SignInForm = () => {
+  const { signInMutation, data, handleChangeData } = useSignIn();
 
   const handleOnchange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    reset();
-    if (statusError == "USER_SIGN_IN_PASSWORD") {
-      document.cookie =
-        "oauth2_error_type=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    }
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    // if (status == "USER_SIGN_IN_PASSWORD") {
+    //   document.cookie =
+    //     "oauth2_error_type=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    // }
+    handleChangeData({ [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (formData.email != "" && formData.password != "") {
-      mutate();
-    }
+    signInMutation.mutate();
   };
-
-  if (data && data.status == "MFA_REQUIRED") {
-    return (
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-1.5 py-6">
-          <h1 className="font-semibold tracking-tight text-2xl">
-            Xác thực đa yếu tố (MFA)
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Tài khoản của bạn được đảm bảo bằng xác thực đa yếu tố (MFA). Để
-            hoàn tất đăng nhập, hãy bật hoặc xem thiết bị MFA của bạn và nhập mã
-            xác thực bên dưới.
-          </p>
-        </div>
-
-        <form>
-          <div className="grid gap-6">
-            <div className="grid gap-6">
-              <div className="grid gap-2">
-                <p>
-                  <span className="font-medium text-sm">E-mail</span>:
-                  dothanhnhutis@gmail.com
-                </p>
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="code">Mã xác thực</Label>
-                  <button
-                    type="button"
-                    className="text-primary text-sm cursor-pointer hover:underline"
-                  >
-                    Khắc phục sự cố MFA
-                  </button>
-                </div>
-                <Input
-                  id="code"
-                  name="code"
-                  placeholder="123456"
-                  maxLength={6}
-                  required
-                  onChange={(e) => setMfaCode(e.target.value)}
-                  value={mfaCode}
-                  disabled={isPending}
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full cursor-pointer"
-                disabled={isPending}
-              >
-                {isPending && (
-                  <LoaderCircleIcon className="size-4 animate-spin" />
-                )}
-                Xác thực
-              </Button>
-            </div>
-            <button
-              type="button"
-              className="text-primary justify-self-start cursor-pointer text-sm hover:underline"
-            >
-              Đăng nhập với tài khoản khác
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-sm">
@@ -155,11 +130,12 @@ const SignInForm = ({
       </p>
 */}
 
-      {data && data.status == "ACTIVATE_REQUIRED" ? (
+      {signInMutation.data &&
+      signInMutation.data.status == "ACTIVATE_REQUIRED" ? (
         <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
           Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
           <Link
-            href={`/reactivate?token=${data.token}`}
+            href={`/reactivate?token=${signInMutation.data.token}`}
             className="text-primary"
           >
             kích hoạt lại
@@ -167,9 +143,10 @@ const SignInForm = ({
           trước khi đăng nhập.
         </p>
       ) : null}
-      {data && data.status == "ERROR" ? (
+
+      {signInMutation.data && signInMutation.data.status == "ERROR" ? (
         <p className="bg-red-100/70 text-sm text-red-600 p-2 mb-2 rounded-md">
-          {data?.message ?? AUTH_MESSAGES.USER_BANNED}
+          {signInMutation.data.message}
         </p>
       ) : null}
 
@@ -193,8 +170,8 @@ const SignInForm = ({
                 placeholder="m@example.com"
                 required
                 onChange={handleOnchange}
-                value={formData.email}
-                disabled={isPending}
+                value={data.email}
+                disabled={signInMutation.isPending}
               />
             </div>
             <div className="grid gap-2">
@@ -202,8 +179,8 @@ const SignInForm = ({
                 <Label htmlFor="password">Mật khẩu</Label>
                 <Link
                   href={
-                    emailSchema.safeParse(formData.email).success
-                      ? `${ROUTES.recover}?email=${formData.email}`
+                    emailSchema.safeParse(data.email).success
+                      ? `${ROUTES.recover}?email=${data.email}`
                       : ROUTES.recover
                   }
                   className="ml-auto text-sm underline-offset-4 hover:underline"
@@ -218,16 +195,16 @@ const SignInForm = ({
                 placeholder="*********"
                 required
                 onChange={handleOnchange}
-                value={formData.password}
-                disabled={isPending}
+                value={data.password}
+                disabled={signInMutation.isPending}
               />
             </div>
             <Button
               type="submit"
               className="w-full cursor-pointer"
-              disabled={isPending}
+              disabled={signInMutation.isPending}
             >
-              {isPending && (
+              {signInMutation.isPending && (
                 <LoaderCircleIcon className="size-4 animate-spin" />
               )}
               Đăng nhập
@@ -250,4 +227,20 @@ const SignInForm = ({
   );
 };
 
-export default SignInForm;
+const SignIn = ({
+  email = "",
+  statusError,
+}: {
+  email?: string;
+  statusError?: string;
+}) => {
+  const { signInMutation } = useSignIn();
+
+  if (signInMutation.data && signInMutation.data.status == "MFA_REQUIRED") {
+    return <MFAForm />;
+  }
+
+  return <SignInForm />;
+};
+
+export default SignIn;

@@ -6,6 +6,27 @@ import AuthApi from "@/libs/services/AuthAPI";
 import { DefaultResponseData } from "@/types/api";
 import { SignIn, SignUp } from "@/types/auth";
 
+export async function signInMFAAction(
+  token: string,
+  input: { email: string; code: string }
+) {
+  try {
+    return await AuthApi.signInMFA(token, input);
+  } catch (error: unknown) {
+    if (error instanceof APIError) {
+      const data = error.response.data as DefaultResponseData;
+      return {
+        ...data,
+        status: "ERROR",
+      };
+    }
+    return {
+      message: "Mã xác thực không hợp lệ.",
+      status: "ERROR",
+    };
+  }
+}
+
 export async function signInAction(input: SignIn): Promise<
   DefaultResponseData & {
     token: string | null;

@@ -14,6 +14,23 @@ const authInstance = API.create({
 });
 
 export default class AuthApi {
+  static async signInMFA(
+    token: string,
+    input: { email: string; code: string }
+  ) {
+    const { data, headers } = await authInstance.post<{
+      status: string;
+      message: string;
+    }>("/signin/mfa", input, {
+      headers: { ...(await getHeaders()), Authorization: token },
+    });
+
+    const rawCookie = headers.get("set-cookie") ?? "";
+    await loadCookie(rawCookie);
+
+    return data;
+  }
+
   static async signIn(input: SignIn) {
     const { data, headers } = await authInstance.post<{
       token: string;

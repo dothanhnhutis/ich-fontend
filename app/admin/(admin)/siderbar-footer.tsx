@@ -8,7 +8,7 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
-import { useIsMobile } from "@/lib/hooks/use-mobile";
+import { useIsMobile } from "@/libs/hooks/use-mobile";
 
 import {
   Avatar,

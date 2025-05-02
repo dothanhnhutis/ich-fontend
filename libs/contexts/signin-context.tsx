@@ -55,16 +55,15 @@ export function SignInProvider({ children }: { children: React.ReactNode }) {
       return await signInAction({ email: data.email, password: data.password });
     },
     onSuccess({ status, message }) {
-      switch (status) {
-        case "SUCCESS":
-          router.refresh();
-          toast.success(message);
-          break;
-        case "ERROR":
-          setData((prev) => ({ ...prev, email: "", password: "" }));
-          break;
-        default:
-          break;
+      if (status == "SUCCESS") {
+        setData((prev) => ({ ...prev, email: "", password: "" }));
+        router.refresh();
+        toast.success(message);
+      } else if (status == "MFA_REQUIRED") {
+        setData((prev) => ({ ...prev, password: "" }));
+        return;
+      } else {
+        setData((prev) => ({ ...prev, email: "", password: "" }));
       }
     },
   });

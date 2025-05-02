@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import { cn } from "@/lib/utils";
+import cn from "@/utils/cn";
 import { PlusCircleIcon } from "lucide-react";
 
 export const metadata: Metadata = {

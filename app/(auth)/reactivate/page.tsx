@@ -1,7 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { sendReactivateAccountAction } from "../actions";
+import { sendReactivateAccountAction } from "@/libs/actions/AuthActions";
 
 export const metadata: Metadata = {
   title: "Khôi Phục Tài Khoản",

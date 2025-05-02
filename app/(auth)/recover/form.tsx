@@ -9,7 +9,7 @@ import { Label } from "@/components/commons/label";
 import { LoaderCircleIcon } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { sendRecoverAccountAction } from "../actions";
+import { sendRecoverAccountAction } from "@/libs/actions/AuthActions";
 type RecoverFormProps = {
   email?: string;
 };

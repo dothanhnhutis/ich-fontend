@@ -99,26 +99,10 @@ export default class AuthApi {
   }
 
   static async activateAccount(token: string) {
-    try {
-      const { data } = await authInstance.get<DefaultResponseData>(
-        "/activate",
-        {
-          headers: { ...(await getHeaders()), Authorization: token },
-        }
-      );
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof APIError) {
-        const data = error.response.data as DefaultResponseData;
-        return data;
-      }
-      console.error("Unknown error", error);
-      return {
-        status: 400,
-        success: false,
-        message: "Kích hoạt tài khoản thất bại",
-      };
-    }
+    const { data } = await authInstance.get<DefaultResponseData>("/activate", {
+      headers: { ...(await getHeaders()), Authorization: token },
+    });
+    return data;
   }
 
   static async forgotPassword(email: string): Promise<DefaultResponseData> {
@@ -167,23 +151,12 @@ export default class AuthApi {
   }
 
   static async getToken(token: string): Promise<TokenData | null> {
-    try {
-      const { data } = await authInstance.get<
-        DefaultResponseData & { data: TokenData }
-      >("/token", {
-        headers: { ...(await getHeaders()), Authorization: token },
-      });
-      return data.data;
-    } catch (error: unknown) {
-      if (error instanceof APIError) {
-        const data = error.response.data as DefaultResponseData & {
-          data: TokenData;
-        };
-        return data.data;
-      }
-      console.error("Unknown error", error);
-      return null;
-    }
+    const { data } = await authInstance.get<
+      DefaultResponseData & { data: TokenData }
+    >("/token", {
+      headers: { ...(await getHeaders()), Authorization: token },
+    });
+    return data.data;
   }
 
   static async resetPassword(

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
 import { Button } from "@/components/commons/button";
-import { confirmEmailAction, getTokenAction } from "../actions";
+import { confirmEmailAction, getTokenAction } from "@/libs/actions/AuthActions";
 
 export const metadata: Metadata = {
   title: "Xác Thực Tài Khoản",

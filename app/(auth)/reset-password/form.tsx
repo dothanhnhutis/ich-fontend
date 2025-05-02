@@ -8,8 +8,8 @@ import { CheckIcon, LoaderCircleIcon } from "lucide-react";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { resetPasswordAction } from "../actions";
 import Link from "next/link";
+import { resetPasswordAction } from "@/libs/actions/AuthActions";
 
 const passwordSchema = z
   .string({

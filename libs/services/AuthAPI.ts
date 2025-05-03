@@ -97,7 +97,7 @@ export default class AuthApi {
 
     return data;
   }
-
+  //
   static async activateAccount(token: string) {
     const { data } = await authInstance.get<DefaultResponseData>("/activate", {
       headers: { ...(await getHeaders()), Authorization: token },
@@ -128,59 +128,41 @@ export default class AuthApi {
   }
 
   static async confirmEmail(token: string) {
-    try {
-      const { data } = await authInstance.get<DefaultResponseData>(
-        "/confirm-email",
-        {
-          headers: { ...(await getHeaders()), Authorization: token },
-        }
-      );
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof APIError) {
-        const data = error.response.data as DefaultResponseData;
-        return data;
+    const { data } = await authInstance.get<DefaultResponseData>(
+      "/confirm-email",
+      {
+        headers: { ...(await getHeaders()), Authorization: token },
       }
-      console.error("Unknown error", error);
-      return {
-        status: 400,
-        success: false,
-        message: "",
-      };
-    }
+    );
+    return data;
   }
 
-  static async getToken(token: string): Promise<TokenData | null> {
-    const { data } = await authInstance.get<
-      DefaultResponseData & { data: TokenData }
-    >("/token", {
+  static async getToken(token: string): Promise<{
+    userId: string;
+    tokenKey: string;
+    disabledAt: null | number;
+  } | null> {
+    const { data } = await authInstance.get<{
+      userId: string;
+      tokenKey: string;
+      disabledAt: null | number;
+    }>("/token", {
       headers: { ...(await getHeaders()), Authorization: token },
     });
-    return data.data;
+    return data;
   }
 
   static async resetPassword(
     token: string,
     input: { password: string; confirmPassword: string }
   ): Promise<DefaultResponseData> {
-    try {
-      const { data } = await authInstance.post<DefaultResponseData>(
-        "/reset-password",
-        input,
-        {
-          headers: { ...(await getHeaders()), Authorization: token },
-        }
-      );
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof APIError) {
-        const data = error.response.data as DefaultResponseData;
-        return data;
+    const { data } = await authInstance.post<DefaultResponseData>(
+      "/reset-password",
+      input,
+      {
+        headers: { ...(await getHeaders()), Authorization: token },
       }
-      console.error("Unknown error", error);
-      return {
-        message: "Cập nhật mật khẩu thất bại",
-      };
-    }
+    );
+    return data;
   }
 }

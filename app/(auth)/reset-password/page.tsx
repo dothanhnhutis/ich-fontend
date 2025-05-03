@@ -1,8 +1,8 @@
 import React from "react";
 import ResetPasswordForm from "./form";
 import { notFound } from "next/navigation";
-import { getTokenAction } from "../actions";
 import { Metadata } from "next";
+import { getTokenAction } from "@/libs/actions/AuthActions";
 
 export const metadata: Metadata = {
   title: "Khôi Phục Tài Khoản",
@@ -31,9 +31,9 @@ const ResetPasswordPage = async (props: {
 
   if (!tokenData) return expiredElement;
 
-  if (tokenData.sessionType != "recoverAccount") return notFound();
+  if (tokenData.tokenKey != "recover") return notFound();
 
-  if (tokenData.disableAt == null) return <ResetPasswordForm token={token} />;
+  if (tokenData.disabledAt == null) return <ResetPasswordForm token={token} />;
 
   return expiredElement;
 };

@@ -80,8 +80,8 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
         confirmPassword: "",
       });
     },
-    onSuccess({ success, message }) {
-      if (!success) {
+    onSuccess({ isSuccess, message }) {
+      if (!isSuccess) {
         toast.error(message);
       } else {
         setIsResetPasswordSuccess(true);
@@ -152,7 +152,7 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
                     )}
                   >
                     <CheckIcon size={16} />
-                    <span>8 đến 40 ký tự</span>
+                    <span>8 đến 60 ký tự</span>
                   </p>
                   <p
                     className={cn(
@@ -196,6 +196,7 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
                 ) : null}
               </div>
               <Button
+                className="cursor-pointer"
                 disabled={isPending || isConfirmNewPassword || isPasswordError}
               >
                 {isPending && (
@@ -203,7 +204,7 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
                 )}
                 Khôi phục
               </Button>
-            </form>{" "}
+            </form>
           </>
         )}
       </div>

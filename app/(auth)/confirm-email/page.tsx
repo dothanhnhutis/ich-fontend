@@ -37,10 +37,10 @@ const ConfirmEmailPage = async (props: {
   const tokenData = await getTokenAction(token);
 
   if (!tokenData) return expiredElement;
-  if (tokenData.sessionType != "verifyEmail") return notFound();
-  if (tokenData.disableAt == null) {
-    const { success } = await confirmEmailAction(token);
-    if (!success) return expiredElement;
+  if (tokenData.tokenKey != "verifyEmail") return notFound();
+  if (tokenData.disabledAt == null) {
+    const { isSuccess } = await confirmEmailAction(token);
+    if (!isSuccess) return expiredElement;
   }
 
   return (

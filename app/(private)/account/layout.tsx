@@ -24,9 +24,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import React from "react";
-import { useUser } from "../../UserProvider";
 import { usePathname } from "next/navigation";
 import BrandLogo from "@/components/commons/brand-logo";
+import { useUser } from "@/libs/hooks/use-user";
 
 const AccountLayout = ({
   children,

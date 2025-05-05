@@ -16,9 +16,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/commons/alert-dialog";
-import { useUser } from "@/app/(private)/UserProvider";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useUser } from "@/libs/hooks/use-user";
 
 function LinkGoogleAccount({
   linkData,

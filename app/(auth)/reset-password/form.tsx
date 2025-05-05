@@ -1,14 +1,15 @@
 "use client";
 import React from "react";
+import * as z from "zod";
+import Link from "next/link";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { CheckIcon, LoaderCircleIcon } from "lucide-react";
+
+import cn from "@/utils/cn";
 import PasswordInput from "@/components/password-input";
 import { Button } from "@/components/commons/button";
 import { Label } from "@/components/commons/label";
-import cn from "@/utils/cn";
-import { CheckIcon, LoaderCircleIcon } from "lucide-react";
-import * as z from "zod";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
-import Link from "next/link";
 import { resetPasswordAction } from "@/libs/actions/AuthActions";
 
 const passwordSchema = z

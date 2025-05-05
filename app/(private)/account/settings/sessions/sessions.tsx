@@ -6,10 +6,10 @@ import { Button } from "@/components/commons/button";
 import { EllipsisIcon } from "lucide-react";
 import cn from "@/utils/cn";
 import { toast } from "sonner";
-import { useUser } from "@/app/(private)/UserProvider";
 import { Session } from "@/types/user";
 import { useMutation } from "@tanstack/react-query";
 import { deleteSessionByIdAction } from "../actions";
+import { useUser } from "@/libs/hooks/use-user";
 
 const ipSchema = z.union([
   z.string().ip({ version: "v4" }),

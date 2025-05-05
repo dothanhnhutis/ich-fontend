@@ -1,14 +1,15 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+// import { useQuery, UseQueryResult } from "@tanstack/react-query";
 
 import { User } from "@/types/user";
-import { getCurrentUserAction, logOutAction } from "@/app/(private)/actions";
+import { logOutAction } from "../actions/UserActions";
 
 type UserProvider = {
+  user: User | null;
   logOut: () => Promise<void>;
-  userQuery: UseQueryResult<User | null, Error>;
+  // userQuery: UseQueryResult<User | null, Error>;
 };
 
 export const UserContext = React.createContext<UserProvider | null>(null);
@@ -18,15 +19,22 @@ export const UserProvider = ({
   user,
 }: Readonly<{ children: React.ReactNode; user?: User | null }>) => {
   const router = useRouter();
+  const [state, setUser] = React.useState<User | null>(null);
 
-  const userQuery = useQuery({
-    enabled: !user,
-    initialData: user,
-    queryKey: ["me"],
-    queryFn: async function () {
-      return await getCurrentUserAction();
-    },
-  });
+  React.useEffect(() => {
+    setUser(user || null);
+  }, [user]);
+
+  console.log(state);
+
+  // const userQuery = useQuery({
+  //   enabled: !user,
+  //   initialData: user,
+  //   queryKey: ["me"],
+  //   queryFn: async function () {
+  //     return await getCurrentUserAction();
+  //   },
+  // });
 
   async function handleLogOut() {
     await logOutAction();
@@ -35,10 +43,12 @@ export const UserProvider = ({
 
   const contextValue = React.useMemo<UserProvider>(
     () => ({
-      userQuery,
+      // userQuery,
+      user: state,
       logOut: handleLogOut,
     }),
-    [userQuery]
+    [state]
+    // [userQuery]
   );
   return (
     <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>

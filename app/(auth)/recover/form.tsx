@@ -2,13 +2,13 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from "sonner";
+import { LoaderCircleIcon } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 
 import { Button, buttonVariants } from "@/components/commons/button";
 import { Input } from "@/components/commons/input";
 import { Label } from "@/components/commons/label";
-import { LoaderCircleIcon } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { sendRecoverAccountAction } from "@/libs/actions/AuthActions";
 type RecoverFormProps = {
   email?: string;
@@ -21,9 +21,13 @@ const RecoverForm = ({ email }: RecoverFormProps) => {
     mutationFn: async () => {
       return await sendRecoverAccountAction(formData);
     },
-    onSuccess({ message }) {
+    onSuccess({ isSuccess, message }) {
       setFormData("");
-      toast.success(message);
+      if (isSuccess) {
+        toast.success(message);
+      } else {
+        toast.error(message);
+      }
     },
     onError(error) {
       toast.error(error.message);

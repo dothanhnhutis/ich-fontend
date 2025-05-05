@@ -110,8 +110,6 @@ export default class UserAPI {
       }
       console.log(errMes);
       return {
-        status: 400,
-        success: false,
         message: errMes,
       };
     }
@@ -378,6 +376,8 @@ export default class UserAPI {
           headers: await getHeaders(),
         }
       );
+      revalidateTag("me");
+      revalidatePath("/account/password&security");
       return data;
     } catch (error: unknown) {
       if (error instanceof APIError) {

@@ -14,13 +14,13 @@ import {
 import { Button } from "@/components/commons/button";
 import { Label } from "@/components/commons/label";
 import { Input } from "@/components/commons/input";
-import { useUser } from "@/app/(private)/UserProvider";
 import { useMutation } from "@tanstack/react-query";
 import cn from "@/utils/cn";
 import { useStore } from "@/libs/hooks/use-store";
 import { sendOTPUpdateEmailAction, updateEmailByOTPAction } from "./actions";
 import { LoaderCircleIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useUser } from "@/libs/hooks/use-user";
 
 function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
   const [countDown, setCountDown] = React.useState<number>(0);
@@ -95,7 +95,7 @@ function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
 }
 
 const EmailModal = () => {
-  const { user, isPending: isPendingUser, refetch } = useUser();
+  const { user } = useUser();
   const [open, setOpen] = React.useState<boolean>(false);
 
   const [formData, setFormData] = React.useState<{
@@ -114,7 +114,7 @@ const EmailModal = () => {
       if (!success) {
         toast.error(message);
       } else {
-        refetch();
+        // refetch();
         toast.success(message);
         setOpen(false);
         setFormData({ email: "", otp: "" });
@@ -145,7 +145,7 @@ const EmailModal = () => {
       <div className="flex gap-4 items-center justify-between w-full">
         <div className="text-sm">
           <p className="font-medium">
-            {isPendingUser ? (
+            {false ? (
               <LoaderCircleIcon className="text-muted-foreground shrink w-4 h-4 animate-spin" />
             ) : (
               user?.email

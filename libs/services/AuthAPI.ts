@@ -58,31 +58,15 @@ export default class AuthApi {
   }
 
   static async sendRecoverAccount(email: string) {
-    try {
-      const { data, headers } = await authInstance.post<DefaultResponseData>(
-        "/recover",
-        { email },
-        {
-          headers: await getHeaders(),
-        }
-      );
-      const rawCookie = headers.get("set-cookie") ?? "";
-      await loadCookie(rawCookie);
-
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof APIError) {
-        const data = error.response.data as DefaultResponseData;
-        data.message = "Email đổi mật khẩu đã được gửi.";
-        return data;
+    const { data } = await authInstance.post<DefaultResponseData>(
+      "/recover",
+      { email },
+      {
+        headers: await getHeaders(),
       }
-      console.error("Unknown error", error);
-      return {
-        status: 400,
-        success: false,
-        message: "Email đổi mật khẩu đã được gửi.",
-      };
-    }
+    );
+
+    return data;
   }
 
   static async sendReactivateAccount(

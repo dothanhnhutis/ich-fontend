@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { UserContext } from "../contexts/user-context";
 

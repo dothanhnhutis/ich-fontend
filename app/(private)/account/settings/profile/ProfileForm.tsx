@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { useUser } from "../../../../UserProvider";
 import {
   Avatar,
   AvatarFallback,
@@ -9,6 +8,7 @@ import {
 import { Button } from "@/components/commons/button";
 import { Input } from "@/components/commons/input";
 import { Label } from "@/components/commons/label";
+import { useUser } from "@/libs/hooks/use-user";
 
 const ProfileForm = () => {
   const { user } = useUser();

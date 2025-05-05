@@ -937,11 +937,8 @@ const Step4 = () => {
 const CreateDisplayOrderForm = () => {
   const { step, setStep, data } = useDisplayOrder();
 
-  console.log(data);
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(data);
   };
 
   const disabledNextBtn = React.useMemo(() => {

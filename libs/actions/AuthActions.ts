@@ -40,7 +40,22 @@ export async function sendReactivateAccountAction(token: string) {
 }
 
 export async function sendRecoverAccountAction(email: string) {
-  return await AuthAPI.sendRecoverAccount(email);
+  try {
+    const data = await AuthAPI.sendRecoverAccount(email);
+    return { isSuccess: true, message: data.message };
+  } catch (error: unknown) {
+    let errMes: string = "Gửi E-mail đổi mật khẩu thất bại.";
+    if (error instanceof APIError) {
+      const data = error.response.data as DefaultResponseData;
+      errMes = data.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    return {
+      isSuccess: false,
+      message: errMes,
+    };
+  }
 }
 //
 export async function confirmEmailAction(token: string) {

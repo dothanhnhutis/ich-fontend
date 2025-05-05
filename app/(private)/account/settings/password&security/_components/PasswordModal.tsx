@@ -15,7 +15,6 @@ import {
 } from "@/components/commons/alert-dialog";
 
 import PasswordInput from "@/components/password-input";
-import { useUser } from "@/app/(private)/UserProvider";
 import { Checkbox } from "@/components/commons/checkbox";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
@@ -25,6 +24,7 @@ import {
   updatePasswordAction,
 } from "./actions";
 import { toast } from "sonner";
+import { useUser } from "@/libs/hooks/use-user";
 
 const newPasswordSchema = z
   .string({
@@ -74,7 +74,7 @@ const OldPasswordAlert = ({ handleCancel }: { handleCancel?: () => void }) => {
 };
 
 const PasswordModal = () => {
-  const { user, isPending: isPendingUser, refetch } = useUser();
+  const { user } = useUser();
   const [open, setOpen] = React.useState<boolean>(false);
   const [hiddenPassword, setHiddenPassword] = React.useState<boolean>(true);
   const [focusAt, setFocusAt] = React.useState<string>("");
@@ -149,7 +149,7 @@ const PasswordModal = () => {
         handleCancel();
         toast.success(message);
         if (!user!.hasPassword) {
-          refetch();
+          // refetch();
         }
       } else {
         setOldPasswordError(true);
@@ -166,6 +166,8 @@ const PasswordModal = () => {
       isSignOut: false,
     });
     setOldPasswordError(false);
+    setHiddenPassword(true);
+    setFocusAt("");
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -185,7 +187,7 @@ const PasswordModal = () => {
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger asChild>
           <Button
-            disabled={isPendingUser}
+            disabled={false}
             className="rounded-full cursor-pointer"
             variant="outline"
           >

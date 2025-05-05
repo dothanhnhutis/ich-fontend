@@ -103,3 +103,27 @@ export async function resetPasswordAction(
     };
   }
 }
+
+export async function signInAction(
+  prevState: null | {
+    message: string;
+    token: string | null;
+    status: string;
+  },
+  formData: FormData
+): Promise<null | {
+  message: string;
+  token: string | null;
+  status: string;
+}> {
+  const rawFormData = {
+    customerId: formData.get("email"),
+    amount: formData.get("password"),
+  };
+  console.log(rawFormData);
+  return {
+    message: "",
+    token: "",
+    status: "",
+  };
+}

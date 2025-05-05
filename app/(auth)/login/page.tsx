@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import SignInForm from "@/components/commons/authForms/SignInForm";
 import { SignInProvider } from "@/libs/contexts/signin-context";
+import SignIn from "@/components/features/SignIn";
 
 export const metadata: Metadata = {
   title: "Đăng Nhập",
@@ -20,12 +21,13 @@ const LogInPage = async (props: {
   const email = typeof searchParams.email == "string" ? searchParams.email : "";
 
   return (
-    <SignInProvider>
-      <SignInForm
-        email={email}
-        statusError={cookieStore.get("oauth2_error_type")?.value}
-      />
-    </SignInProvider>
+    // <SignInProvider>
+    //   <SignInForm
+    //     email={email}
+    //     statusError={cookieStore.get("oauth2_error_type")?.value}
+    //   />
+    // </SignInProvider>
+    <SignIn />
   );
 };
 

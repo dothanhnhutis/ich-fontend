@@ -14,8 +14,10 @@ const GlobalProvider = async ({
   return (
     <>
       <TanstackQueryClientProvider>
-        <UserProvider user={user}>{children}</UserProvider>
-        <Toaster visibleToasts={5} richColors />
+        <UserProvider user={user}>
+          {children}
+          <Toaster visibleToasts={5} richColors />
+        </UserProvider>
       </TanstackQueryClientProvider>
     </>
   );

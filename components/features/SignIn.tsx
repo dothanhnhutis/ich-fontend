@@ -1,92 +1,66 @@
 "use client";
 import React from "react";
-import GoogleButton from "../commons/authForms/GoogleButton";
+import * as z from "zod";
+import Link from "next/link";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { LoaderCircleIcon } from "lucide-react";
+
+import GoogleButton from "../commons/GoogleButton";
+import PasswordInput from "../password-input";
 import { Label } from "../commons/label";
 import { Input } from "../commons/input";
-import Link from "next/link";
-import PasswordInput from "../password-input";
 import { Button } from "../commons/button";
-import { LoaderCircleIcon } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
-import { z } from "zod";
-import { signInAction } from "@/libs/actions/AuthActions";
+import { SignInActionRes, SignInFormData } from "@/types/auth";
+import { signInAction, signInMFAAction } from "@/libs/actions/AuthActions";
+import { SignInProvider, useSignIn } from "@/libs/contexts/signin-context";
 
 const emailSchema = z.string().email();
 
-type SignInFormData = {
-  email: string;
-  password: string;
-};
-
-type MFAFormData = Pick<SignInFormData, "email"> & {
-  code: string;
-};
-
-type SignInContextProps = {
-  mfaToken: null | string;
-  formData: SignInFormData & MFAFormData;
-  handleFormData: (data: Partial<SignInContextProps["formData"]>) => void;
-};
-
-const SignInContext = React.createContext<SignInContextProps | null>(null);
-
-export function useSignIn() {
-  const context = React.useContext(SignInContext);
-  if (!context) {
-    throw new Error("useSignIn must be used within a SignInProvider.");
-  }
-  return context;
-}
-
-export function SignInProvider({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
-  const [mfaToken, setMFAToken] = React.useState<string | null>(null);
-  const [formData, setFormData] = React.useState<
-    SignInContextProps["formData"]
-  >({
-    email: "",
+function SignInForm({ email }: { email?: string }) {
+  const router = useRouter();
+  const [formData, setFormData] = React.useState<SignInFormData>({
+    email: email || "",
     password: "",
-    code: "",
   });
-
-  const handleFormData = (data: Partial<SignInContextProps["formData"]>) => {
-    setFormData((prev) => ({ ...prev, ...data }));
-  };
-
-  const contextValue = React.useMemo<SignInContextProps>(
-    () => ({
-      mfaToken,
-      formData,
-      handleFormData,
-    }),
-    [mfaToken, formData]
-  );
-
-  return (
-    <SignInContext.Provider value={contextValue}>
-      {children}
-    </SignInContext.Provider>
-  );
-}
-
-function SignInForm() {
-  const { mfaToken, formData, handleFormData } = useSignIn();
-
-  if (mfaToken) return;
+  const [error, setError] = React.useState<SignInActionRes | null>(null);
+  const [isPending, startTransition] = React.useTransition();
+  const { handleMFAToken } = useSignIn();
 
   const handleOnchange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // if (status == "USER_SIGN_IN_PASSWORD") {
     //   document.cookie =
     //     "oauth2_error_type=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     // }
-    handleFormData({ [e.target.name]: e.target.value });
+    if (error) {
+      setError(null);
+    }
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const [state, formAction, isPending] = React.useActionState(
-    signInAction,
-    null
-  );
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    startTransition(async () => {
+      const res = await signInAction(formData);
+      switch (res.status) {
+        case "SUCCESS":
+          router.refresh();
+          toast.success(res.message);
+          break;
+        case "MFA_REQUIRED":
+          handleMFAToken({ email: formData.email, token: res.token });
+          break;
+        case "ACTIVATE_REQUIRED":
+          setFormData((prev) => ({ ...prev, password: "" }));
+          break;
+        default:
+          setFormData({ email: "", password: "" });
+          break;
+      }
+      setError(res);
+    });
+  };
 
   return (
     <div className="w-full max-w-sm">
@@ -95,7 +69,26 @@ function SignInForm() {
         <p className="text-muted-foreground text-sm">Chào mừng bạn trở lại</p>
       </div>
 
-      <form action={formAction}>
+      {error && error.status == "ACTIVATE_REQUIRED" ? (
+        <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
+          Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
+          <Link
+            href={`/reactivate?token=${error.token}`}
+            className="text-primary"
+          >
+            kích hoạt lại
+          </Link>{" "}
+          trước khi đăng nhập.
+        </p>
+      ) : null}
+
+      {error && error.status == "ERROR" ? (
+        <p className="bg-red-100/70 text-sm text-red-600 p-2 mb-2 rounded-md">
+          {error.message}
+        </p>
+      ) : null}
+
+      <form onSubmit={handleSubmit}>
         <div className="grid gap-6">
           <div className="flex flex-col gap-4">
             <GoogleButton />
@@ -173,18 +166,122 @@ function SignInForm() {
 }
 
 function MFAForm() {
-  const { mfaToken } = useSignIn();
+  const router = useRouter();
+  const { mfaToken, handleMFAToken } = useSignIn();
+  const [code, setCode] = React.useState<string>("");
+  const [isPending, startTransition] = React.useTransition();
+  const [error, setError] = React.useState<null | Awaited<
+    ReturnType<typeof signInMFAAction>
+  >>(null);
 
   if (!mfaToken) return;
 
-  return <div>mfaform</div>;
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    startTransition(async () => {
+      const res = await signInMFAAction({
+        ...mfaToken,
+        code,
+      });
+
+      if (res.status == "SUCCESS") {
+        router.refresh();
+        toast.success(res.message);
+      } else if (res.status == "ERROR") {
+        setCode("");
+        setError(res);
+      }
+    });
+  };
+
+  return (
+    <div className="w-full max-w-sm">
+      <div className="flex flex-col gap-1.5 py-6">
+        <h1 className="font-semibold tracking-tight text-2xl">
+          Xác thực đa yếu tố (MFA)
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Tài khoản của bạn được đảm bảo bằng xác thực đa yếu tố (MFA). Để hoàn
+          tất đăng nhập, hãy bật hoặc xem thiết bị MFA của bạn và nhập mã xác
+          thực bên dưới.
+        </p>
+      </div>
+
+      {error && error.status == "ERROR" ? (
+        <p className="bg-red-100/70 text-sm text-red-600 p-2 mb-2 rounded-md">
+          {error.message}
+        </p>
+      ) : null}
+
+      <form onSubmit={handleSubmit}>
+        <div className="grid gap-6">
+          <div className="grid gap-6">
+            <div className="grid gap-2">
+              <p>
+                <span className="font-medium text-sm">E-mail</span>:{" "}
+                {mfaToken.email}
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="code">Mã xác thực</Label>
+                <button
+                  type="button"
+                  className="text-primary text-sm cursor-pointer hover:underline"
+                >
+                  Khắc phục sự cố MFA
+                </button>
+              </div>
+              <Input
+                id="code"
+                name="code"
+                placeholder="123456"
+                maxLength={6}
+                required
+                onChange={(e) => {
+                  setError(null);
+                  setCode(e.target.value);
+                }}
+                value={code}
+                disabled={isPending}
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer"
+              disabled={isPending}
+            >
+              {isPending && (
+                <LoaderCircleIcon className="size-4 animate-spin" />
+              )}
+              Xác thực
+            </Button>
+          </div>
+          <button
+            type="button"
+            className="text-primary justify-self-start cursor-pointer text-sm hover:underline"
+            onClick={() => {
+              handleMFAToken(null);
+            }}
+          >
+            Đăng nhập với tài khoản khác
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 }
 
-export default function SignIn() {
+function SignInWrapper({ email }: { email?: string }) {
+  const { mfaToken } = useSignIn();
+  if (mfaToken) return <MFAForm />;
+  return <SignInForm email={email} />;
+}
+
+export default function SignIn({ email }: { email?: string }) {
   return (
     <SignInProvider>
-      <SignInForm />
-      <MFAForm />
+      <SignInWrapper email={email} />
     </SignInProvider>
   );
 }

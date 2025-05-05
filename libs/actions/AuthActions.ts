@@ -1,9 +1,15 @@
 "use server";
 import { APIError } from "@/libs/services/api";
+import AuthApi from "@/libs/services/AuthAPI";
 import AuthAPI from "@/libs/services/AuthAPI";
 import { DefaultResponseData } from "@/types/api";
+import {
+  MFAFormData,
+  SignInActionRes,
+  SignInFormData,
+  SignUpFormData,
+} from "@/types/auth";
 
-//
 export async function activateAccountAction(token: string) {
   try {
     const data = await AuthAPI.activateAccount(token);
@@ -103,27 +109,65 @@ export async function resetPasswordAction(
     };
   }
 }
-
+// done
 export async function signInAction(
-  prevState: null | {
-    message: string;
-    token: string | null;
-    status: string;
-  },
-  formData: FormData
-): Promise<null | {
-  message: string;
-  token: string | null;
-  status: string;
-}> {
-  const rawFormData = {
-    customerId: formData.get("email"),
-    amount: formData.get("password"),
-  };
-  console.log(rawFormData);
-  return {
-    message: "",
-    token: "",
-    status: "",
-  };
+  input: SignInFormData
+): Promise<SignInActionRes> {
+  try {
+    return await AuthApi.signIn(input);
+  } catch (error: unknown) {
+    if (error instanceof APIError) {
+      const data = error.response.data as DefaultResponseData;
+      return {
+        ...data,
+        status: "ERROR",
+        token: null,
+      };
+    }
+    return {
+      message: "Email và mật khẩu không hợp lệ.",
+      status: "ERROR",
+      token: null,
+    };
+  }
+}
+// done
+export async function signInMFAAction(input: MFAFormData) {
+  try {
+    return await AuthApi.signInMFA(input);
+  } catch (error: unknown) {
+    if (error instanceof APIError) {
+      const data = error.response.data as DefaultResponseData;
+      return {
+        ...data,
+        status: "ERROR",
+      };
+    }
+    return {
+      message: "Mã xác thực không hợp lệ.",
+      status: "ERROR",
+    };
+  }
+}
+// done
+export async function signUpAction(input: SignUpFormData) {
+  try {
+    const { message } = await AuthApi.signUp(input);
+    return {
+      isSuccess: true,
+      message,
+    };
+  } catch (error: unknown) {
+    let errMes: string = "Email đã được đăng ký.";
+    if (error instanceof APIError) {
+      const data = error.response.data as DefaultResponseData;
+      errMes = data.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    return {
+      isSuccess: false,
+      message: errMes,
+    };
+  }
 }

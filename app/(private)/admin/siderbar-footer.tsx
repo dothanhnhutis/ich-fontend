@@ -50,7 +50,7 @@ const AdminSidebarFooter = () => {
               >
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
-                    src={currentUser?.image || "/user-picture.jpg"}
+                    src={currentUser?.image || "/images/user-picture.jpg"}
                     alt={currentUser?.username}
                   />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>

@@ -1,13 +1,13 @@
 import React from "react";
 import { Metadata } from "next";
-import SignUpForm from "@/components/commons/authForms/SignUpForm";
+import SignUp from "@/components/features/SignUp";
 
 export const metadata: Metadata = {
   title: "Đăng Ký Tài Khoản",
 };
 
 const SignUpPage = () => {
-  return <SignUpForm />;
+  return <SignUp />;
 };
 
 export default SignUpPage;

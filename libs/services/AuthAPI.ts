@@ -2,7 +2,14 @@ import "server-only";
 import { API, APIError } from "./api";
 import { getHeaders, loadCookie } from "./common";
 import { DefaultResponseData } from "@/types/api";
-import { SignIn, SignUp, TokenData } from "@/types/auth";
+import {
+  MFAFormData,
+  MFAToken,
+  SignInAPIRes,
+  SignInFormData,
+  SignInMFAAPIRes,
+  SignUpFormData,
+} from "@/types/auth";
 
 const authInstance = API.create({
   baseUrl: "http://localhost:4000" + "/api/v1/auth",
@@ -14,39 +21,38 @@ const authInstance = API.create({
 });
 
 export default class AuthApi {
-  static async signInMFA(
-    token: string,
-    input: { email: string; code: string }
-  ) {
-    const { data, headers } = await authInstance.post<{
-      status: string;
-      message: string;
-    }>("/signin/mfa", input, {
-      headers: { ...(await getHeaders()), Authorization: token },
-    });
+  //done
+  static async signInMFA({
+    token,
+    ...input
+  }: MFAFormData): Promise<SignInMFAAPIRes> {
+    const { data } = await authInstance.post<SignInMFAAPIRes>(
+      "/signin/mfa",
+      input,
+      {
+        headers: { ...(await getHeaders()), Authorization: token },
+      }
+    );
+
+    return data;
+  }
+  //done
+  static async signIn(input: SignInFormData): Promise<SignInAPIRes> {
+    const { data, headers } = await authInstance.post<SignInAPIRes>(
+      "/signin",
+      input,
+      {
+        headers: await getHeaders(),
+      }
+    );
 
     const rawCookie = headers.get("set-cookie") ?? "";
     await loadCookie(rawCookie);
 
     return data;
   }
-
-  static async signIn(input: SignIn) {
-    const { data, headers } = await authInstance.post<{
-      token: string;
-      status: string;
-      message: string;
-    }>("/signin", input, {
-      headers: await getHeaders(),
-    });
-
-    const rawCookie = headers.get("set-cookie") ?? "";
-    await loadCookie(rawCookie);
-
-    return data;
-  }
-
-  static async signUp(input: SignUp): Promise<DefaultResponseData> {
+  //done
+  static async signUp(input: SignUpFormData): Promise<DefaultResponseData> {
     const { data } = await authInstance.post<DefaultResponseData>(
       "/signup",
       input,

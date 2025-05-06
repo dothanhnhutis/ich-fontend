@@ -1,5 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
+
 import Sessions from "./sessions";
 import { getSessionsAction } from "@/libs/actions/UserActions";
 

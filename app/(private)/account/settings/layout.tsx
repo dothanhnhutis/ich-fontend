@@ -46,7 +46,8 @@ const navs = [
 ];
 const PrivateUserLayout = ({
   children,
-}: Readonly<{ children: React.ReactNode }>) => {
+  tabs,
+}: Readonly<{ children: React.ReactNode; tabs: React.ReactNode }>) => {
   const { user } = useUser();
 
   const pathName = usePathname();
@@ -103,6 +104,7 @@ const PrivateUserLayout = ({
               </Link>
             ))}
           </div>
+          {tabs}
           {children}
         </div>
       </div>

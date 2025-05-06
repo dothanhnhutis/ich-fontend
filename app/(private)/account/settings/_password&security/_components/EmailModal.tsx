@@ -1,5 +1,10 @@
 "use client";
 import React from "react";
+import * as z from "zod";
+import { toast } from "sonner";
+import { LoaderCircleIcon } from "lucide-react";
+
+import cn from "@/utils/cn";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,18 +16,26 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/commons/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/commons/dialog";
 import { Button } from "@/components/commons/button";
 import { Label } from "@/components/commons/label";
 import { Input } from "@/components/commons/input";
-import cn from "@/utils/cn";
 import { useStore } from "@/libs/hooks/use-store";
-import { LoaderCircleIcon } from "lucide-react";
-import { toast } from "sonner";
 import { useUser } from "@/libs/hooks/use-user";
 import {
   sendOTPUpdateEmailAction,
   updateEmailByOTPAction,
 } from "@/libs/actions/UserActions";
+
+const emailSchema = z.string().email("E-mail không hợp lệ");
 
 function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
   const [countDown, setCountDown] = React.useState<number>(0);
@@ -64,6 +77,11 @@ function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
   const handleSend = () => {
     if (!disabled) {
       startTransition(async () => {
+        const invalidEmail = emailSchema.safeParse(email);
+        if (invalidEmail.success == false) {
+          toast.error(invalidEmail.error.issues[0].message);
+          return;
+        }
         if (blackListEmail.includes(email)) {
           toast.error("E-mail đã được đăng ký");
           return;
@@ -188,7 +206,7 @@ const EmailModal = () => {
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-6 items-center gap-2 sm:gap-4">
-                  <Label htmlFor="email" className="col-span-2">
+                  <Label htmlFor="email" className="col-span-2 text-right">
                     E-mail
                   </Label>
                   <Input
@@ -268,4 +286,73 @@ const EmailModal = () => {
   );
 };
 
-export default EmailModal;
+export default EmailModal1;
+
+export function EmailModal1() {
+  const { user } = useUser();
+
+  return (
+    <div className="flex flex-col lg:flex-row w-full gap-4 border-b py-4">
+      <div className="w-full">
+        <p className="font-bold">Email address</p>
+        <p className="text-xs font-normal leading-snug text-muted-foreground">
+          Quản lý email đăng nhập và liên kết với tài khoản của bạn.
+        </p>
+      </div>
+
+      <div className="flex gap-4 items-center justify-between w-full">
+        {user ? (
+          <div className="text-sm">
+            {user.emailVerified ? (
+              <>
+                <p className="font-medium">{user.email}</p>
+                <p className="font-medium text-green-500">Đã xác thực</p>
+              </>
+            ) : (
+              <>
+                <p className="font-medium">{user.email}</p>
+                <p className="font-medium text-destructive">
+                  Chưa xác thực
+                </p>{" "}
+              </>
+            )}
+          </div>
+        ) : (
+          <LoaderCircleIcon className="text-muted-foreground shrink w-4 h-4 animate-spin" />
+        )}
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button className="rounded-full cursor-pointer" variant="outline">
+              Thay đổi
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Thay đổi địa chỉ email</AlertDialogTitle>
+              <AlertDialogDescription className="hidden"></AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="grid gap-4 py-4 text-right">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="inline text-right">
+                  E-mail
+                </Label>
+                <Input id="email" className="col-span-3" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="otp" className="inline text-right">
+                  Mã xác thực
+                </Label>
+                <Input id="otp" className="col-span-3" />
+              </div>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Huỷ</AlertDialogCancel>
+              <AlertDialogAction>Cập nhật</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </div>
+  );
+}

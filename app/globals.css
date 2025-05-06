@@ -146,6 +146,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  .bg-not-found {
+    @apply bg-[url('/dribbble.gif')] bg-cover bg-center;
+  }
 }
 
 ::-webkit-scrollbar {
@@ -160,4 +163,84 @@ input::-webkit-inner-spin-button {
   /* display: none; <- Crashes Chrome on hover */
   -webkit-appearance: none;
   margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+.cropperjs .cropper-point {
+  background: transparent;
+  height: 30px !important;
+  width: 30px !important;
+  opacity: 1;
+}
+
+.cropperjs .cropper-view-box {
+  outline: 1px solid #ffffff80;
+}
+
+.cropperjs .cropper-line {
+  background-color: #ffffff80;
+}
+
+.cropperjs .cropper-point.point-nw {
+  border-left: 2px solid #fff;
+  border-top: 2px solid #fff;
+}
+
+.cropperjs .cropper-point.point-ne {
+  border-right: 2px solid #fff;
+  border-top: 2px solid #fff;
+}
+
+.cropperjs .cropper-point.point-se {
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+}
+
+.cropperjs .cropper-point.point-sw {
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+}
+
+@keyframes loader-dots1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes loader-dots3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes loader-dots2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(24px, 0);
+  }
+}
+
+.loader-dots div {
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+.loader-dots div:nth-child(1) {
+  left: 8px;
+  animation: loader-dots1 0.6s infinite;
+}
+.loader-dots div:nth-child(2) {
+  left: 8px;
+  animation: loader-dots2 0.6s infinite;
+}
+.loader-dots div:nth-child(3) {
+  left: 32px;
+  animation: loader-dots2 0.6s infinite;
+}
+.loader-dots div:nth-child(4) {
+  left: 56px;
+  animation: loader-dots3 0.6s infinite;
 }

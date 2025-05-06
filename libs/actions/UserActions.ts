@@ -80,7 +80,7 @@ export async function updateEmailByOTPAction(input: UpdateEmailByOTPFormData) {
   try {
     const { message } = await UserAPI.updateEmailByOTP(input);
     return {
-      isSuccess: false,
+      isSuccess: true,
       message,
     };
   } catch (error: unknown) {

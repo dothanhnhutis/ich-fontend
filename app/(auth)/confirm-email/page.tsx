@@ -22,38 +22,40 @@ const ConfirmEmailPage = async (props: {
 
   if (!token) notFound();
 
-  const expiredElement: React.JSX.Element = (
-    <div className="flex flex-col items-center sm:mx-auto sm:max-w-md gap-2 text-center text-red-500">
-      <h4 className="font-semibold text-2xl text-black">Xác Thực Tài Khoản</h4>
-      <p>Xác thực email không thành công.</p>
-      <p>Mã thông báo đã hết hạn</p>
+  return <div>oker</div>;
 
-      <Button asChild>
-        <Link href="/">Go to Home</Link>
-      </Button>
-    </div>
-  );
+  // const expiredElement: React.JSX.Element = (
+  //   <div className="flex flex-col items-center sm:mx-auto sm:max-w-md gap-2 text-center text-red-500">
+  //     <h4 className="font-semibold text-2xl text-black">Xác Thực Tài Khoản</h4>
+  //     <p>Xác thực email không thành công.</p>
+  //     <p>Mã thông báo đã hết hạn</p>
 
-  const tokenData = await getTokenAction(token);
+  //     <Button asChild>
+  //       <Link href="/">Go to Home</Link>
+  //     </Button>
+  //   </div>
+  // );
 
-  if (!tokenData) return expiredElement;
-  if (tokenData.tokenKey != "verify-email") return notFound();
-  if (tokenData.disabledAt == null) {
-    const { isSuccess } = await confirmEmailAction(token);
-    if (!isSuccess) return expiredElement;
-  }
+  // const tokenData = await getTokenAction(token);
 
-  return (
-    <div className="flex flex-col items-center sm:mx-auto sm:max-w-md gap-2 text-center text-green-500">
-      <h4 className="font-semibold text-2xl text-black">Xác Thực Tài Khoản</h4>
-      <p className="text-sm text-green-500 text-center">
-        Xác thực tài khoản thành công
-      </p>
-      <Button asChild>
-        <Link href="/">Go to Home</Link>
-      </Button>
-    </div>
-  );
+  // if (!tokenData) return expiredElement;
+  // if (tokenData.tokenKey != "verify-email") return notFound();
+  // if (tokenData.disabledAt == null) {
+  //   const { isSuccess } = await confirmEmailAction(token);
+  //   if (!isSuccess) return expiredElement;
+  // }
+
+  // return (
+  //   <div className="flex flex-col items-center sm:mx-auto sm:max-w-md gap-2 text-center text-green-500">
+  //     <h4 className="font-semibold text-2xl text-black">Xác Thực Tài Khoản</h4>
+  //     <p className="text-sm text-green-500 text-center">
+  //       Xác thực tài khoản thành công
+  //     </p>
+  //     <Button asChild>
+  //       <Link href="/">Go to Home</Link>
+  //     </Button>
+  //   </div>
+  // );
 };
 
 export default ConfirmEmailPage;

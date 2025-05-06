@@ -26,13 +26,15 @@ export default class AuthApi {
     token,
     ...input
   }: MFAFormData): Promise<SignInMFAAPIRes> {
-    const { data } = await authInstance.post<SignInMFAAPIRes>(
+    const { data, headers } = await authInstance.post<SignInMFAAPIRes>(
       "/signin/mfa",
       input,
       {
         headers: { ...(await getHeaders()), Authorization: token },
       }
     );
+    const rawCookie = headers.get("set-cookie") ?? "";
+    await loadCookie(rawCookie);
 
     return data;
   }

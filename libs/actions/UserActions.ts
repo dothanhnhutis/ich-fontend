@@ -108,10 +108,9 @@ export async function sendOTPUpdateEmailAction(email: string) {
     };
   } catch (error: unknown) {
     let errMes = "unknown error";
-
     if (error instanceof APIError) {
-      const { message } = error as DefaultResponseData;
-      console.log("errrrrrrrrrrrrr", message);
+      const { message } = error.response.data as DefaultResponseData;
+      errMes = message;
     } else if (error instanceof Error) {
       errMes = error.message;
     }

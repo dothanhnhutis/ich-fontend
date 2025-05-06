@@ -27,6 +27,7 @@ import {
 function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
   const [countDown, setCountDown] = React.useState<number>(0);
   const [emailLocalStore, setEmailLocalStore] = useStore("changeEmail");
+  const [blackListEmail, setBlackListEmail] = React.useState<string[]>([]);
 
   const emailStore: { [index: string]: number } = React.useMemo(() => {
     const regex =
@@ -63,6 +64,10 @@ function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
   const handleSend = () => {
     if (!disabled) {
       startTransition(async () => {
+        if (blackListEmail.includes(email)) {
+          toast.error("E-mail đã được đăng ký");
+          return;
+        }
         const { isSuccess, message } = await sendOTPUpdateEmailAction(email);
         if (isSuccess) {
           setEmailLocalStore(
@@ -70,6 +75,7 @@ function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
           );
           toast.success(message);
         } else {
+          setBlackListEmail((prev) => [...prev, email]);
           toast.error(message);
         }
       });
@@ -181,8 +187,8 @@ const EmailModal = () => {
             </AlertDialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-6 items-center gap-4">
-                  <Label htmlFor="email" className="text-right col-span-2">
+                <div className="grid grid-cols-6 items-center gap-2 sm:gap-4">
+                  <Label htmlFor="email" className="col-span-2">
                     E-mail
                   </Label>
                   <Input
@@ -200,8 +206,8 @@ const EmailModal = () => {
                     type="email"
                   />
                 </div>
-                <div className="grid grid-cols-6 items-center gap-4">
-                  <Label htmlFor="otp" className="text-right col-span-2">
+                <div className="grid grid-cols-6 items-center gap-2 sm:gap-4">
+                  <Label htmlFor="otp" className="col-span-2">
                     Mã xác thực
                   </Label>
 

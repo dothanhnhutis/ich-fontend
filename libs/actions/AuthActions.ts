@@ -5,11 +5,12 @@ import AuthAPI from "@/libs/services/AuthAPI";
 import { DefaultResponseData } from "@/types/api";
 import {
   MFAFormData,
+  ResetPasswordFormData,
   SignInActionRes,
   SignInFormData,
   SignUpFormData,
 } from "@/types/auth";
-
+// done
 export async function activateAccountAction(token: string) {
   try {
     const data = await AuthAPI.activateAccount(token);
@@ -25,7 +26,7 @@ export async function activateAccountAction(token: string) {
     return { isSuccess: false, message: errMes };
   }
 }
-
+// done
 export async function sendReactivateAccountAction(token: string) {
   try {
     const data = await AuthAPI.sendReactivateAccount(token);
@@ -44,7 +45,7 @@ export async function sendReactivateAccountAction(token: string) {
     };
   }
 }
-
+// done
 export async function sendRecoverAccountAction(email: string) {
   try {
     const data = await AuthAPI.sendRecoverAccount(email);
@@ -63,7 +64,7 @@ export async function sendRecoverAccountAction(email: string) {
     };
   }
 }
-//
+// done
 export async function confirmEmailAction(token: string) {
   try {
     const data = await AuthAPI.confirmEmail(token);
@@ -76,21 +77,19 @@ export async function confirmEmailAction(token: string) {
     return { isSuccess: false, message: "Xác thực tài khoản thất bại" };
   }
 }
-//
+// done
 export async function getTokenAction(token: string) {
   try {
     return await AuthAPI.getToken(token);
   } catch (error: unknown) {
+    console.log(error);
     return null;
   }
 }
-//
-export async function resetPasswordAction(
-  token: string,
-  input: { password: string; confirmPassword: string }
-) {
+// done
+export async function resetPasswordAction(input: ResetPasswordFormData) {
   try {
-    const { message } = await AuthAPI.resetPassword(token, input);
+    const { message } = await AuthAPI.resetPassword(input);
     return {
       isSuccess: true,
       message,

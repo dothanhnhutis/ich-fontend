@@ -7,9 +7,8 @@ import { EllipsisIcon } from "lucide-react";
 import cn from "@/utils/cn";
 import { toast } from "sonner";
 import { Session } from "@/types/user";
-import { useMutation } from "@tanstack/react-query";
-import { deleteSessionByIdAction } from "../actions";
 import { useUser } from "@/libs/hooks/use-user";
+import { deleteSessionByIdAction } from "@/libs/actions/UserActions";
 
 const ipSchema = z.union([
   z.string().ip({ version: "v4" }),
@@ -23,18 +22,17 @@ const SessionItem = ({
   session: Session;
   isCurrentSession: boolean;
 }) => {
-  const { isPending, mutate } = useMutation({
-    mutationFn: async (sessionId: string) => {
-      return await deleteSessionByIdAction(sessionId);
-    },
-    onSuccess({ success, message }) {
-      if (success) {
+  const [isPending, startTransition] = React.useTransition();
+  const handleDeleteSessionById = (sessionId: string) => {
+    startTransition(async () => {
+      const { isSuccess, message } = await deleteSessionByIdAction(sessionId);
+      if (isSuccess) {
         toast.success(message);
       } else {
         toast.error(message);
       }
-    },
-  });
+    });
+  };
 
   return (
     <div
@@ -71,7 +69,7 @@ const SessionItem = ({
         </div>
       ) : (
         <Button
-          onClick={() => mutate(session.id)}
+          onClick={() => handleDeleteSessionById(session.id)}
           disabled={isPending}
           variant="ghost"
           className="hover:bg-transparent cursor-pointer disabled:cursor-not-allowed"

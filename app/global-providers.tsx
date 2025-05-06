@@ -1,15 +1,15 @@
 import React from "react";
 import { Toaster } from "sonner";
 import { UserProvider } from "@/libs/contexts/user-context";
-import UserAPI from "@/libs/services/UserAPI";
 import TanstackQueryClientProvider from "@/libs/contexts/query-client-context";
+import { getCurrentUserAction } from "@/libs/actions/UserActions";
 
 const GlobalProvider = async ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  const user = await UserAPI.getCurrrentUser();
+  const user = await getCurrentUserAction();
 
   return (
     <>

@@ -31,3 +31,15 @@ export type SignUpFormData = SignInFormData & {
   username: string;
   confirmPassword: string;
 };
+
+export type TokenSession = {
+  userId: string;
+  tokenKey: string;
+  disabledAt: null | number;
+};
+
+export type ResetPasswordFormData = {
+  token: string;
+  password: string;
+  confirmPassword: string;
+};

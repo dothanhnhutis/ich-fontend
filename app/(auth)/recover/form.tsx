@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { LoaderCircleIcon } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
 
 import { Button, buttonVariants } from "@/components/commons/button";
 import { Input } from "@/components/commons/input";
@@ -17,26 +16,19 @@ type RecoverFormProps = {
 const RecoverForm = ({ email }: RecoverFormProps) => {
   const [formData, setFormData] = React.useState<string>(email || "");
 
-  const { isPending, mutate } = useMutation({
-    mutationFn: async () => {
-      return await sendRecoverAccountAction(formData);
-    },
-    onSuccess({ isSuccess, message }) {
+  const [isPending, startTransition] = React.useTransition();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    startTransition(async () => {
       setFormData("");
+      const { isSuccess, message } = await sendRecoverAccountAction(formData);
       if (isSuccess) {
         toast.success(message);
       } else {
         toast.error(message);
       }
-    },
-    onError(error) {
-      toast.error(error.message);
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    mutate();
+    });
   };
   return (
     <div

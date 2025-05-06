@@ -1,14 +1,14 @@
 import React from "react";
 import { Metadata } from "next";
-import UserAPI from "@/libs/services/UserAPI";
 import Sessions from "./sessions";
+import { getSessionsAction } from "@/libs/actions/UserActions";
 
 export const metadata: Metadata = {
   title: "Phiên đăng nhập",
 };
 
 const SessionsPage = async () => {
-  const sessions = await UserAPI.getSessions();
+  const sessions = await getSessionsAction();
 
   return (
     <div className="w-full">

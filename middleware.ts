@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import UserAPI from "./libs/services/UserAPI";
 import { User } from "./types/user";
 import { ROUTES } from "./constants/routes";
+import { getCurrentUserAction } from "./libs/actions/UserActions";
 
 // import { DEFAULT_LOGIN_REDIRECT } from "./constants/routes";
 // import UserApi, { CurrentUser } from "./lib/services/user";
@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
 
   let user: User | null = null;
   if (sid) {
-    user = await UserAPI.getCurrrentUser();
+    user = await getCurrentUserAction();
   }
 
   if (user) {

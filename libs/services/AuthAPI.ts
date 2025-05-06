@@ -5,10 +5,12 @@ import { DefaultResponseData } from "@/types/api";
 import {
   MFAFormData,
   MFAToken,
+  ResetPasswordFormData,
   SignInAPIRes,
   SignInFormData,
   SignInMFAAPIRes,
   SignUpFormData,
+  TokenSession,
 } from "@/types/auth";
 
 const authInstance = API.create({
@@ -64,7 +66,7 @@ export default class AuthApi {
     );
     return data;
   }
-
+  //done
   static async sendRecoverAccount(email: string) {
     const { data } = await authInstance.post<DefaultResponseData>(
       "/recover",
@@ -73,10 +75,9 @@ export default class AuthApi {
         headers: await getHeaders(),
       }
     );
-
     return data;
   }
-
+  // done
   static async sendReactivateAccount(
     token: string
   ): Promise<DefaultResponseData> {
@@ -89,36 +90,14 @@ export default class AuthApi {
 
     return data;
   }
-  //
+  // done
   static async activateAccount(token: string) {
     const { data } = await authInstance.get<DefaultResponseData>("/activate", {
       headers: { ...(await getHeaders()), Authorization: token },
     });
     return data;
   }
-
-  static async forgotPassword(email: string): Promise<DefaultResponseData> {
-    try {
-      const { data } = await authInstance.post<DefaultResponseData>(
-        "/recover",
-        { email },
-        {
-          headers: await getHeaders(),
-        }
-      );
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof APIError) {
-        const data = error.response.data as DefaultResponseData;
-        return data;
-      }
-      console.error("Unknown error", error);
-      return {
-        message: "",
-      };
-    }
-  }
-
+  // done
   static async confirmEmail(token: string) {
     const { data } = await authInstance.get<DefaultResponseData>(
       "/confirm-email",
@@ -128,26 +107,18 @@ export default class AuthApi {
     );
     return data;
   }
-
-  static async getToken(token: string): Promise<{
-    userId: string;
-    tokenKey: string;
-    disabledAt: null | number;
-  } | null> {
-    const { data } = await authInstance.get<{
-      userId: string;
-      tokenKey: string;
-      disabledAt: null | number;
-    }>("/token", {
+  // done
+  static async getToken(token: string): Promise<TokenSession | null> {
+    const { data } = await authInstance.get<TokenSession | null>("/token", {
       headers: { ...(await getHeaders()), Authorization: token },
     });
     return data;
   }
-
-  static async resetPassword(
-    token: string,
-    input: { password: string; confirmPassword: string }
-  ): Promise<DefaultResponseData> {
+  // done
+  static async resetPassword({
+    token,
+    ...input
+  }: ResetPasswordFormData): Promise<DefaultResponseData> {
     const { data } = await authInstance.post<DefaultResponseData>(
       "/reset-password",
       input,

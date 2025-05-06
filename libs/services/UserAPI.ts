@@ -10,6 +10,7 @@ import {
   Session,
   SetupMFA,
   TOTP,
+  UpdateEmailByOTPFormData,
   UpdatePassword,
   User,
 } from "@/types/user";
@@ -24,95 +25,41 @@ const userInstance = API.create({
 });
 
 export default class UserAPI {
-  static async logOut() {
-    try {
-      await userInstance.delete("/signout", {
-        headers: await getHeaders(),
-      });
-    } catch (error: unknown) {
-      let errMes = "unknown error";
-      if (error instanceof APIError) {
-        errMes = error.message;
-      } else if (error instanceof Error) {
-        errMes = error.message;
-      }
-    } finally {
-      revalidateTag("me");
-      const cookieStore = await cookies();
-      cookieStore.delete("sid");
-    }
+  // done
+  static async logOut(): Promise<void> {
+    await userInstance.delete("/signout", {
+      headers: await getHeaders(),
+    });
   }
-
+  // done
   static async getCurrrentUser(): Promise<User | null> {
-    try {
-      const { data } = await userInstance.get<User>("/me", {
-        headers: await getHeaders(),
-        next: {
-          tags: ["me"],
-        },
-      });
-      return data;
-    } catch (error: unknown) {
-      let errMes = "unknown error";
-      if (error instanceof APIError) {
-        errMes = error.message;
-      } else if (error instanceof Error) {
-        errMes = error.message;
-      }
-      console.log(errMes);
-      return null;
-    }
+    const { data } = await userInstance.get<User | null>("/me", {
+      headers: await getHeaders(),
+      next: {
+        tags: ["me"],
+      },
+    });
+    return data;
   }
-
-  static async getSessions() {
-    try {
-      const {
-        data: { data },
-      } = await userInstance.get<{
-        success: boolean;
-        message: string;
-        data: Session[];
-      }>("/sessions", {
-        headers: await getHeaders(),
-      });
-      return data;
-    } catch (error: unknown) {
-      let errMes = "unknown error";
-      if (error instanceof APIError) {
-        errMes = error.message;
-      } else if (error instanceof Error) {
-        errMes = error.message;
-      }
-      console.log(errMes);
-      return [];
-    }
+  // done
+  static async getSessions(): Promise<Session[]> {
+    const { data } = await userInstance.get<Session[]>("/sessions", {
+      headers: await getHeaders(),
+    });
+    return data;
   }
-
+  // done
   static async deleteSessionById(
     sessionId: string
   ): Promise<DefaultResponseData> {
-    try {
-      const { data } = await userInstance.delete<DefaultResponseData>(
-        `/sessions/${sessionId}`,
-        {
-          headers: await getHeaders(),
-        }
-      );
-
-      revalidatePath("/account/sessions");
-      return data;
-    } catch (error: unknown) {
-      let errMes = "unknown error";
-      if (error instanceof APIError) {
-        return error.response.data as DefaultResponseData;
-      } else if (error instanceof Error) {
-        errMes = error.message;
+    const { data } = await userInstance.delete<DefaultResponseData>(
+      `/sessions/${sessionId}`,
+      {
+        headers: await getHeaders(),
       }
-      console.log(errMes);
-      return {
-        message: errMes,
-      };
-    }
+    );
+    revalidatePath("/account/sessions");
+    return data;
   }
 
   static async setupMFA(deviceName: string): Promise<SetupMFA> {
@@ -258,8 +205,6 @@ export default class UserAPI {
         errMes = error.message;
       }
       return {
-        status: 400,
-        success: false,
         message: errMes,
       };
     }
@@ -291,53 +236,31 @@ export default class UserAPI {
       };
     }
   }
-
-  static async sendOTPUpdateEmail(email: string): Promise<void> {
-    try {
-      await userInstance.post<DefaultResponseData>(
-        `/email`,
-        { email },
-        {
-          headers: await getHeaders(),
-        }
-      );
-    } catch (error: unknown) {
-      let errMes = "unknown error";
-      if (error instanceof APIError) {
-        errMes = error.message;
-      } else if (error instanceof Error) {
-        errMes = error.message;
+  //
+  static async sendOTPUpdateEmail(email: string): Promise<DefaultResponseData> {
+    const { data } = await userInstance.post<DefaultResponseData>(
+      `/email`,
+      { email },
+      {
+        headers: await getHeaders(),
       }
-      console.log(errMes);
-    }
+    );
+    return data;
   }
-
-  static async updateEmailByOTP(input: {
-    email: string;
-    otp: string;
-  }): Promise<DefaultResponseData> {
-    try {
-      const { data } = await userInstance.patch<DefaultResponseData>(
-        "/email",
-        input,
-        {
-          headers: await getHeaders(),
-        }
-      );
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof APIError) {
-        const data = error.response.data as DefaultResponseData;
-
-        return data;
+  // done
+  static async updateEmailByOTP(
+    input: UpdateEmailByOTPFormData
+  ): Promise<DefaultResponseData> {
+    const { data } = await userInstance.patch<DefaultResponseData>(
+      "/email",
+      input,
+      {
+        headers: await getHeaders(),
       }
-      console.error("Unknown error", error);
-      return {
-        status: 400,
-        success: false,
-        message: "",
-      };
-    }
+    );
+    revalidateTag("me");
+    revalidatePath("/account/settings/password&security");
+    return data;
   }
 
   static async updatePassword(input: UpdatePassword) {

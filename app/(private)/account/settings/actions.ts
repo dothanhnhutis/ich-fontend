@@ -1,10 +1,6 @@
 "use server";
 import UserAPI from "@/libs/services/UserAPI";
 
-export async function deleteSessionByIdAction(sessionId: string) {
-  return await UserAPI.deleteSessionById(sessionId);
-}
-
 export async function setupMFAAction(deviceName: string) {
   return await UserAPI.setupMFA(deviceName);
 }

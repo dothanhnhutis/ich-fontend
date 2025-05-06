@@ -90,3 +90,10 @@ export type UpdatePassword = {
   confirmNewPassword: string;
   isSignOut: boolean;
 };
+
+// ----------------
+
+export type UpdateEmailByOTPFormData = {
+  email: string;
+  otp: string;
+};

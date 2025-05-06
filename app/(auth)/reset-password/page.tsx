@@ -21,21 +21,18 @@ const ResetPasswordPage = async (props: {
 
   if (!token) return notFound();
 
-  const expiredElement: React.JSX.Element = (
-    <p className="text-sm text-red-500 text-center">
-      Your change password token has expired
-    </p>
-  );
-
   const tokenData = await getTokenAction(token);
 
-  if (!tokenData) return expiredElement;
+  if (!tokenData || tokenData.tokenKey != "recover") return notFound();
 
-  if (tokenData.tokenKey != "recover") return notFound();
+  if (tokenData.disabledAt != null)
+    return (
+      <p className="text-sm text-red-500 text-center">
+        Your change password token has expired
+      </p>
+    );
 
-  if (tokenData.disabledAt == null) return <ResetPasswordForm token={token} />;
-
-  return expiredElement;
+  return <ResetPasswordForm token={token} />;
 };
 
 export default ResetPasswordPage;

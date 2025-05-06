@@ -14,13 +14,15 @@ import {
 import { Button } from "@/components/commons/button";
 import { Label } from "@/components/commons/label";
 import { Input } from "@/components/commons/input";
-import { useMutation } from "@tanstack/react-query";
 import cn from "@/utils/cn";
 import { useStore } from "@/libs/hooks/use-store";
-import { sendOTPUpdateEmailAction, updateEmailByOTPAction } from "./actions";
 import { LoaderCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@/libs/hooks/use-user";
+import {
+  sendOTPUpdateEmailAction,
+  updateEmailByOTPAction,
+} from "@/libs/actions/UserActions";
 
 function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
   const [countDown, setCountDown] = React.useState<number>(0);
@@ -38,16 +40,7 @@ function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
     return {};
   }, [emailLocalStore]);
 
-  const { isPending, mutate } = useMutation({
-    mutationFn: async function () {
-      await sendOTPUpdateEmailAction(email);
-    },
-    onSuccess() {
-      setEmailLocalStore(
-        JSON.stringify({ ...emailStore, [email]: Date.now() })
-      );
-    },
-  });
+  const [isPending, startTransition] = React.useTransition();
 
   React.useEffect(() => {
     let timeId: NodeJS.Timeout | undefined;
@@ -69,7 +62,17 @@ function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
 
   const handleSend = () => {
     if (!disabled) {
-      mutate();
+      startTransition(async () => {
+        const { isSuccess, message } = await sendOTPUpdateEmailAction(email);
+        if (isSuccess) {
+          setEmailLocalStore(
+            JSON.stringify({ ...emailStore, [email]: Date.now() })
+          );
+          toast.success(message);
+        } else {
+          toast.error(message);
+        }
+      });
     }
   };
 
@@ -97,6 +100,7 @@ function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
 const EmailModal = () => {
   const { user } = useUser();
   const [open, setOpen] = React.useState<boolean>(false);
+  const [errorOTPInput, setErrorOTPInput] = React.useState<boolean>(false);
 
   const [formData, setFormData] = React.useState<{
     email: string;
@@ -106,31 +110,29 @@ const EmailModal = () => {
     otp: "",
   });
 
-  const { data, isPending, mutate, reset } = useMutation({
-    mutationFn: async function () {
-      return await updateEmailByOTPAction(formData);
-    },
-    onSuccess({ success, message }) {
-      if (!success) {
-        toast.error(message);
-      } else {
-        // refetch();
-        toast.success(message);
-        setOpen(false);
-        setFormData({ email: "", otp: "" });
-      }
-    },
-  });
+  const [isPending, startTransition] = React.useTransition();
+
   const handleOnChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.name == "otp") {
-      reset();
+      setErrorOTPInput(false);
     }
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutate();
+    startTransition(async () => {
+      const { isSuccess, message } = await updateEmailByOTPAction(formData);
+      if (!isSuccess) {
+        toast.error(message);
+        setErrorOTPInput(true);
+        setFormData((prev) => ({ ...prev, otp: "" }));
+      } else {
+        toast.success(message);
+        setOpen(false);
+        setFormData({ email: "", otp: "" });
+      }
+    });
   };
 
   return (
@@ -206,7 +208,7 @@ const EmailModal = () => {
                   <div
                     className={cn(
                       "flex items-center gap-2 col-span-4 px-3 py-1 h-9 border rounded-md focus-within:ring-4 focus-within:outline-1 ring-ring/10",
-                      data && !data.success
+                      errorOTPInput
                         ? "border-red-500 bg-red-50 outline-red-50 ring-red-50"
                         : ""
                     )}
@@ -243,9 +245,7 @@ const EmailModal = () => {
                 <AlertDialogAction
                   type="submit"
                   disabled={
-                    user?.email == formData.email ||
-                    isPending ||
-                    (data && !data.success)
+                    user?.email == formData.email || isPending || errorOTPInput
                   }
                 >
                   Lưu

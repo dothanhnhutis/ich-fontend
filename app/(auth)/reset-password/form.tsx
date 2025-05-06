@@ -3,7 +3,6 @@ import React from "react";
 import * as z from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
 import { CheckIcon, LoaderCircleIcon } from "lucide-react";
 
 import cn from "@/utils/cn";
@@ -11,6 +10,7 @@ import PasswordInput from "@/components/password-input";
 import { Button } from "@/components/commons/button";
 import { Label } from "@/components/commons/label";
 import { resetPasswordAction } from "@/libs/actions/AuthActions";
+import { ResetPasswordFormData } from "@/types/auth";
 
 const passwordSchema = z
   .string({
@@ -24,7 +24,7 @@ const passwordSchema = z
     "Mật khẩu mới phải có ký tự hoa, thường, sô và ký tự đặc biệt"
   );
 
-const ResetPasswordForm = ({ token }: { token: string }) => {
+const ResetPasswordForm = ({ token }: Pick<ResetPasswordFormData, "token">) => {
   const [isResetPassswordSuccess, setIsResetPasswordSuccess] =
     React.useState<boolean>(false);
   const [hiddenPassword, setHiddenPassword] = React.useState<boolean>(true);
@@ -36,10 +36,9 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
     setFocusAt("");
   };
 
-  const [formData, setFormData] = React.useState<{
-    password: string;
-    confirmPassword: string;
-  }>({
+  const [formData, setFormData] = React.useState<
+    Omit<ResetPasswordFormData, "token">
+  >({
     password: "",
     confirmPassword: "",
   });
@@ -47,6 +46,7 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
+
   const isPasswordSchemaErrors = React.useMemo(() => {
     const { success, error } = passwordSchema.safeParse(formData.password);
     if (success) return [];
@@ -71,28 +71,24 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
     );
   }, [formData, focusAt]);
 
-  const { isPending, mutate } = useMutation({
-    mutationFn: async () => {
-      return await resetPasswordAction(token, formData);
-    },
-    onSettled() {
+  const [isPending, startTransition] = React.useTransition();
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    startTransition(async () => {
       setFormData({
         password: "",
         confirmPassword: "",
       });
-    },
-    onSuccess({ isSuccess, message }) {
+      const { isSuccess, message } = await resetPasswordAction({
+        token,
+        ...formData,
+      });
       if (!isSuccess) {
         toast.error(message);
       } else {
         setIsResetPasswordSuccess(true);
       }
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    mutate();
+    });
   };
 
   return (

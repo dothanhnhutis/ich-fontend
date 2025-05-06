@@ -22,7 +22,9 @@ const ReactivatePage = async (props: {
 
   const { isSuccess, message } = await sendReactivateAccountAction(token);
 
-  return <div>{message}</div>;
+  if (isSuccess) return <p className="text-green-500">{message}</p>;
+
+  return <p className="text-red-500">{message}</p>;
 };
 
 export default ReactivatePage;

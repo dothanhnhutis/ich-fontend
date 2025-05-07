@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import BrandLogo from "@/components/commons/brand-logo";
+import AuthLayout from "@/components/layouts/AuthLayout";
 
 export const metadata: Metadata = {
   title: {
@@ -15,23 +15,12 @@ export const metadata: Metadata = {
   },
 };
 
-const AuthLayout = ({
+const AuthLayoutPage = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  return (
-    <>
-      <div className="sticky top-0 left-0 right-0 z-50 bg-accent-foreground">
-        <div className="flex items-center justify-between gap-2 px-2 sm:px-3 py-1 h-[64px] mx-auto max-w-7xl">
-          <BrandLogo />
-        </div>
-      </div>
-      <section className="flex flex-col items-center gap-6 bg-background p-2 sm:p-10">
-        {children}
-      </section>
-    </>
-  );
+  return <AuthLayout>{children}</AuthLayout>;
 };
 
-export default AuthLayout;
+export default AuthLayoutPage;

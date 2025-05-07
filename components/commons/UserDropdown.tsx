@@ -1,4 +1,8 @@
 "use client";
+import React from "react";
+import { useRouter } from "next/navigation";
+import { LogOutIcon, SettingsIcon } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,47 +27,39 @@ import {
   DropdownMenuTrigger,
 } from "@/components/commons/dropdown-menu";
 import { Skeleton } from "@/components/commons/skeleton";
-import { LogOutIcon, SettingsIcon } from "lucide-react";
-import React from "react";
-
-import { useRouter } from "next/navigation";
 import { useUser } from "@/libs/hooks/use-user";
 import { DEFAULT_LOGOUT_REDIRECT } from "@/constants/routes";
 
-const UserMenu = () => {
-  const { user } = useUser();
+const UserDropdownMenu = () => {
+  const router = useRouter();
+  const { user, isPending, logOut } = useUser();
   const [open, setOpen] = React.useState<boolean>(false);
 
-  const router = useRouter();
-
   const handleSignOut = async () => {
-    try {
-      // await signOut();
-      router.push(DEFAULT_LOGOUT_REDIRECT);
-    } catch (error: unknown) {
-      console.log(error);
-    }
+    await logOut();
+    router.push(DEFAULT_LOGOUT_REDIRECT);
   };
+  if (isPending) return <Skeleton className="h-10 w-10 rounded-full" />;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger className="outline-none">
-        <Avatar>
+        <Avatar className="h-10 w-10">
           <AvatarImage
             referrerPolicy="no-referrer"
-            src={user?.avatar?.url || "/user-picture.jpg"}
+            src={user?.avatar?.url || "/images/user-picture.jpg"}
           />
           <AvatarFallback className="bg-transparent">
             <Skeleton className="h-10 w-10 rounded-full" />
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent avoidCollisions align="end" className="w-[245px]">
+      <DropdownMenuContent avoidCollisions align="end" className="w-[200px]">
         <DropdownMenuLabel className="flex flex-col items-center">
           <Avatar className="w-24 h-24">
             <AvatarImage
               referrerPolicy="no-referrer"
-              src={user?.avatar?.url || "/user-picture.jpg"}
+              src={user?.avatar?.url || "/images/user-picture.jpg"}
             />
             <AvatarFallback className="bg-transparent">
               <Skeleton className="w-24 h-24 rounded-full" />
@@ -78,7 +74,7 @@ const UserMenu = () => {
               className="cursor-pointer"
               onSelect={(e) => e.preventDefault()}
             >
-              <SettingsIcon className="mr-4 h-4 w-4" />
+              <SettingsIcon className="h-4 w-4" />
               <span>Đóng tài khoản</span>
             </DropdownMenuItem>
           </AlertDialogTrigger>
@@ -97,7 +93,7 @@ const UserMenu = () => {
         </AlertDialog>
 
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-          <LogOutIcon className="mr-4 h-4 w-4" />
+          <LogOutIcon className="h-4 w-4" />
           <span>Đăng xuất</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -105,4 +101,4 @@ const UserMenu = () => {
   );
 };
 
-export default UserMenu;
+export default UserDropdownMenu;

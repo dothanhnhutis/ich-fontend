@@ -335,4 +335,11 @@ export default class UserAPI {
       return [];
     }
   }
+
+  static async reSendVerifyEmail(): Promise<DefaultResponseData> {
+    const { data } = await userInstance.get<DefaultResponseData>("/links", {
+      headers: await getHeaders(),
+    });
+    return data;
+  }
 }

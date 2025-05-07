@@ -3,7 +3,7 @@ export const COMPLETE_PROFILE_ROUTE: string = "/last-step";
 
 export const apiAuthPrefix: string = "/api";
 export const DEFAULT_LOGIN_REDIRECT: string = "/account";
-export const DEFAULT_LOGOUT_REDIRECT: string = "/signin";
+export const DEFAULT_LOGOUT_REDIRECT: string = "/login";
 
 export const authRoutes: RegExp = /^\/(signin|signup|recover)$/;
 export const middleRoutes: RegExp = /^\/(verify-email|last-step)$/;

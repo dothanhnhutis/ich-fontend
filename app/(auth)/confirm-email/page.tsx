@@ -24,7 +24,6 @@ const ConfirmEmailPage = async (props: {
   if (!token) notFound();
 
   const tokenData = await getTokenAction(token);
-
   if (
     !tokenData ||
     tokenData.tokenKey != "verify-email" ||

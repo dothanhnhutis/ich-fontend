@@ -68,13 +68,16 @@ export async function sendRecoverAccountAction(email: string) {
 export async function confirmEmailAction(token: string) {
   try {
     const data = await AuthAPI.confirmEmail(token);
-    return { isSuccess: false, message: data.message };
+    return { isSuccess: true, message: data.message };
   } catch (error: unknown) {
+    let errMes: string = "Xác thực tài khoản thất bại";
     if (error instanceof APIError) {
       const data = error.response.data as DefaultResponseData;
-      return { isSuccess: false, message: data.message };
+      errMes = data.message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
     }
-    return { isSuccess: false, message: "Xác thực tài khoản thất bại" };
+    return { isSuccess: false, message: errMes };
   }
 }
 // done

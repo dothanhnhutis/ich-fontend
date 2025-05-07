@@ -216,12 +216,12 @@ const VerifyEmail = () => {
                           type="text"
                           placeholder="Email address"
                           className={cn(
-                            false
+                            user?.email === email
                               ? "focus-visible:ring-red-100 border-red-500 focus-visible:border-red-500 bg-red-50"
                               : ""
                           )}
                         />
-                        {true && (
+                        {false && (
                           <p className="text-destructive font-light text-sm mt-1">
                             E-mail này đã được sử dụng
                           </p>
@@ -229,7 +229,7 @@ const VerifyEmail = () => {
                       </div>
 
                       <Button
-                        disabled={isPendindUpdateEmail}
+                        disabled={isPendindUpdateEmail || user?.email === email}
                         variant="outline"
                         className="rounded-full border-2 border-primary !text-primary font-bold cursor-pointer"
                       >

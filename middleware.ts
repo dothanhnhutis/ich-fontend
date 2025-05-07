@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { User } from "./types/user";
-import { ROUTES } from "./constants/routes";
+import { protectedRoutesRegex, ROUTES } from "./constants/routes";
 import { getCurrentUserAction } from "./libs/actions/UserActions";
 
 // import { DEFAULT_LOGIN_REDIRECT } from "./constants/routes";
@@ -50,6 +50,20 @@ export async function middleware(request: NextRequest) {
     if (nextUrl.pathname == "/login") {
       return NextResponse.redirect(new URL(ROUTES.accountPage, url));
     }
+
+    if (user.emailVerified == null) {
+      if (
+        !nextUrl.pathname.startsWith(ROUTES.verifyEmail) &&
+        protectedRoutesRegex.test(nextUrl.pathname)
+      ) {
+        return NextResponse.redirect(new URL(ROUTES.verifyEmail, url));
+      }
+    } else {
+      if (nextUrl.pathname.startsWith(ROUTES.verifyEmail)) {
+        return NextResponse.redirect(new URL(ROUTES.accountPage, url));
+      }
+    }
+
     if (
       nextUrl.pathname == "/account" ||
       nextUrl.pathname == "/account/settings"

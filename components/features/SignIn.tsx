@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { LoaderCircleIcon } from "lucide-react";
 
 import GoogleButton from "../commons/GoogleButton";
-import PasswordInput from "../password-input";
+import PasswordInput from "../PasswordInput";
 import { Label } from "../commons/label";
 import { Input } from "../commons/input";
 import { Button } from "../commons/button";

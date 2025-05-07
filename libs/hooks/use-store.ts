@@ -21,8 +21,7 @@ export function useStore1<
     | number[]
     | { [index: string]: string | number }[]
 >(key: string): [T | null, (value: T) => void] {
-  // 1. Khởi tạo state từ localStorage (chỉ chạy lần đầu)
-  const [storedValue, setStoredValue] = React.useState<T | null>(() => {
+  function getLocalStorage<T>(key: string) {
     if (typeof window === "undefined") return null;
     const item = window.localStorage.getItem(key);
     if (item === null) return null;
@@ -31,21 +30,31 @@ export function useStore1<
     } catch {
       return item as T;
     }
-  });
+  }
 
-  // 2. Hàm cập nhật state và sync ngược lại localStorage
+  const [localStorage, setLocalStorage] = React.useState<T | null>(
+    getLocalStorage(key)
+  );
+
+  React.useEffect(() => {
+    setLocalStorage(getLocalStorage(key));
+  }, [key]);
+
   const setValue = React.useCallback(
     (value: T) => {
       try {
-        const serialized = JSON.stringify(value);
-        window.localStorage.setItem(key, serialized);
+        if (typeof value == "string" || typeof value == "number") {
+          window.localStorage.setItem(key, `${value}`);
+        } else {
+          window.localStorage.setItem(key, JSON.stringify(value));
+        }
       } catch (error) {
-        window.localStorage.setItem(key, `${value}`);
+        return;
       }
-      // setStoredValue(value);
+      setLocalStorage(value);
     },
     [key]
   );
 
-  return [storedValue, setValue];
+  return [localStorage, setValue];
 }

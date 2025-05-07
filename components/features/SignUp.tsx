@@ -7,7 +7,7 @@ import { CheckIcon, LoaderCircleIcon } from "lucide-react";
 
 import cn from "@/utils/cn";
 import GoogleButton from "../commons/GoogleButton";
-import PasswordInput from "@/components/password-input";
+import PasswordInput from "@/components/PasswordInput";
 import { Button } from "@/components/commons/button";
 import { Input } from "@/components/commons/input";
 import { Label } from "@/components/commons/label";

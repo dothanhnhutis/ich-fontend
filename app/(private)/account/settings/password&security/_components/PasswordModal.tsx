@@ -14,7 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/commons/alert-dialog";
 
-import PasswordInput from "@/components/password-input";
+import PasswordInput from "@/components/PasswordInput";
 import { Checkbox } from "@/components/commons/checkbox";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";

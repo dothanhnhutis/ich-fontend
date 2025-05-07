@@ -18,6 +18,8 @@ const adminRoutes: RegExp = /^\/admin/;
 export const isAdminRegex: RegExp =
   /^(create|read|update|delete):(Role|Location|User)*$/;
 
+export const protectedRoutesRegex: RegExp = /^\/(admin|account)\/?.*$/;
+
 export const privateRegexRoutes = [
   userRoutes,
   postsRoutes,
@@ -34,6 +36,7 @@ export const ROUTES = {
   signUp: "/register",
   recover: "/recover",
   accountPage: "/account",
+  verifyEmail: "/verify-email",
 };
 
 // export const privateRegExpRoutes = [

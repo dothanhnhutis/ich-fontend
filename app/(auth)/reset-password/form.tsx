@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { CheckIcon, LoaderCircleIcon } from "lucide-react";
 
 import cn from "@/utils/cn";
-import PasswordInput from "@/components/password-input";
+import PasswordInput from "@/components/PasswordInput";
 import { Button } from "@/components/commons/button";
 import { Label } from "@/components/commons/label";
 import { resetPasswordAction } from "@/libs/actions/AuthActions";

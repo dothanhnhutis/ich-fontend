@@ -3,13 +3,21 @@ import React from "react";
 import { useRouter } from "next/navigation";
 
 import { User } from "@/types/user";
-import { logOutAction, reSendVerifyEmailAction } from "../actions/UserActions";
+import {
+  logOutAction,
+  reSendVerifyEmailAction,
+  updateOrSendOTPUpdateEmailAction,
+} from "../actions/UserActions";
 
 type UserProvider = {
   user: User | null;
   isPending: boolean;
   logOut: () => Promise<void>;
   handleReSendVerifyEmail(): Promise<{
+    isSuccess: boolean;
+    message: string;
+  }>;
+  handleUpdateOrSendOTPUpdateEmail(email: string): Promise<{
     isSuccess: boolean;
     message: string;
   }>;
@@ -47,12 +55,20 @@ export const UserProvider = ({
     return await reSendVerifyEmailAction();
   }
 
+  async function handleUpdateOrSendOTPUpdateEmail(email: string): Promise<{
+    isSuccess: boolean;
+    message: string;
+  }> {
+    return await updateOrSendOTPUpdateEmailAction(email);
+  }
+
   const contextValue = React.useMemo<UserProvider>(
     () => ({
       user: state,
       isPending,
       logOut: handleLogOut,
       handleReSendVerifyEmail,
+      handleUpdateOrSendOTPUpdateEmail,
     }),
     [state, isPending]
   );

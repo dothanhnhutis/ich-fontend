@@ -335,11 +335,28 @@ export default class UserAPI {
       return [];
     }
   }
-
+  // done
   static async reSendVerifyEmail(): Promise<DefaultResponseData> {
-    const { data } = await userInstance.get<DefaultResponseData>("/links", {
-      headers: await getHeaders(),
-    });
+    const { data } = await userInstance.get<DefaultResponseData>(
+      "/mail/verify-email",
+      {
+        headers: await getHeaders(),
+      }
+    );
+    return data;
+  }
+
+  //done
+  static async updateOrSendOTPUpdateEmail(
+    email: string
+  ): Promise<DefaultResponseData> {
+    const { data } = await userInstance.post<DefaultResponseData>(
+      "/email",
+      { email },
+      {
+        headers: await getHeaders(),
+      }
+    );
     return data;
   }
 }

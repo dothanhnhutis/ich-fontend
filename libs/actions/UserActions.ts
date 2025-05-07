@@ -121,12 +121,39 @@ export async function sendOTPUpdateEmailAction(email: string) {
   }
 }
 
+//done
 export async function reSendVerifyEmailAction(): Promise<{
   isSuccess: boolean;
   message: string;
 }> {
   try {
     const { message } = await UserAPI.reSendVerifyEmail();
+    return {
+      isSuccess: true,
+      message,
+    };
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof APIError) {
+      const { message } = error.response.data as DefaultResponseData;
+      errMes = message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    return {
+      isSuccess: false,
+      message: errMes,
+    };
+  }
+}
+
+//
+export async function updateOrSendOTPUpdateEmailAction(email: string): Promise<{
+  isSuccess: boolean;
+  message: string;
+}> {
+  try {
+    const { message } = await UserAPI.updateOrSendOTPUpdateEmail(email);
     return {
       isSuccess: true,
       message,

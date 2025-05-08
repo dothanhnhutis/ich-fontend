@@ -13,12 +13,35 @@ import { Input } from "../commons/input";
 import { Button } from "../commons/button";
 import { ROUTES } from "@/constants/routes";
 import { SignInActionRes, SignInFormData } from "@/types/auth";
-import { signInAction, signInMFAAction } from "@/libs/actions/AuthActions";
+import {
+  clearOAuthErrorData,
+  signInAction,
+  signInMFAAction,
+} from "@/libs/actions/AuthActions";
 import { SignInProvider, useSignIn } from "@/libs/contexts/signin-context";
 
 const emailSchema = z.string().email();
 
-function SignInForm({ email }: { email?: string }) {
+type OAuthError =
+  | {
+      type: "SIGNED_UP_WITH_PASSWORD";
+    }
+  | {
+      type: "USER_BANNED";
+      banReason: string;
+    }
+  | {
+      type: "USER_DISABLED";
+      token: string;
+    };
+
+function SignInForm({
+  email,
+  oAuthError,
+}: {
+  email?: string;
+  oAuthError?: string;
+}) {
   const router = useRouter();
   const [formData, setFormData] = React.useState<SignInFormData>({
     email: email || "",
@@ -28,11 +51,28 @@ function SignInForm({ email }: { email?: string }) {
   const [isPending, startTransition] = React.useTransition();
   const { handleMFAToken } = useSignIn();
 
+  const [oAuthErr, setOAuthErr] = React.useState<OAuthError | null>(() => {
+    if (!oAuthError) return null;
+    try {
+      return JSON.parse(oAuthError);
+    } catch (error) {
+      return null;
+    }
+  });
+
+  React.useEffect(() => {
+    const handleClear = async () => {
+      await clearOAuthErrorData();
+    };
+    handleClear();
+  }, [oAuthErr]);
+
   const handleOnchange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // if (status == "USER_SIGN_IN_PASSWORD") {
-    //   document.cookie =
-    //     "oauth2_error_type=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    // }
+    if (oAuthErr) {
+      setOAuthErr(null);
+      // document.cookie =
+      //   "oauth2_error_type=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
     if (error) {
       setError(null);
     }
@@ -85,6 +125,30 @@ function SignInForm({ email }: { email?: string }) {
       {error && error.status == "ERROR" ? (
         <p className="bg-red-100/70 text-sm text-red-600 p-2 mb-2 rounded-md">
           {error.message}
+        </p>
+      ) : null}
+
+      {oAuthErr && oAuthErr.type == "USER_BANNED" ? (
+        <p className="bg-red-100/70 text-sm text-red-600 p-2 mb-2 rounded-md">
+          {oAuthErr.banReason}
+        </p>
+      ) : null}
+
+      {oAuthErr && oAuthErr.type == "USER_DISABLED" ? (
+        <p className="bg-yellow-100/70 text-sm text-yellow-600 p-2 mb-2 rounded-md">
+          Tài khoản của bạn đã vô hiệu hoá. Vui lòng{" "}
+          <Link
+            href={`/reactivate?token=${oAuthErr.token}`}
+            className="text-primary"
+          >
+            kích hoạt lại
+          </Link>{" "}
+          trước khi đăng nhập.
+        </p>
+      ) : null}
+      {oAuthErr && oAuthErr.type == "SIGNED_UP_WITH_PASSWORD" ? (
+        <p className="bg-blue-100/70 text-sm text-blue-600 p-2 mb-2 rounded-md">
+          Tài khoản đã đăng ký bằng mật khẩu
         </p>
       ) : null}
 
@@ -272,16 +336,29 @@ function MFAForm() {
   );
 }
 
-function SignInWrapper({ email }: { email?: string }) {
+function SignInWrapper({
+  email,
+  oAuthError,
+}: {
+  email?: string;
+  oAuthError?: string;
+}) {
   const { mfaToken } = useSignIn();
   if (mfaToken) return <MFAForm />;
-  return <SignInForm email={email} />;
+
+  return <SignInForm email={email} oAuthError={oAuthError} />;
 }
 
-export default function SignIn({ email }: { email?: string }) {
+export default function SignIn({
+  email,
+  oAuthError,
+}: {
+  email?: string;
+  oAuthError?: string;
+}) {
   return (
     <SignInProvider>
-      <SignInWrapper email={email} />
+      <SignInWrapper email={email} oAuthError={oAuthError} />
     </SignInProvider>
   );
 }

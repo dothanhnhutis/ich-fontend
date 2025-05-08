@@ -43,6 +43,7 @@ export type Session = {
   userId: string;
   cookie: CookieOpt;
   ip: string;
+  provider: string;
   userAgent: {
     ua: string;
     browser: Record<string, string>;
@@ -67,10 +68,14 @@ export type User = {
   id: string;
   email: string;
   emailVerified: Date | null;
-  password: string;
+  isDisabled: boolean;
+  disabledAt: Date | null;
+  isBanned: boolean;
+  bannedAt: Date | null;
+  banExpires: Date | null;
+  banReason: string | null;
   username: string;
-  avatar: Avatar | null;
-  isActive: boolean;
+  avatar: string | null;
   createdAt: Date;
   updatedAt: Date;
   session: Session;

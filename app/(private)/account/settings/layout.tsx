@@ -9,7 +9,7 @@ import cn from "@/utils/cn";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
-import { DEFAULT_AVATAR } from "@/constants/temp";
+import { DEFAULT_AVATAR, USERNAME_MAX_LENGTH } from "@/constants/user";
 import { useUser } from "@/libs/hooks/use-user";
 
 const navs = [
@@ -60,25 +60,27 @@ const PrivateUserLayout = ({
         <div className="flex items-center gap-2 mb-4">
           <Avatar className="h-16 w-16 rounded-full">
             <AvatarImage
-              src={user?.avatar?.url || DEFAULT_AVATAR}
+              src={user?.avatar || DEFAULT_AVATAR}
               alt={user?.username}
             />
             <AvatarFallback className="h-16 w-16 rounded-full">
-              CN
+              {user ? user.username.substring(0, 2).toUpperCase() : "ICH"}
             </AvatarFallback>
           </Avatar>
           <div className="text-muted-foreground">
             <div className="flex items-center gap-2">
-              <p className="text-xl font-semibold text-black">
-                {user?.username}
-                {nav ? (
-                  <>
-                    <span className="mx-2 text-lg text-muted-foreground">
-                      /
-                    </span>
-                    <span>{nav.label}</span>
-                  </>
-                ) : null}
+              <p className="text-xl font-semibold text-black relative">
+                <span>
+                  {user
+                    ? user.username.length <= USERNAME_MAX_LENGTH
+                      ? user.username
+                      : `${user.username
+                          .substring(0, USERNAME_MAX_LENGTH)
+                          .trim()}...`
+                    : "Me"}
+                </span>
+                <span className="px-2">/</span>
+                {nav ? <span>{nav.label}</span> : null}
               </p>
             </div>
 

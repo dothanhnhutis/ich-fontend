@@ -47,7 +47,7 @@ const UserDropdownMenu = () => {
         <Avatar className="h-10 w-10">
           <AvatarImage
             referrerPolicy="no-referrer"
-            src={user?.avatar?.url || "/images/user-picture.jpg"}
+            src={user?.avatar || "/images/user-picture.jpg"}
           />
           <AvatarFallback className="bg-transparent">
             <Skeleton className="h-10 w-10 rounded-full" />
@@ -59,7 +59,7 @@ const UserDropdownMenu = () => {
           <Avatar className="w-24 h-24">
             <AvatarImage
               referrerPolicy="no-referrer"
-              src={user?.avatar?.url || "/images/user-picture.jpg"}
+              src={user?.avatar || "/images/user-picture.jpg"}
             />
             <AvatarFallback className="bg-transparent">
               <Skeleton className="w-24 h-24 rounded-full" />

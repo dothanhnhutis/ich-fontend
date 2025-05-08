@@ -18,7 +18,9 @@ const LogInPage = async (props: {
   const cookieStore = await cookies();
   const email = typeof searchParams.email == "string" ? searchParams.email : "";
 
-  return <SignIn email={email} />;
+  return (
+    <SignIn email={email} oAuthError={cookieStore.get("oauth_error")?.value} />
+  );
 };
 
 export default LogInPage;

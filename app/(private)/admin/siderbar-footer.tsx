@@ -53,7 +53,9 @@ const AdminSidebarFooter = () => {
                     src={currentUser?.image || "/images/user-picture.jpg"}
                     alt={currentUser?.username}
                   />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    user ? user.username.substring(0, 1).toUpperCase() : "ICH"
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
@@ -77,7 +79,11 @@ const AdminSidebarFooter = () => {
                       src={currentUser?.image || "/user-picture.jpg"}
                       alt={currentUser?.username}
                     />
-                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                    <AvatarFallback className="rounded-lg">
+                      {currentUser
+                        ? currentUser.username.substring(0, 1).toUpperCase()
+                        : "ICH"}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">

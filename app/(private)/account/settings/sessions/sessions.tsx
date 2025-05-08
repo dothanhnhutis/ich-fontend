@@ -59,6 +59,7 @@ const SessionItem = ({
           {`Lần truy cập cuối: ${format(session.lastAccess, "dd/MM/yy HH:mm")}`}
         </p>
         <p>{`Đã đăng nhập: ${format(session.createAt, "dd/MM/yy HH:mm")}`}</p>
+        <p>{`Đăng nhập bằng: ${session.provider}`}</p>
 
         <button type="button">
           <EllipsisIcon className="shrink-0 size-6" />

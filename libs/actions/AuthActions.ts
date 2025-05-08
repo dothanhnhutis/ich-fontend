@@ -10,6 +10,7 @@ import {
   SignInFormData,
   SignUpFormData,
 } from "@/types/auth";
+import { cookies } from "next/headers";
 // done
 export async function activateAccountAction(token: string) {
   try {
@@ -132,6 +133,11 @@ export async function signInAction(
       token: null,
     };
   }
+}
+//
+export async function clearOAuthErrorData() {
+  const cookieStore = await cookies();
+  cookieStore.delete("oauth_error");
 }
 // done
 export async function signInMFAAction(input: MFAFormData) {

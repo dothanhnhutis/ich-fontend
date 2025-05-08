@@ -357,6 +357,8 @@ export default class UserAPI {
         headers: await getHeaders(),
       }
     );
+    revalidateTag("me");
+    revalidatePath("/verify-email");
     return data;
   }
 }

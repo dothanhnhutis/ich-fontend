@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/commons/dropdown-menu";
-import { DEFAULT_AVATAR } from "@/constants/temp";
+import { DEFAULT_AVATAR, USERNAME_MAX_LENGTH } from "@/constants/user";
 import {
   Bell,
   BellIcon,
@@ -56,11 +56,11 @@ const AccountLayout = ({
               <DropdownMenuTrigger asChild>
                 <Avatar className="h-9 w-9 rounded-full">
                   <AvatarImage
-                    src={user?.avatar?.url || DEFAULT_AVATAR}
+                    src={user?.avatar || DEFAULT_AVATAR}
                     alt={user?.username}
                   />
                   <AvatarFallback className="h-9 w-9 rounded-full">
-                    CN
+                    {user ? user.username.substring(0, 2).toUpperCase() : "ICH"}
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
@@ -73,14 +73,24 @@ const AccountLayout = ({
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage
-                        src={user?.avatar?.url || DEFAULT_AVATAR}
+                        src={user?.avatar || DEFAULT_AVATAR}
                         alt={user?.username}
                       />
-                      <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                      <AvatarFallback className="rounded-lg">
+                        {user
+                          ? user.username.substring(0, 2).toUpperCase()
+                          : "ICH"}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">
-                        {user?.username}
+                        {user
+                          ? user.username.length <= USERNAME_MAX_LENGTH
+                            ? user.username
+                            : `${user.username
+                                .substring(0, USERNAME_MAX_LENGTH)
+                                .trim()}...`
+                          : "Me"}
                       </span>
                       <span className="truncate text-xs">{user?.email}</span>
                     </div>

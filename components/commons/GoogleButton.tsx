@@ -6,6 +6,7 @@ const GoogleButton = ({
   label = "Đăng nhập bằng Google",
 }: {
   label?: string;
+  redirect?: string;
 }) => {
   const handleOnClick = () => {
     const authorizationUrl = `http://localhost:4000/api/v1/auth/google`;

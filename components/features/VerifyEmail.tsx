@@ -27,7 +27,13 @@ const VerifyEmail = () => {
     handleUpdateOrSendOTPUpdateEmail,
   } = useUser();
   const [countDown, setCountDown] = React.useState<number>(0);
+  const [countDown1, setCountDown1] = React.useState<number>(0);
   const [isPendindReSendVerifyEmail, startTransition] = React.useTransition();
+
+  const [email, setEmail] = React.useState<string>("");
+  const [open, setOpen] = React.useState<boolean>(false);
+  const [isPendindUpdateEmail, startTransition1] = React.useTransition();
+  const [emailExists, setEmailExists] = React.useState<string[]>([]);
 
   const handleReSendEmail = () => {
     startTransition(async () => {
@@ -57,10 +63,21 @@ const VerifyEmail = () => {
     };
   }, [countDown, data, user]);
 
-  const [email, setEmail] = React.useState<string>("");
-  const [open, setOpen] = React.useState<boolean>(false);
-
-  const [isPendindUpdateEmail, startTransition1] = React.useTransition();
+  React.useEffect(() => {
+    let timeId: NodeJS.Timeout | undefined;
+    const time = user && data && data[email];
+    if (time && 60 - Math.ceil((Date.now() - time) / 1000) > 0) {
+      timeId = setInterval(() => {
+        setCountDown1(60 - Math.ceil((Date.now() - time) / 1000));
+      });
+    } else {
+      setCountDown1(0);
+      if (timeId) clearInterval(timeId);
+    }
+    return () => {
+      if (timeId) clearInterval(timeId);
+    };
+  }, [countDown1, email, data]);
 
   const handleUpdateEmail = () => {
     startTransition1(async () => {
@@ -68,10 +85,12 @@ const VerifyEmail = () => {
         email
       );
       if (isSuccess) {
+        setData({ ...data, [email]: Date.now() });
         setEmail("");
-        setOpen(false);
         toast.success(message);
+        setOpen(false);
       } else {
+        setEmailExists((prev) => [...prev, email]);
         toast.error(message);
       }
     });
@@ -216,27 +235,44 @@ const VerifyEmail = () => {
                           type="text"
                           placeholder="Email address"
                           className={cn(
-                            user?.email === email
+                            user?.email === email || emailExists.includes(email)
                               ? "focus-visible:ring-red-100 border-red-500 focus-visible:border-red-500 bg-red-50"
                               : ""
                           )}
                         />
-                        {false && (
+                        {emailExists.includes(email) ? (
                           <p className="text-destructive font-light text-sm mt-1">
-                            E-mail này đã được sử dụng
+                            E-mail này đã tồn tại
                           </p>
-                        )}
+                        ) : null}
+
+                        {user?.email === email ? (
+                          <p className="text-destructive font-light text-sm mt-1">
+                            E-mail mới không được trùng với email hiện tại.
+                          </p>
+                        ) : null}
                       </div>
 
                       <Button
-                        disabled={isPendindUpdateEmail || user?.email === email}
+                        disabled={
+                          countDown1 > 0 ||
+                          isPendindUpdateEmail ||
+                          user?.email === email ||
+                          emailExists.includes(email)
+                        }
                         variant="outline"
                         className="rounded-full border-2 border-primary !text-primary font-bold cursor-pointer"
                       >
-                        {isPendindUpdateEmail && (
-                          <LoaderCircleIcon className="h-4 w-4 animate-spin flex-shrink-0 mr-2" />
-                        )}
                         Cập nhật
+                        {isPendindUpdateEmail ? (
+                          <LoaderCircleIcon className="h-4 w-4 mr-2 animate-spin flex-shrink-0" />
+                        ) : (
+                          `${
+                            countDown1 > 0 && emailExists.includes(email)
+                              ? ` (${countDown1}s)`
+                              : ""
+                          } `
+                        )}
                       </Button>
                     </form>
                   </DialogContent>

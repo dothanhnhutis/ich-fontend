@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 
 import { User } from "@/types/user";
 import {
+  getCurrentUserAction,
   logOutAction,
   reSendVerifyEmailAction,
   updateOrSendOTPUpdateEmailAction,
@@ -34,9 +35,15 @@ export const UserProvider = ({
   const [isPending, setIsPending] = React.useState<boolean>(true);
 
   React.useEffect(() => {
-    setUser(user || null);
-    setIsPending(false);
+    const fetchUser = async () => {
+      const user = await getCurrentUserAction();
+      setUser(user || null);
+      setIsPending(false);
+    };
+    fetchUser();
   }, [user]);
+
+  console.log(state);
 
   async function handleLogOut() {
     await logOutAction();

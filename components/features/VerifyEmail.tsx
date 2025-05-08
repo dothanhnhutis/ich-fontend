@@ -224,11 +224,11 @@ const VerifyEmail = () => {
                         e.preventDefault();
                         handleUpdateEmail();
                       }}
-                      className="flex flex-col sm:flex-row gap-2 mt-4"
                     >
-                      <div>
+                      <div className="inline-flex flex-col sm:flex-row gap-2 mt-4">
                         <Input
                           name="email"
+                          required
                           disabled={isPendindUpdateEmail}
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
@@ -240,40 +240,40 @@ const VerifyEmail = () => {
                               : ""
                           )}
                         />
-                        {emailExists.includes(email) ? (
-                          <p className="text-destructive font-light text-sm mt-1">
-                            E-mail này đã tồn tại
-                          </p>
-                        ) : null}
 
-                        {user?.email === email ? (
-                          <p className="text-destructive font-light text-sm mt-1">
-                            E-mail mới không được trùng với email hiện tại.
-                          </p>
-                        ) : null}
+                        <Button
+                          disabled={
+                            countDown1 > 0 ||
+                            isPendindUpdateEmail ||
+                            user?.email === email ||
+                            emailExists.includes(email)
+                          }
+                          variant="outline"
+                          className="rounded-full border-2 border-primary !text-primary font-bold cursor-pointer"
+                        >
+                          Cập nhật
+                          {isPendindUpdateEmail ? (
+                            <LoaderCircleIcon className="h-4 w-4 mr-2 animate-spin flex-shrink-0" />
+                          ) : (
+                            `${
+                              countDown1 > 0 && emailExists.includes(email)
+                                ? ` (${countDown1}s)`
+                                : ""
+                            } `
+                          )}
+                        </Button>
                       </div>
+                      {emailExists.includes(email) ? (
+                        <p className="text-destructive font-light text-sm mt-1">
+                          E-mail này đã tồn tại
+                        </p>
+                      ) : null}
 
-                      <Button
-                        disabled={
-                          countDown1 > 0 ||
-                          isPendindUpdateEmail ||
-                          user?.email === email ||
-                          emailExists.includes(email)
-                        }
-                        variant="outline"
-                        className="rounded-full border-2 border-primary !text-primary font-bold cursor-pointer"
-                      >
-                        Cập nhật
-                        {isPendindUpdateEmail ? (
-                          <LoaderCircleIcon className="h-4 w-4 mr-2 animate-spin flex-shrink-0" />
-                        ) : (
-                          `${
-                            countDown1 > 0 && emailExists.includes(email)
-                              ? ` (${countDown1}s)`
-                              : ""
-                          } `
-                        )}
-                      </Button>
+                      {user?.email === email ? (
+                        <p className="text-destructive font-light text-sm mt-1">
+                          E-mail mới không được trùng với email hiện tại.
+                        </p>
+                      ) : null}
                     </form>
                   </DialogContent>
                 </Dialog>

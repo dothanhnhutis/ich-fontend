@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import React from "react";
 import { DEFAULT_AVATAR, USERNAME_MAX_LENGTH } from "@/constants/user";
 import { useUser } from "@/libs/hooks/use-user";
+import { Skeleton } from "@/components/commons/skeleton";
 
 const navs = [
   {
@@ -64,7 +65,7 @@ const PrivateUserLayout = ({
               alt={user?.username}
             />
             <AvatarFallback className="h-16 w-16 rounded-full">
-              {user ? user.username.substring(0, 2).toUpperCase() : "ICH"}
+              <Skeleton className="h-16 w-16 rounded-full" />
             </AvatarFallback>
           </Avatar>
           <div className="text-muted-foreground">

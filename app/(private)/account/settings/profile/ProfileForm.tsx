@@ -10,6 +10,7 @@ import { Input } from "@/components/commons/input";
 import { Label } from "@/components/commons/label";
 import { useUser } from "@/libs/hooks/use-user";
 import { DEFAULT_AVATAR } from "@/constants/user";
+import { Skeleton } from "@/components/commons/skeleton";
 
 const ProfileForm = () => {
   const { user } = useUser();
@@ -17,12 +18,9 @@ const ProfileForm = () => {
     <div className="w-full">
       <div className="flex gap-2 items-center mb-4">
         <Avatar className="h-16 w-16 rounded-full">
-          <AvatarImage
-            src={user?.avatar || DEFAULT_AVATAR}
-            alt={user?.username}
-          />
+          <AvatarImage src={user?.avatar} alt={user?.username} />
           <AvatarFallback className="h-16 w-16 rounded-full">
-            {user ? user.username.substring(0, 1).toUpperCase() : "ICH"}
+            <Skeleton className="h-16 w-16 rounded-full" />
           </AvatarFallback>
         </Avatar>
         <Button

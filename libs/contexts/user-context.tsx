@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 
 import { User } from "@/types/user";
 import {
+  disconnectProviderAction,
   getCurrentUserAction,
   logOutAction,
   reSendVerifyEmailAction,
@@ -19,6 +20,10 @@ type UserProvider = {
     message: string;
   }>;
   handleUpdateOrSendOTPUpdateEmail(email: string): Promise<{
+    isSuccess: boolean;
+    message: string;
+  }>;
+  handleDisconnectProvider: (provider: "google") => Promise<{
     isSuccess: boolean;
     message: string;
   }>;
@@ -69,6 +74,13 @@ export const UserProvider = ({
     return await updateOrSendOTPUpdateEmailAction(email);
   }
 
+  async function handleDisconnectProvider(provider: "google"): Promise<{
+    isSuccess: boolean;
+    message: string;
+  }> {
+    return await disconnectProviderAction(provider);
+  }
+
   const contextValue = React.useMemo<UserProvider>(
     () => ({
       user: state,
@@ -76,6 +88,7 @@ export const UserProvider = ({
       logOut: handleLogOut,
       handleReSendVerifyEmail,
       handleUpdateOrSendOTPUpdateEmail,
+      handleDisconnectProvider,
     }),
     [state, isPending]
   );

@@ -18,6 +18,7 @@ import {
 } from "@/components/commons/alert-dialog";
 import { toast } from "sonner";
 import { useUser } from "@/libs/hooks/use-user";
+import { LoaderCircleIcon } from "lucide-react";
 
 function LinkGoogleAccount({
   linkData,
@@ -39,6 +40,23 @@ function LinkGoogleAccount({
   //   },
   // });
 
+  const { handleDisconnectProvider } = useUser();
+
+  const [open, setOpen] = React.useState(false);
+  const [isPending, startTransition] = React.useTransition();
+
+  const handleUnlink = (provider: "google") => {
+    startTransition(async () => {
+      const { isSuccess, message } = await handleDisconnectProvider(provider);
+      if (!isSuccess) {
+        toast.error(message);
+        return;
+      } else {
+        toast.success(message);
+      }
+    });
+  };
+
   return (
     <div className="flex items-center gap-4 justify-between">
       <div
@@ -51,7 +69,7 @@ function LinkGoogleAccount({
       </div>
       {linkData ? (
         hasPassword ? (
-          <AlertDialog>
+          <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
               <Button className="rounded-full cursor-pointer" variant="outline">
                 Ngắt kết nối
@@ -66,9 +84,16 @@ function LinkGoogleAccount({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogAction className="bg-destructive hover:bg-destructive/80 text-background">
+                <Button
+                  disabled={isPending}
+                  onClick={() => handleUnlink("google")}
+                  className="bg-destructive hover:bg-destructive/80 text-background"
+                >
                   Ngắt kết nối
-                </AlertDialogAction>
+                  {isPending ? (
+                    <LoaderCircleIcon className="ml-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                </Button>
                 <AlertDialogCancel>Huỷ</AlertDialogCancel>
               </AlertDialogFooter>
             </AlertDialogContent>

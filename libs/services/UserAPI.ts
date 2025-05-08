@@ -272,6 +272,8 @@ export default class UserAPI {
           headers: await getHeaders(),
         }
       );
+      revalidateTag("me");
+      revalidatePath("/account/settings/password&security");
       return data;
     } catch (error: unknown) {
       if (error instanceof APIError) {
@@ -300,7 +302,7 @@ export default class UserAPI {
         }
       );
       revalidateTag("me");
-      revalidatePath("/account/password&security");
+      revalidatePath("/account/settings/password&security");
       return data;
     } catch (error: unknown) {
       if (error instanceof APIError) {
@@ -334,6 +336,20 @@ export default class UserAPI {
       console.error("Unknown error", error);
       return [];
     }
+  }
+
+  static async disconnectProvider(
+    provider: string
+  ): Promise<DefaultResponseData> {
+    const { data } = await userInstance.delete<DefaultResponseData>(
+      `/links/${provider}`,
+      {
+        headers: await getHeaders(),
+      }
+    );
+    revalidateTag("me");
+    revalidatePath("/account/password&security");
+    return data;
   }
   // done
   static async reSendVerifyEmail(): Promise<DefaultResponseData> {

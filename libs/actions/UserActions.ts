@@ -147,13 +147,39 @@ export async function reSendVerifyEmailAction(): Promise<{
   }
 }
 
-//
+//done
 export async function updateOrSendOTPUpdateEmailAction(email: string): Promise<{
   isSuccess: boolean;
   message: string;
 }> {
   try {
     const { message } = await UserAPI.updateOrSendOTPUpdateEmail(email);
+    return {
+      isSuccess: true,
+      message,
+    };
+  } catch (error: unknown) {
+    let errMes = "unknown error";
+    if (error instanceof APIError) {
+      const { message } = error.response.data as DefaultResponseData;
+      errMes = message;
+    } else if (error instanceof Error) {
+      errMes = error.message;
+    }
+    return {
+      isSuccess: false,
+      message: errMes,
+    };
+  }
+}
+
+//
+export async function disconnectProviderAction(provider: "google"): Promise<{
+  isSuccess: boolean;
+  message: string;
+}> {
+  try {
+    const { message } = await UserAPI.disconnectProvider(provider);
     return {
       isSuccess: true,
       message,

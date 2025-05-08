@@ -37,49 +37,49 @@ import { getCurrentUserAction } from "./libs/actions/UserActions";
 // }
 
 export async function middleware(request: NextRequest) {
-  // const { nextUrl, url } = request;
+  const { nextUrl, url } = request;
 
-  // const sid = request.cookies.get("sid");
+  const sid = request.cookies.get("sid");
 
-  // let user: User | null = null;
-  // if (sid) {
-  //   user = await getCurrentUserAction();
-  // }
+  let user: User | null = null;
+  if (sid) {
+    user = await getCurrentUserAction();
+  }
 
-  // if (user) {
-  //   if (nextUrl.pathname == "/login") {
-  //     return NextResponse.redirect(new URL(ROUTES.accountPage, url));
-  //   }
+  if (user) {
+    if (nextUrl.pathname == "/login") {
+      return NextResponse.redirect(new URL(ROUTES.accountPage, url));
+    }
 
-  //   if (user.emailVerified == null) {
-  //     if (
-  //       !nextUrl.pathname.startsWith(ROUTES.verifyEmail) &&
-  //       protectedRoutesRegex.test(nextUrl.pathname)
-  //     ) {
-  //       return NextResponse.redirect(new URL(ROUTES.verifyEmail, url));
-  //     }
-  //   } else {
-  //     if (nextUrl.pathname.startsWith(ROUTES.verifyEmail)) {
-  //       return NextResponse.redirect(new URL(ROUTES.accountPage, url));
-  //     }
-  //   }
+    if (user.emailVerified == null) {
+      if (
+        !nextUrl.pathname.startsWith(ROUTES.verifyEmail) &&
+        protectedRoutesRegex.test(nextUrl.pathname)
+      ) {
+        return NextResponse.redirect(new URL(ROUTES.verifyEmail, url));
+      }
+    } else {
+      if (nextUrl.pathname.startsWith(ROUTES.verifyEmail)) {
+        return NextResponse.redirect(new URL(ROUTES.accountPage, url));
+      }
+    }
 
-  //   if (
-  //     nextUrl.pathname == "/account" ||
-  //     nextUrl.pathname == "/account/settings"
-  //   ) {
-  //     const response = NextResponse.rewrite(
-  //       new URL("/account/settings/profile", request.url)
-  //     );
-  //     return response;
-  //   }
-  // } else {
-  //   if (nextUrl.pathname.startsWith("/account")) {
-  //     const response = NextResponse.redirect(new URL("/login", request.url));
-  //     response.cookies.set("sid", "", { maxAge: 0, path: "/" });
-  //     return response;
-  //   }
-  // }
+    if (
+      nextUrl.pathname == "/account" ||
+      nextUrl.pathname == "/account/settings"
+    ) {
+      const response = NextResponse.rewrite(
+        new URL("/account/settings/profile", request.url)
+      );
+      return response;
+    }
+  } else {
+    if (nextUrl.pathname.startsWith("/account")) {
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      response.cookies.set("sid", "", { maxAge: 0, path: "/" });
+      return response;
+    }
+  }
 
   return NextResponse.next();
 }

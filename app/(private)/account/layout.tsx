@@ -27,6 +27,7 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import BrandLogo from "@/components/commons/brand-logo";
 import { useUser } from "@/libs/hooks/use-user";
+import { Skeleton } from "@/components/commons/skeleton";
 
 const AccountLayout = ({
   children,
@@ -60,7 +61,7 @@ const AccountLayout = ({
                     alt={user?.username}
                   />
                   <AvatarFallback className="h-9 w-9 rounded-full">
-                    {user ? user.username.substring(0, 2).toUpperCase() : "ICH"}
+                    <Skeleton className="h-9 w-9 rounded-full" />
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
@@ -77,9 +78,7 @@ const AccountLayout = ({
                         alt={user?.username}
                       />
                       <AvatarFallback className="rounded-lg">
-                        {user
-                          ? user.username.substring(0, 2).toUpperCase()
-                          : "ICH"}
+                        <Skeleton className="h-8 w-8 rounded-lg" />
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">

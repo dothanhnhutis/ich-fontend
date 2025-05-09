@@ -27,19 +27,6 @@ function LinkGoogleAccount({
   linkData?: Account;
   hasPassword?: boolean;
 }) {
-  // const { isPending, mutate } = useMutation({
-  //   mutationFn: async () => {
-  //     return await disableAccountAction();
-  //   },
-  //   onSuccess({ success, message }) {
-  //     if (success) {
-  //       toast.success(message);
-  //     } else {
-  //       toast.error(message);
-  //     }
-  //   },
-  // });
-
   const { handleDisconnectProvider } = useUser();
 
   const [open, setOpen] = React.useState(false);
@@ -55,6 +42,11 @@ function LinkGoogleAccount({
         toast.success(message);
       }
     });
+  };
+
+  const handleOnClick = () => {
+    const authorizationUrl = `http://localhost:4000/api/v1/users/links/google`;
+    window.location.href = authorizationUrl;
   };
 
   return (
@@ -112,7 +104,11 @@ function LinkGoogleAccount({
           </Button>
         )
       ) : (
-        <Button className="rounded-full cursor-pointer" variant="outline">
+        <Button
+          onClick={handleOnClick}
+          className="rounded-full cursor-pointer"
+          variant="outline"
+        >
           Kết nối
         </Button>
       )}

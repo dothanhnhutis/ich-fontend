@@ -236,7 +236,7 @@ export default class UserAPI {
       };
     }
   }
-  //
+  // done
   static async sendOTPUpdateEmail(email: string): Promise<DefaultResponseData> {
     const { data } = await userInstance.post<DefaultResponseData>(
       "/email",

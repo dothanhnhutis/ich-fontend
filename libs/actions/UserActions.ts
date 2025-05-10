@@ -98,7 +98,7 @@ export async function updateEmailByOTPAction(input: UpdateEmailByOTPFormData) {
     };
   }
 }
-
+//done
 export async function sendOTPUpdateEmailAction(email: string) {
   try {
     const { message } = await UserAPI.sendOTPUpdateEmail(email);

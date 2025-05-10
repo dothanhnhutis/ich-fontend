@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
 import {
   disconnectProviderAction,
-  getCurrentUserAction,
   logOutAction,
   reSendVerifyEmailAction,
   updateOrSendOTPUpdateEmailAction,
@@ -13,7 +12,6 @@ import {
 
 type UserProvider = {
   user: User | null;
-  isPending: boolean;
   logOut: () => Promise<void>;
   handleReSendVerifyEmail(): Promise<{
     isSuccess: boolean;
@@ -34,21 +32,15 @@ export const UserContext = React.createContext<UserProvider | null>(null);
 export const UserProvider = ({
   children,
   user,
-}: Readonly<{ children: React.ReactNode; user?: User | null }>) => {
+}: Readonly<{ children: React.ReactNode; user: User | null }>) => {
   const router = useRouter();
   const [state, setUser] = React.useState<User | null>(null);
-  const [isPending, setIsPending] = React.useState<boolean>(true);
 
   React.useEffect(() => {
-    const fetchUser = async () => {
-      const user = await getCurrentUserAction();
-      setUser(user || null);
-      setIsPending(false);
-    };
-    fetchUser();
+    setUser(user);
   }, [user]);
 
-  console.log(state);
+  console.log("user", state);
 
   async function handleLogOut() {
     await logOutAction();
@@ -84,13 +76,13 @@ export const UserProvider = ({
   const contextValue = React.useMemo<UserProvider>(
     () => ({
       user: state,
-      isPending,
+
       logOut: handleLogOut,
       handleReSendVerifyEmail,
       handleUpdateOrSendOTPUpdateEmail,
       handleDisconnectProvider,
     }),
-    [state, isPending]
+    [state]
   );
   return (
     <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>

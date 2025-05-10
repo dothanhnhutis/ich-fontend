@@ -7,7 +7,6 @@ import { LoaderCircleIcon } from "lucide-react";
 import cn from "@/utils/cn";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -16,54 +15,45 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/commons/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/commons/dialog";
 import { Button } from "@/components/commons/button";
 import { Label } from "@/components/commons/label";
 import { Input } from "@/components/commons/input";
-import { useStore } from "@/libs/hooks/use-store";
+import { useStore1 } from "@/libs/hooks/use-store";
 import { useUser } from "@/libs/hooks/use-user";
 import {
   sendOTPUpdateEmailAction,
   updateEmailByOTPAction,
 } from "@/libs/actions/UserActions";
 
-const emailSchema = z.string().email("E-mail không hợp lệ");
+const formSchema = z.object({
+  email: z.string().email("E-mail không hợp lệ"),
+  otp: z.string().length(6, "Mã xác thực không hợp lệ"),
+});
 
-function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
+function EmailModal() {
+  const { user } = useUser();
+  const [emailLocalStore, setEmailLocalStore] =
+    useStore1<Record<string, number>>("changeEmail");
+  const [emailExists, setEmailExists] = React.useState<string[]>([]);
   const [countDown, setCountDown] = React.useState<number>(0);
-  const [emailLocalStore, setEmailLocalStore] = useStore("changeEmail");
-  const [blackListEmail, setBlackListEmail] = React.useState<string[]>([]);
+  const [open, setOpen] = React.useState<boolean>(false);
+  const [otpError, setOTPError] = React.useState<boolean>(false);
 
-  const emailStore: { [index: string]: number } = React.useMemo(() => {
-    const regex =
-      /^\{\s*("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"\s*:\s*\d+\s*,\s*)*("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"\s*:\s*\d+)\s*\}$/;
-    if (
-      emailLocalStore &&
-      typeof emailLocalStore == "string" &&
-      regex.test(emailLocalStore)
-    )
-      return JSON.parse(emailLocalStore);
-    return {};
-  }, [emailLocalStore]);
-
-  const [isPending, startTransition] = React.useTransition();
+  const [formData, setFormData] = React.useState<{
+    email: string;
+    otp: string;
+  }>({
+    email: "",
+    otp: "",
+  });
 
   React.useEffect(() => {
     let timeId: NodeJS.Timeout | undefined;
-    if (
-      emailStore[email] &&
-      60 - Math.ceil((Date.now() - emailStore[email]) / 1000) > 0
-    ) {
+    const time =
+      formData.email && emailLocalStore && emailLocalStore[formData.email];
+    if (time && 60 - Math.ceil((Date.now() - time) / 1000) > 0) {
       timeId = setInterval(() => {
-        setCountDown(60 - Math.ceil((Date.now() - emailStore[email]) / 1000));
+        setCountDown(60 - Math.ceil((Date.now() - time) / 1000));
       });
     } else {
       setCountDown(0);
@@ -72,232 +62,7 @@ function SendBtn({ email, disabled }: { email: string; disabled?: boolean }) {
     return () => {
       if (timeId) clearInterval(timeId);
     };
-  }, [email, emailStore, countDown]);
-
-  const handleSend = () => {
-    if (!disabled) {
-      startTransition(async () => {
-        const invalidEmail = emailSchema.safeParse(email);
-        if (invalidEmail.success == false) {
-          toast.error(invalidEmail.error.issues[0].message);
-          return;
-        }
-        if (blackListEmail.includes(email)) {
-          toast.error("E-mail đã được đăng ký");
-          return;
-        }
-        const { isSuccess, message } = await sendOTPUpdateEmailAction(email);
-        if (isSuccess) {
-          setEmailLocalStore(
-            JSON.stringify({ ...emailStore, [email]: Date.now() })
-          );
-          toast.success(message);
-        } else {
-          setBlackListEmail((prev) => [...prev, email]);
-          toast.error(message);
-        }
-      });
-    }
-  };
-
-  if (countDown > 0) {
-    return (
-      <span className="shrink-0 text-xs text-muted-foreground">{`Gửi (${countDown})`}</span>
-    );
-  }
-
-  return (
-    <button
-      onClick={handleSend}
-      disabled={disabled || isPending}
-      type="button"
-      className="text-primary inline-flex gap-0.5 cursor-pointer text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      Gửi
-      {isPending ? (
-        <LoaderCircleIcon className="shrink w-4 h-4 animate-spin" />
-      ) : null}
-    </button>
-  );
-}
-
-const EmailModal = () => {
-  const { user } = useUser();
-  const [open, setOpen] = React.useState<boolean>(false);
-  const [errorOTPInput, setErrorOTPInput] = React.useState<boolean>(false);
-
-  const [formData, setFormData] = React.useState<{
-    email: string;
-    otp: string;
-  }>({
-    email: "",
-    otp: "",
-  });
-
-  const [isPending, startTransition] = React.useTransition();
-
-  const handleOnChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.name == "otp") {
-      setErrorOTPInput(false);
-    }
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    startTransition(async () => {
-      const { isSuccess, message } = await updateEmailByOTPAction(formData);
-      if (!isSuccess) {
-        toast.error(message);
-        setErrorOTPInput(true);
-        setFormData((prev) => ({ ...prev, otp: "" }));
-      } else {
-        toast.success(message);
-        setOpen(false);
-        setFormData({ email: "", otp: "" });
-      }
-    });
-  };
-
-  return (
-    <div className="flex flex-col lg:flex-row w-full gap-4 border-b py-4">
-      <div className="w-full">
-        <p className="font-bold">Email address</p>
-        <p className="text-xs font-normal leading-snug text-muted-foreground">
-          Quản lý email đăng nhập và liên kết với tài khoản của bạn.
-        </p>
-      </div>
-
-      <div className="flex gap-4 items-center justify-between w-full">
-        <div className="text-sm">
-          <p className="font-medium">
-            {false ? (
-              <LoaderCircleIcon className="text-muted-foreground shrink w-4 h-4 animate-spin" />
-            ) : (
-              user?.email
-            )}
-          </p>
-          {user?.emailVerified ? (
-            <div className="text-green-500">Đã xác thực</div>
-          ) : (
-            <div className="text-destructive">Chưa xác thực</div>
-          )}
-        </div>
-
-        <AlertDialog
-          open={open}
-          onOpenChange={(open) => {
-            if (open) {
-              setFormData({ email: "", otp: "" });
-              setOpen(open);
-            }
-          }}
-        >
-          <AlertDialogTrigger asChild>
-            <Button className="rounded-full cursor-pointer" variant="outline">
-              Thay đổi
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Thay đổi địa chỉ email</AlertDialogTitle>
-              <AlertDialogDescription className="hidden"></AlertDialogDescription>
-            </AlertDialogHeader>
-            <form onSubmit={handleSubmit}>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-6 items-center gap-2 sm:gap-4">
-                  <Label htmlFor="email" className="col-span-2 text-right">
-                    E-mail
-                  </Label>
-                  <Input
-                    value={formData.email}
-                    onChange={handleOnChangeInput}
-                    id="email"
-                    name="email"
-                    required
-                    className={cn(
-                      "col-span-4",
-                      user?.email == formData.email
-                        ? "border-red-500 bg-red-50 outline-red-50 ring-red-50"
-                        : ""
-                    )}
-                    type="email"
-                  />
-                </div>
-                <div className="grid grid-cols-6 items-center gap-2 sm:gap-4">
-                  <Label htmlFor="otp" className="col-span-2">
-                    Mã xác thực
-                  </Label>
-
-                  <div
-                    className={cn(
-                      "flex items-center gap-2 col-span-4 px-3 py-1 h-9 border rounded-md focus-within:ring-4 focus-within:outline-1 ring-ring/10",
-                      errorOTPInput
-                        ? "border-red-500 bg-red-50 outline-red-50 ring-red-50"
-                        : ""
-                    )}
-                  >
-                    <input
-                      value={formData.otp}
-                      onChange={handleOnChangeInput}
-                      id="otp"
-                      name="otp"
-                      required
-                      maxLength={6}
-                      type="text"
-                      className={cn(
-                        "w-full h-full text-base md:text-sm focus-visible:ring-0 focus-visible:outline-0"
-                      )}
-                    />
-                    <SendBtn
-                      email={formData.email}
-                      disabled={
-                        !formData.email || user?.email == formData.email
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <AlertDialogFooter className="[&>button]:cursor-pointer">
-                <AlertDialogCancel
-                  disabled={isPending}
-                  onClick={() => setOpen(false)}
-                >
-                  Huỷ
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  type="submit"
-                  disabled={
-                    user?.email == formData.email || isPending || errorOTPInput
-                  }
-                >
-                  Lưu
-                  {isPending ? (
-                    <LoaderCircleIcon className="shrink w-4 h-4 animate-spin" />
-                  ) : null}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </form>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </div>
-  );
-};
-
-export default EmailModal1;
-
-export function EmailModal1() {
-  const { user } = useUser();
-
-  const [formData, setFormData] = React.useState<{
-    email: string;
-    otp: string;
-  }>({
-    email: "",
-    otp: "",
-  });
+  }, [countDown, emailLocalStore, formData.email]);
 
   function handleOnChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.name == "otp") {
@@ -309,14 +74,63 @@ export function EmailModal1() {
     } else {
       setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     }
+    setOTPError(false);
   }
 
   const emailError = React.useMemo(() => {
-    return user?.email == formData.email;
-  }, [formData.email]);
+    return (
+      user?.email == formData.email || emailExists.includes(formData.email)
+    );
+  }, [formData.email, emailExists]);
+
+  const [isSendOTPPending, startTransition] = React.useTransition();
+
+  function handleSendOTP() {
+    startTransition(async () => {
+      if (emailError) return;
+      const invalidEmail = formSchema.shape.email.safeParse(formData.email);
+      if (invalidEmail.success == false) {
+        toast.error(invalidEmail.error.issues[0].message);
+        return;
+      }
+
+      const { isSuccess, message } = await sendOTPUpdateEmailAction(
+        formData.email
+      );
+      if (isSuccess) {
+        setEmailLocalStore({
+          ...emailLocalStore,
+          [formData.email]: Date.now(),
+        });
+        toast.success(message);
+      } else {
+        setEmailExists((prev) => [...prev, formData.email]);
+        toast.error(message);
+      }
+    });
+  }
+
+  const [isSubmitting, startTransitionSubmit] = React.useTransition();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const invalidEmail = formSchema.shape.otp.safeParse(formData.otp);
+    if (invalidEmail.success == false) {
+      toast.error(invalidEmail.error.issues[0].message);
+      setOTPError(true);
+      return;
+    }
+    startTransitionSubmit(async () => {
+      const { isSuccess, message } = await updateEmailByOTPAction(formData);
+      if (!isSuccess) {
+        toast.error(message);
+        setOTPError(true);
+      } else {
+        setOpen(false);
+        setFormData({ email: "", otp: "" });
+        toast.success(message);
+      }
+    });
   };
 
   return (
@@ -349,7 +163,13 @@ export function EmailModal1() {
           <LoaderCircleIcon className="text-muted-foreground shrink w-4 h-4 animate-spin" />
         )}
 
-        <AlertDialog>
+        <AlertDialog
+          open={open}
+          onOpenChange={(v) => {
+            if (isSubmitting) return;
+            setOpen(v);
+          }}
+        >
           <AlertDialogTrigger asChild>
             <Button className="rounded-full cursor-pointer" variant="outline">
               Thay đổi
@@ -385,6 +205,7 @@ export function EmailModal1() {
                     )}
                   />
                 </div>
+
                 <div className="grid min-[400px]:grid-cols-4 items-center min-[400px]:gap-4 gap-2">
                   <Label
                     htmlFor="otp"
@@ -392,24 +213,14 @@ export function EmailModal1() {
                   >
                     Mã xác thực
                   </Label>
-                  <Input
-                    required
-                    id="otp"
-                    name="otp"
-                    maxLength={6}
-                    value={formData.otp}
-                    onChange={handleOnChange}
-                    className="min-[400px]:col-span-3"
-                  />
-                </div>
-                <div className="grid min-[400px]:grid-cols-4 items-center min-[400px]:gap-4 gap-2">
-                  <Label
-                    htmlFor="otp"
-                    className="inline min-[400px]:text-right"
+                  <div
+                    className={cn(
+                      "flex items-center gap-3 border rounded-md h-9 py-1 px-3 min-[400px]:col-span-3 focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
+                      otpError
+                        ? "border-red-500 focus-within:border-red-500 bg-red-50 focus-within:ring-red-100"
+                        : ""
+                    )}
                   >
-                    Mã xác thực
-                  </Label>
-                  <div className="flex items-center gap-3 border rounded-md h-9 py-1 px-3 min-[400px]:col-span-3">
                     <input
                       required
                       type="text"
@@ -418,22 +229,41 @@ export function EmailModal1() {
                       maxLength={6}
                       value={formData.otp}
                       onChange={handleOnChange}
-                      className="w-full focus-within:outline-none"
+                      className="h-full w-full focus-within:outline-none"
                     />
 
-                    <p className="text-muted-foreground text-sm  ">Gửi (60s)</p>
-                    {/* <button
-                      type="button"
-                      className="text-primary cursor-pointer"
-                    >
-                      Gửi
-                    </button> */}
+                    {countDown > 0 ? (
+                      <p className="shrink-0 text-muted-foreground text-sm">
+                        {`Gửi (${countDown}s)`}
+                      </p>
+                    ) : (
+                      <button
+                        onClick={handleSendOTP}
+                        tabIndex={-1}
+                        disabled={emailError || isSendOTPPending}
+                        type="button"
+                        className="shrink-0 flex items-center gap-2 text-sm text-primary cursor-pointer disabled:text-muted-foreground disabled:cursor-not-allowed"
+                      >
+                        Gửi
+                        {isSendOTPPending ? (
+                          <LoaderCircleIcon className="h-4 w-4 animate-spin flex-shrink-0" />
+                        ) : null}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Huỷ</AlertDialogCancel>
-                <Button className="cursor-pointer">Cập nhật</Button>
+                <Button
+                  className="cursor-pointer"
+                  disabled={isSubmitting || emailError || otpError}
+                >
+                  Cập nhật
+                  {isSubmitting ? (
+                    <LoaderCircleIcon className="h-4 w-4 animate-spin flex-shrink-0" />
+                  ) : null}
+                </Button>
               </AlertDialogFooter>
             </form>
           </AlertDialogContent>
@@ -442,3 +272,5 @@ export function EmailModal1() {
     </div>
   );
 }
+
+export default EmailModal;

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { FormEvent } from "react";
 import * as z from "zod";
 import { toast } from "sonner";
 import { LoaderCircleIcon } from "lucide-react";
@@ -291,6 +291,34 @@ export default EmailModal1;
 export function EmailModal1() {
   const { user } = useUser();
 
+  const [formData, setFormData] = React.useState<{
+    email: string;
+    otp: string;
+  }>({
+    email: "",
+    otp: "",
+  });
+
+  function handleOnChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.name == "otp") {
+      const numberRegex = /^\d{0,6}$/;
+      const number = numberRegex.test(e.target.value)
+        ? e.target.value
+        : formData.otp;
+      setFormData((prev) => ({ ...prev, otp: number }));
+    } else {
+      setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    }
+  }
+
+  const emailError = React.useMemo(() => {
+    return user?.email == formData.email;
+  }, [formData.email]);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  };
+
   return (
     <div className="flex flex-col lg:flex-row w-full gap-4 border-b py-4">
       <div className="w-full">
@@ -327,29 +355,87 @@ export function EmailModal1() {
               Thay đổi
             </Button>
           </AlertDialogTrigger>
+
           <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Thay đổi địa chỉ email</AlertDialogTitle>
-              <AlertDialogDescription className="hidden"></AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="grid gap-4 py-4 text-right">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="inline text-right">
-                  E-mail
-                </Label>
-                <Input id="email" className="col-span-3" />
+            <form className="grid gap-4" onSubmit={handleSubmit}>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Thay đổi địa chỉ email</AlertDialogTitle>
+                <AlertDialogDescription className="hidden"></AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid min-[400px]:grid-cols-4 items-center min-[400px]:gap-4 gap-2">
+                  <Label
+                    htmlFor="email"
+                    className="inline min-[400px]:text-right"
+                  >
+                    E-mail
+                  </Label>
+                  <Input
+                    required
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleOnChange}
+                    className={cn(
+                      "min-[400px]:col-span-3",
+                      emailError
+                        ? "border-red-500 bg-red-50 ring-red-50 focus-visible:border-red-500 focus-visible:ring-red-100"
+                        : ""
+                    )}
+                  />
+                </div>
+                <div className="grid min-[400px]:grid-cols-4 items-center min-[400px]:gap-4 gap-2">
+                  <Label
+                    htmlFor="otp"
+                    className="inline min-[400px]:text-right"
+                  >
+                    Mã xác thực
+                  </Label>
+                  <Input
+                    required
+                    id="otp"
+                    name="otp"
+                    maxLength={6}
+                    value={formData.otp}
+                    onChange={handleOnChange}
+                    className="min-[400px]:col-span-3"
+                  />
+                </div>
+                <div className="grid min-[400px]:grid-cols-4 items-center min-[400px]:gap-4 gap-2">
+                  <Label
+                    htmlFor="otp"
+                    className="inline min-[400px]:text-right"
+                  >
+                    Mã xác thực
+                  </Label>
+                  <div className="flex items-center gap-3 border rounded-md h-9 py-1 px-3 min-[400px]:col-span-3">
+                    <input
+                      required
+                      type="text"
+                      id="otp"
+                      name="otp"
+                      maxLength={6}
+                      value={formData.otp}
+                      onChange={handleOnChange}
+                      className="w-full focus-within:outline-none"
+                    />
+
+                    <p className="text-muted-foreground text-sm  ">Gửi (60s)</p>
+                    {/* <button
+                      type="button"
+                      className="text-primary cursor-pointer"
+                    >
+                      Gửi
+                    </button> */}
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="otp" className="inline text-right">
-                  Mã xác thực
-                </Label>
-                <Input id="otp" className="col-span-3" />
-              </div>
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Huỷ</AlertDialogCancel>
-              <AlertDialogAction>Cập nhật</AlertDialogAction>
-            </AlertDialogFooter>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Huỷ</AlertDialogCancel>
+                <Button className="cursor-pointer">Cập nhật</Button>
+              </AlertDialogFooter>
+            </form>
           </AlertDialogContent>
         </AlertDialog>
       </div>

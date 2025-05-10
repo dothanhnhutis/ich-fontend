@@ -7,7 +7,6 @@ import { FcGoogle } from "react-icons/fc";
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
